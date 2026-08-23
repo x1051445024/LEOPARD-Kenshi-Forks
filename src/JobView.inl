@@ -258,6 +258,7 @@
 
     bool RepairSelection()
     {
+        const bool hadSelectedJobs = !g_selectedJobs.empty();
         std::vector<SelectedJob> repaired;
         repaired.reserve(g_selectedJobs.size());
         for (size_t index = 0; index < g_selectedJobs.size(); ++index)
@@ -315,6 +316,14 @@
             }
         }
         g_selectedJobs.swap(repaired);
+
+        // Job-card selections are the source of truth for their owning
+        // recipients. Do not run this for an already-empty job selection:
+        // direct portrait/squad recipient selections are independent state.
+        if (hadSelectedJobs)
+        {
+            SyncRecipientsToSelectedJobs();
+        }
 
         if (FindDisplayedMember(g_selectionAnchorMember) == NULL)
         {
@@ -376,6 +385,9 @@
             }
         }
         UpdateRemoveButton();
+        ApplyRecipientSelectionStates();
+        UpdateSquadSelectorSelection();
+        UpdateSquadHeading();
     }
 
     JobHighlightKey MakeJobHighlightKey(const JobRowSnapshot& job)
@@ -810,6 +822,7 @@
         HandleIdentity target;
         StationCategory category;
         StationVisualSubtype visualSubtype;
+        std::vector<std::string> nativeIconCandidates;
 
         JobStationCategoryCacheEntry() :
             category(STATION_OTHER), visualSubtype(STATION_VISUAL_DEFAULT)
@@ -825,23 +838,62 @@
         MyGUI::ImageBox* icon,
         const char* resource);
 
+    bool TrySetJobNativeIcon(
+        MyGUI::ImageBox* icon,
+        const std::vector<std::string>* candidates)
+    {
+        if (icon == NULL || candidates == NULL)
+        {
+            return false;
+        }
+        for (size_t index = 0; index < candidates->size(); ++index)
+        {
+            const std::string& candidate = (*candidates)[index];
+            if (candidate.empty() ||
+                !TryEnsureNativeIconTexture(&candidate))
+            {
+                continue;
+            }
+            if (TrySetJobStationCategoryIcon(icon, candidate.c_str()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool SetJobStationCategoryArtwork(
+        MyGUI::ImageBox* icon,
+        MyGUI::Widget* overlay,
+        StationCategory category,
+        StationVisualSubtype visualSubtype,
+        const std::vector<std::string>* nativeCandidates)
+    {
+        if (icon == NULL || overlay == NULL)
+        {
+            return false;
+        }
+        bool applied = TrySetJobNativeIcon(icon, nativeCandidates);
+        if (!applied)
+        {
+            const char* resource = GetStationVisualIconResource(
+                category, visualSubtype);
+            applied = resource != NULL && resource[0] != '\0' &&
+                TrySetJobStationCategoryIcon(icon, resource);
+        }
+        icon->setVisible(applied);
+        overlay->setVisible(applied);
+        return applied;
+    }
+
     bool SetJobStationCategoryArtwork(
         MyGUI::ImageBox* icon,
         MyGUI::Widget* overlay,
         StationCategory category,
         StationVisualSubtype visualSubtype)
     {
-        if (icon == NULL || overlay == NULL)
-        {
-            return false;
-        }
-        const char* resource = GetStationVisualIconResource(
-            category, visualSubtype);
-        const bool applied = resource != NULL && resource[0] != '\0' &&
-            TrySetJobStationCategoryIcon(icon, resource);
-        icon->setVisible(applied);
-        overlay->setVisible(applied);
-        return applied;
+        return SetJobStationCategoryArtwork(
+            icon, overlay, category, visualSubtype, NULL);
     }
 
     bool TryGetCachedJobStationCategory(
@@ -875,6 +927,47 @@
                 *categoryOut = g_jobStationCategoryCache[index].category;
                 *visualSubtypeOut =
                     g_jobStationCategoryCache[index].visualSubtype;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool TryGetCachedJobStationArtwork(
+        const HandleIdentity& target,
+        StationCategory* categoryOut,
+        StationVisualSubtype* visualSubtypeOut,
+        std::vector<std::string>* nativeCandidatesOut)
+    {
+        if (categoryOut == NULL || visualSubtypeOut == NULL ||
+            nativeCandidatesOut == NULL || !target.valid ||
+            target.type != BUILDING)
+        {
+            return false;
+        }
+        nativeCandidatesOut->clear();
+        for (size_t index = 0; index < g_stationScan.stations.size(); ++index)
+        {
+            const StationTargetSnapshot& station =
+                g_stationScan.stations[index];
+            if (SameHandleIdentity(station.identity, target))
+            {
+                *categoryOut = station.category;
+                *visualSubtypeOut = station.visualSubtype;
+                *nativeCandidatesOut = station.nativeIconCandidates;
+                return true;
+            }
+        }
+        for (size_t index = 0; index < g_jobStationCategoryCache.size(); ++index)
+        {
+            if (SameHandleIdentity(
+                    g_jobStationCategoryCache[index].target, target))
+            {
+                *categoryOut = g_jobStationCategoryCache[index].category;
+                *visualSubtypeOut =
+                    g_jobStationCategoryCache[index].visualSubtype;
+                *nativeCandidatesOut =
+                    g_jobStationCategoryCache[index].nativeIconCandidates;
                 return true;
             }
         }
@@ -920,15 +1013,18 @@
     bool TryResolveJobStationCategory(
         const HandleIdentity& target,
         StationCategory* categoryOut,
-        StationVisualSubtype* visualSubtypeOut)
+        StationVisualSubtype* visualSubtypeOut,
+        std::vector<std::string>* nativeCandidatesOut)
     {
         if (categoryOut == NULL || visualSubtypeOut == NULL ||
-            !target.valid || target.type != BUILDING)
+            nativeCandidatesOut == NULL || !target.valid ||
+            target.type != BUILDING)
         {
             return false;
         }
         *categoryOut = STATION_OTHER;
         *visualSubtypeOut = STATION_VISUAL_DEFAULT;
+        nativeCandidatesOut->clear();
         const hand targetHandle(
             target.index, target.serial, target.type,
             target.container, target.containerSerial);
@@ -949,17 +1045,24 @@
         {
             *categoryOut = STATION_OTHER;
             *visualSubtypeOut = STATION_VISUAL_DEFAULT;
+            TryReadStationNativeIconCandidates(
+                building, nativeCandidatesOut);
             return false;
         }
         TryReadStationVisualSubtype(
             building, natural, visualSubtypeOut);
+        // Only value strings leave this lookup. The native GameData and
+        // Building pointers remain inside the guarded leaf that copies them.
+        TryReadStationNativeIconCandidates(
+            building, nativeCandidatesOut);
         return true;
     }
 
     bool ApplyJobStationCategoryArtwork(
         const HandleIdentity& target,
         StationCategory category,
-        StationVisualSubtype visualSubtype)
+        StationVisualSubtype visualSubtype,
+        const std::vector<std::string>& nativeCandidates)
     {
         bool targetUsedBySquadJob = false;
         const size_t memberCount = std::min(
@@ -991,10 +1094,21 @@
                     widgets.cards[slot].categoryIcon,
                     widgets.cards[slot].categoryOverlay,
                     category,
-                    visualSubtype);
+                    visualSubtype,
+                    &nativeCandidates);
             }
         }
         return targetUsedBySquadJob;
+    }
+
+    bool ApplyJobStationCategoryArtwork(
+        const HandleIdentity& target,
+        StationCategory category,
+        StationVisualSubtype visualSubtype)
+    {
+        const std::vector<std::string> noNativeCandidates;
+        return ApplyJobStationCategoryArtwork(
+            target, category, visualSubtype, noNativeCandidates);
     }
 
     void TickJobStationCategoryCache()
@@ -1007,26 +1121,30 @@
         g_jobStationCategoryPending.erase(g_jobStationCategoryPending.begin());
         StationCategory category = STATION_OTHER;
         StationVisualSubtype visualSubtype = STATION_VISUAL_DEFAULT;
+        std::vector<std::string> nativeCandidates;
         // The Stations pass may have resolved this target while the hidden
         // Squad artwork queue was paused. Reuse that value snapshot instead
         // of performing a second live-building lookup after scanning ends.
-        if (TryGetCachedJobStationCategory(
-                target, &category, &visualSubtype))
+        if (TryGetCachedJobStationArtwork(
+                target, &category, &visualSubtype, &nativeCandidates))
         {
             ApplyJobStationCategoryArtwork(
-                target, category, visualSubtype);
+                target, category, visualSubtype, nativeCandidates);
             return;
         }
         // A queue target can be unavailable even though its permanent job is
         // still editable.  Give that card the neutral Other artwork instead
         // of leaving it iconless or retrying an engine lookup every frame.
-        TryResolveJobStationCategory(target, &category, &visualSubtype);
+        TryResolveJobStationCategory(
+            target, &category, &visualSubtype, &nativeCandidates);
         JobStationCategoryCacheEntry entry;
         entry.target = target;
         entry.category = category;
         entry.visualSubtype = visualSubtype;
+        entry.nativeIconCandidates = nativeCandidates;
         g_jobStationCategoryCache.push_back(entry);
-        ApplyJobStationCategoryArtwork(target, category, visualSubtype);
+        ApplyJobStationCategoryArtwork(
+            target, category, visualSubtype, nativeCandidates);
     }
 
     bool DrainPendingJobStationCategoriesImmediately()
@@ -1119,11 +1237,15 @@
             }
             entry.category = station.category;
             entry.visualSubtype = station.visualSubtype;
+            entry.nativeIconCandidates = station.nativeIconCandidates;
             found = true;
             break;
         }
         const bool targetUsedBySquadJob = ApplyJobStationCategoryArtwork(
-            station.identity, station.category, station.visualSubtype);
+            station.identity,
+            station.category,
+            station.visualSubtype,
+            station.nativeIconCandidates);
         if (!found && targetUsedBySquadJob && station.identity.valid &&
             station.identity.type == BUILDING)
         {
@@ -1131,6 +1253,7 @@
             entry.target = station.identity;
             entry.category = station.category;
             entry.visualSubtype = station.visualSubtype;
+            entry.nativeIconCandidates = station.nativeIconCandidates;
             g_jobStationCategoryCache.push_back(entry);
         }
     }
@@ -1345,8 +1468,7 @@
             // the full queue cell. A matching dark tint gives it the same
             // blended treatment as station headers while the text remains
             // readable above it.
-            if (g_stationIconLocationRegistered &&
-                (roleIconResource != NULL || hasStationArtworkTarget))
+            if (roleIconResource != NULL || hasStationArtworkTarget)
             {
                 const int iconSize = CARD_HEIGHT;
                 const int iconLeft = (CARD_WIDTH - iconSize) / 2;
@@ -1392,15 +1514,17 @@
                     StationCategory stationCategory = STATION_OTHER;
                     StationVisualSubtype stationVisualSubtype =
                         STATION_VISUAL_DEFAULT;
-                    if (TryGetCachedJobStationCategory(
+                    std::vector<std::string> nativeCandidates;
+                    if (TryGetCachedJobStationArtwork(
                             row.target, &stationCategory,
-                            &stationVisualSubtype))
+                            &stationVisualSubtype, &nativeCandidates))
                     {
                         SetJobStationCategoryArtwork(
                             card.categoryIcon,
                             card.categoryOverlay,
                             stationCategory,
-                            stationVisualSubtype);
+                            stationVisualSubtype,
+                            &nativeCandidates);
                     }
                     else
                     {
@@ -2036,7 +2160,9 @@
             g_verticalScroll->setScrollRange(static_cast<size_t>(g_maxVerticalOffset + 1));
             g_verticalScroll->setScrollPage(static_cast<size_t>(std::max(1, g_bodyHeight)));
             g_verticalScroll->setScrollViewPage(static_cast<size_t>(ROW_STRIDE));
-            g_verticalScroll->setScrollPosition(static_cast<size_t>(g_verticalOffset));
+            SetThemeScrollBarPosition(
+                g_verticalScroll,
+                static_cast<size_t>(g_verticalOffset));
             g_verticalScroll->setEnabled(g_maxVerticalOffset > 0);
         }
         if (g_horizontalScroll != NULL)
@@ -2044,7 +2170,9 @@
             g_horizontalScroll->setScrollRange(static_cast<size_t>(g_maxHorizontalOffset + 1));
             g_horizontalScroll->setScrollPage(static_cast<size_t>(std::max(1, g_jobWidth)));
             g_horizontalScroll->setScrollViewPage(static_cast<size_t>(CARD_STRIDE));
-            g_horizontalScroll->setScrollPosition(static_cast<size_t>(g_horizontalOffset));
+            SetThemeScrollBarPosition(
+                g_horizontalScroll,
+                static_cast<size_t>(g_horizontalOffset));
             g_horizontalScroll->setEnabled(g_maxHorizontalOffset > 0);
         }
         g_changingScroll = false;
@@ -2370,6 +2498,14 @@
         if (!SameSquadSnapshot(g_squad, *nextCurrent))
         {
             g_squad = *nextCurrent;
+        }
+        // A fresh manager session starts with every squad implicitly closed.
+        // Open only Kenshi's current squad and mark it as automatic so the
+        // existing native-TAB transition can close it again when appropriate.
+        if (g_squadCollapseStates.empty() && g_squad.identity.valid)
+        {
+            SetSquadCollapsedForNativeTab(
+                g_squad.identity, false, true);
         }
         if (refreshed)
         {

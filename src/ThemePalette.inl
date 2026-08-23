@@ -19,6 +19,22 @@
     const char* const THEME_TAG_STATUS_FRAME = "KJM_ThemeStatusFrame";
     const char* const THEME_TAG_STATUS_TEXT = "KJM_ThemeStatusText";
     const char* const THEME_TAG_STATION_TINT = "KJM_ThemeStationTint";
+    const char* const THEME_TAG_SCROLLBAR = "KJM_ThemeScrollBar";
+    const char* const THEME_TAG_SCROLLBAR_SKIN =
+        "KJM_ThemeScrollBarSkin";
+    const char* const THEME_TAG_SCROLLBAR_PART =
+        "KJM_ThemeScrollBarPart";
+    const char* const THEME_SCROLLBAR_TRACK = "track";
+    const char* const THEME_SCROLLBAR_THUMB = "thumb";
+    const char* const THEME_SCROLLBAR_OUTLINE = "outline";
+    const char* const THEME_SCROLLBAR_VERTICAL_SMALL_SKIN =
+        "Kenshi_ScrollBarV";
+    const char* const THEME_SCROLLBAR_HORIZONTAL_SMALL_SKIN =
+        "Kenshi_ScrollBarH";
+    const char* const THEME_SCROLLBAR_VERTICAL_LARGE_SKIN =
+        "Kenshi_SliderVBig";
+    const char* const THEME_SCROLLBAR_HORIZONTAL_LARGE_SKIN =
+        "Kenshi_SliderHBig";
     const char* const THEME_TINT_STATION_NORMAL = "normal";
     const char* const THEME_TINT_STATION_BLOCKING = "blocking";
     const char* const THEME_TAG_TEXT = "KJM_ThemeText";
@@ -250,6 +266,303 @@
     MyGUI::Colour ThemeSuccessTextColour()
     {
         return GetThemePalette().successText;
+    }
+
+    void ApplyThemeScrollBarPart(MyGUI::Widget* widget)
+    {
+        if (widget == NULL ||
+            !widget->isUserString(THEME_TAG_SCROLLBAR_PART))
+        {
+            return;
+        }
+
+        const bool dark = IsDarkUIFriendlyFontColorsEnabled();
+        if (!dark)
+        {
+            widget->setVisible(false);
+            return;
+        }
+
+        const std::string& role =
+            widget->getUserString(THEME_TAG_SCROLLBAR_PART);
+        // Thumb visibility also depends on range and geometry. Its dedicated
+        // updater owns that state; theme application only owns its colour.
+        if (role != THEME_SCROLLBAR_THUMB)
+        {
+            widget->setVisible(true);
+        }
+        if (role == THEME_SCROLLBAR_THUMB)
+        {
+            // The native large-slider handle is translucent. This opaque,
+            // mouse-transparent face sits above it so the track cannot show
+            // through the draggable area.
+            widget->setColour(MyGUI::Colour(0.66f, 0.61f, 0.50f));
+            widget->setAlpha(1.0f);
+        }
+        else if (role == THEME_SCROLLBAR_OUTLINE)
+        {
+            widget->setColour(MyGUI::Colour(0.74f, 0.69f, 0.57f));
+            widget->setAlpha(0.96f);
+        }
+        else
+        {
+            widget->setColour(MyGUI::Colour(0.48f, 0.44f, 0.36f));
+            widget->setAlpha(0.62f);
+        }
+    }
+
+    void TagThemeScrollBarPart(
+        MyGUI::Widget* widget,
+        const char* role,
+        int depth)
+    {
+        if (widget == NULL || role == NULL)
+        {
+            return;
+        }
+        widget->setUserString(THEME_TAG_SCROLLBAR_PART, role);
+        widget->setDepth(depth);
+        widget->setNeedMouseFocus(false);
+        widget->setNeedKeyFocus(false);
+        ApplyThemeScrollBarPart(widget);
+    }
+
+    MyGUI::Widget* CreateThemeScrollBarPart(
+        MyGUI::Widget* parent,
+        const MyGUI::IntCoord& coord,
+        MyGUI::Align align,
+        const char* role,
+        int depth)
+    {
+        if (parent == NULL)
+        {
+            return NULL;
+        }
+        MyGUI::Widget* part = parent->createWidget<MyGUI::Widget>(
+            "WhiteSkin", coord, align);
+        TagThemeScrollBarPart(part, role, depth);
+        return part;
+    }
+
+    void CreateThemeScrollBarEdge(
+        MyGUI::Widget* parent,
+        const MyGUI::IntCoord& coord,
+        MyGUI::Align align)
+    {
+        CreateThemeScrollBarPart(
+            parent,
+            coord,
+            align,
+            THEME_SCROLLBAR_OUTLINE,
+            -1);
+    }
+
+    const char* GetThemeScrollBarSkin(bool vertical)
+    {
+        if (IsDarkUIFriendlyFontColorsEnabled())
+        {
+            return vertical ?
+                THEME_SCROLLBAR_VERTICAL_LARGE_SKIN :
+                THEME_SCROLLBAR_HORIZONTAL_LARGE_SKIN;
+        }
+        return vertical ?
+            THEME_SCROLLBAR_VERTICAL_SMALL_SKIN :
+            THEME_SCROLLBAR_HORIZONTAL_SMALL_SKIN;
+    }
+
+    MyGUI::Widget* FindThemeScrollBarPart(
+        MyGUI::ScrollBar* scrollBar,
+        const char* role)
+    {
+        if (scrollBar == NULL || role == NULL)
+        {
+            return NULL;
+        }
+        const size_t childCount = scrollBar->getChildCount();
+        for (size_t index = 0; index < childCount; ++index)
+        {
+            MyGUI::Widget* child = scrollBar->getChildAt(index);
+            if (child != NULL &&
+                child->isUserString(THEME_TAG_SCROLLBAR_PART) &&
+                child->getUserString(THEME_TAG_SCROLLBAR_PART) == role)
+            {
+                return child;
+            }
+        }
+        return NULL;
+    }
+
+    void UpdateThemeScrollBarThumb(MyGUI::ScrollBar* scrollBar)
+    {
+        MyGUI::Widget* thumb = FindThemeScrollBarPart(
+            scrollBar, THEME_SCROLLBAR_THUMB);
+        if (scrollBar == NULL || thumb == NULL)
+        {
+            return;
+        }
+
+        const size_t range = scrollBar->getScrollRange();
+        const int lineLength = scrollBar->getLineSize();
+        const int thumbLength = std::min(
+            lineLength, scrollBar->getTrackSize());
+        const bool show = IsDarkUIFriendlyFontColorsEnabled() &&
+            range > 1 && lineLength > thumbLength && thumbLength > 0;
+        thumb->setVisible(show);
+        if (!show)
+        {
+            return;
+        }
+
+        const int travel = lineLength - thumbLength;
+        // Match MyGUI ScrollBar::updateTrack exactly. It uses integer
+        // division, so rounding here would let the visual face lead the
+        // actual draggable handle by one pixel at some positions.
+        const int trackOffset = static_cast<int>(
+            (static_cast<size_t>(travel) *
+                scrollBar->getScrollPosition()) /
+            (range - 1));
+        // Both Kenshi large-slider skins start TrackPlace 25 pixels after
+        // the leading arrow. These insets leave the native handle border
+        // visible around the new solid face.
+        const int trackStart = 25;
+        if (scrollBar->getVerticalAlignment())
+        {
+            thumb->setCoord(
+                3,
+                trackStart + trackOffset,
+                25,
+                thumbLength);
+        }
+        else
+        {
+            thumb->setCoord(
+                trackStart + trackOffset,
+                5,
+                thumbLength,
+                22);
+        }
+    }
+
+    void OnThemeScrollBarPositionChanged(
+        MyGUI::ScrollBar* scrollBar,
+        size_t)
+    {
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void SetThemeScrollBarPosition(
+        MyGUI::ScrollBar* scrollBar,
+        size_t position)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        scrollBar->setScrollPosition(position);
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void ApplyThemeScrollBarSkin(MyGUI::ScrollBar* scrollBar)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        const bool vertical = scrollBar->getVerticalAlignment();
+        const char* desiredSkin = GetThemeScrollBarSkin(vertical);
+        const std::string currentSkin =
+            scrollBar->isUserString(THEME_TAG_SCROLLBAR_SKIN) ?
+                scrollBar->getUserString(THEME_TAG_SCROLLBAR_SKIN) : "";
+        if (currentSkin != desiredSkin)
+        {
+            const size_t scrollPage = scrollBar->getScrollPage();
+            const size_t scrollViewPage = scrollBar->getScrollViewPage();
+            const size_t scrollWheelPage = scrollBar->getScrollWheelPage();
+            // changeWidgetSkin is MyGUI's supported path for replacing the
+            // private skin-child tree. It preserves the ScrollBar object and
+            // its event delegates. MyGUI resets the three page-step values
+            // while it initialises the replacement skin, so restore them
+            // before this interaction continues.
+            scrollBar->changeWidgetSkin(desiredSkin);
+            scrollBar->setScrollPage(scrollPage);
+            scrollBar->setScrollViewPage(scrollViewPage);
+            scrollBar->setScrollWheelPage(scrollWheelPage);
+            scrollBar->setUserString(
+                THEME_TAG_SCROLLBAR_SKIN, desiredSkin);
+        }
+
+        // The small vanilla layouts permit a 10-pixel thumb. Keep a larger
+        // floor in both modes; the dark large-slider skins already exceed it.
+        const int minimumThumbLength = 36;
+        scrollBar->setMinTrackSize(minimumThumbLength);
+        scrollBar->setTrackSize(std::max(
+            minimumThumbLength, scrollBar->getTrackSize()));
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void TagThemeScrollBar(MyGUI::ScrollBar* scrollBar)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        if (scrollBar->isUserString(THEME_TAG_SCROLLBAR))
+        {
+            return;
+        }
+        scrollBar->setUserString(THEME_TAG_SCROLLBAR, "1");
+        ApplyThemeScrollBarSkin(scrollBar);
+
+        const int width = scrollBar->getWidth();
+        const int height = scrollBar->getHeight();
+        const bool vertical = scrollBar->getVerticalAlignment();
+        const int trackThickness = std::min(
+            12, std::max(1, (vertical ? width : height) - 6));
+        CreateThemeScrollBarPart(
+            scrollBar,
+            vertical ?
+                MyGUI::IntCoord(
+                    (width - trackThickness) / 2,
+                    2,
+                    trackThickness,
+                    std::max(1, height - 4)) :
+                MyGUI::IntCoord(
+                    2,
+                    (height - trackThickness) / 2,
+                    std::max(1, width - 4),
+                    trackThickness),
+            vertical ?
+                (MyGUI::Align::Top | MyGUI::Align::VStretch) :
+                (MyGUI::Align::Left | MyGUI::Align::HStretch),
+            THEME_SCROLLBAR_TRACK,
+            100);
+
+        CreateThemeScrollBarPart(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, 1, 1),
+            MyGUI::Align::Top | MyGUI::Align::Left,
+            THEME_SCROLLBAR_THUMB,
+            -2);
+        scrollBar->eventScrollChangePosition +=
+            MyGUI::newDelegate(OnThemeScrollBarPositionChanged);
+        UpdateThemeScrollBarThumb(scrollBar);
+
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, width, 2),
+            MyGUI::Align::Top | MyGUI::Align::HStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, std::max(0, height - 2), width, 2),
+            MyGUI::Align::Bottom | MyGUI::Align::HStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, 2, height),
+            MyGUI::Align::Left | MyGUI::Align::VStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(std::max(0, width - 2), 0, 2, height),
+            MyGUI::Align::Right | MyGUI::Align::VStretch);
     }
 
     void ApplyThemeBackground(MyGUI::Widget* widget)
@@ -523,6 +836,18 @@
                 root,
                 root->getUserString(THEME_TAG_STATION_TINT) ==
                     THEME_TINT_STATION_BLOCKING);
+        }
+
+        if (root->isUserString(THEME_TAG_SCROLLBAR_PART))
+        {
+            ApplyThemeScrollBarPart(root);
+        }
+
+        if (root->isUserString(THEME_TAG_SCROLLBAR) &&
+            root->isType<MyGUI::ScrollBar>())
+        {
+            ApplyThemeScrollBarSkin(
+                root->castType<MyGUI::ScrollBar>(false));
         }
 
         if (root->isUserString(THEME_TAG_TEXT))

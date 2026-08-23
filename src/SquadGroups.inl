@@ -58,6 +58,7 @@
     std::vector<VisibleMemberBinding> g_visibleMemberBindings;
     std::vector<SquadGroupWidgets> g_squadGroupWidgets;
     std::vector<SelectedRecipient> g_selectedRecipients;
+    std::vector<HandleIdentity> g_bottomSelectedSquads;
     PendingJobBatchUiAction g_pendingJobBatchUiAction;
     int g_dragDestinationVisibleIndex = -1;
     MyGUI::Button* g_prioritizeCoreJobsButton = NULL;
@@ -122,12 +123,15 @@
 
     bool JobCardSelectionMode()
     {
-        return !g_selectedJobs.empty() && g_selectedRecipients.empty();
+        // A job selection also derives its owning recipients.  Keep the two
+        // predicates independent so the job action and recipient action
+        // buttons can both use the same intuitive card selection.
+        return !g_selectedJobs.empty();
     }
 
     bool RecipientSelectionMode()
     {
-        if (!g_selectedJobs.empty() || g_selectedRecipients.empty())
+        if (g_selectedRecipients.empty())
         {
             return false;
         }
@@ -164,6 +168,45 @@
     bool IsRecipientSelected(const HandleIdentity& member)
     {
         return FindSelectedRecipientIndex(member) >= 0;
+    }
+
+    int FindBottomSelectedSquadIndex(const HandleIdentity& squad)
+    {
+        for (size_t index = 0;
+             index < g_bottomSelectedSquads.size(); ++index)
+        {
+            if (SameHandleIdentity(g_bottomSelectedSquads[index], squad))
+            {
+                return static_cast<int>(index);
+            }
+        }
+        return -1;
+    }
+
+    void ResetBottomSquadSelectionTracking()
+    {
+        g_bottomSelectedSquads.clear();
+    }
+
+    void SetBottomSquadSelected(
+        const HandleIdentity& squad,
+        bool selected)
+    {
+        const int index = FindBottomSelectedSquadIndex(squad);
+        if (!selected)
+        {
+            if (index >= 0)
+            {
+                g_bottomSelectedSquads.erase(
+                    g_bottomSelectedSquads.begin() + index);
+            }
+            return;
+        }
+        if (index < 0 && squad.valid &&
+            g_bottomSelectedSquads.size() < 256)
+        {
+            g_bottomSelectedSquads.push_back(squad);
+        }
     }
 
     void AddSelectedRecipient(
@@ -251,6 +294,49 @@
         }
     }
 
+    bool ApplyBottomSquadSelectionCollapseState()
+    {
+        bool hasSelectedSquad = false;
+        for (size_t squadIndex = 0;
+             squadIndex < g_allSquads.squads.size(); ++squadIndex)
+        {
+            if (FindBottomSelectedSquadIndex(
+                    g_allSquads.squads[squadIndex].identity) >= 0)
+            {
+                hasSelectedSquad = true;
+                break;
+            }
+        }
+
+        bool changed = false;
+        for (size_t squadIndex = 0;
+             squadIndex < g_allSquads.squads.size(); ++squadIndex)
+        {
+            const SquadSnapshot& squad = g_allSquads.squads[squadIndex];
+            const bool shouldExpand = hasSelectedSquad ?
+                FindBottomSelectedSquadIndex(squad.identity) >= 0 :
+                SameHandleIdentity(squad.identity, g_squad.identity);
+            const bool shouldCollapse = !shouldExpand;
+            if (IsSquadCollapsed(squad.identity) != shouldCollapse)
+            {
+                changed = true;
+            }
+            if (!hasSelectedSquad && shouldExpand)
+            {
+                SetSquadCollapsedForNativeTab(
+                    squad.identity, false, true);
+            }
+            else
+            {
+                // A bottom-button selection is an explicit view choice. Mark
+                // those open/closed states as manual so native TAB preserves
+                // the same distinction as a squad-header click.
+                SetSquadCollapsed(squad.identity, shouldCollapse);
+            }
+        }
+        return changed;
+    }
+
     void PruneSelectedRecipientsToDisplayedRoster()
     {
         std::vector<SelectedRecipient> retained;
@@ -299,6 +385,7 @@
     void ResetRecipientSelection()
     {
         g_selectedRecipients.clear();
+        ResetBottomSquadSelectionTracking();
     }
 
     const SquadSnapshot* FindDisplayedSquad(
@@ -340,6 +427,46 @@
             *squadOut = NULL;
         }
         return NULL;
+    }
+
+    void SyncRecipientsToSelectedJobs()
+    {
+        std::vector<SelectedRecipient> derived;
+        derived.reserve(g_selectedJobs.size());
+        for (size_t selectedIndex = 0;
+             selectedIndex < g_selectedJobs.size(); ++selectedIndex)
+        {
+            const SquadSnapshot* squad = NULL;
+            const MemberSnapshot* member = FindDisplayedMember(
+                g_selectedJobs[selectedIndex].member, &squad);
+            if (member == NULL || squad == NULL || !member->queueAvailable)
+            {
+                continue;
+            }
+
+            bool alreadyDerived = false;
+            for (size_t derivedIndex = 0;
+                 derivedIndex < derived.size(); ++derivedIndex)
+            {
+                if (SameHandleIdentity(
+                        derived[derivedIndex].member,
+                        member->identity))
+                {
+                    alreadyDerived = true;
+                    break;
+                }
+            }
+            if (alreadyDerived)
+            {
+                continue;
+            }
+
+            SelectedRecipient recipient;
+            recipient.squad = squad->identity;
+            recipient.member = member->identity;
+            derived.push_back(recipient);
+        }
+        g_selectedRecipients.swap(derived);
     }
 
     const MemberSnapshot* GetVisibleMember(

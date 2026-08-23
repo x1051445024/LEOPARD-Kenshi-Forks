@@ -602,6 +602,12 @@
         return -1;
     }
 
+    void ApplySynchronizedJobSelectionStates()
+    {
+        SyncRecipientsToSelectedJobs();
+        ApplyCardSelectionStates();
+    }
+
     void AddSelectedJob(int memberIndex, int slot)
     {
         if (memberIndex < 0 || slot < 0 ||
@@ -639,7 +645,7 @@
             g_selectionAnchorMember = member->identity;
             g_selectionAnchorSlot = slot;
         }
-        ApplyCardSelectionStates();
+        ApplySynchronizedJobSelectionStates();
     }
 
     void ApplyCardClickSelection(int memberIndex, int slot)
@@ -694,7 +700,7 @@
             return;
         }
 
-        ApplyCardSelectionStates();
+        ApplySynchronizedJobSelectionStates();
     }
 
     void ClearJobSelection()
@@ -705,9 +711,17 @@
         {
             return;
         }
+        const bool hadSelectedJobs = !g_selectedJobs.empty();
         g_selectedJobs.clear();
         ResetHandleIdentity(&g_selectionAnchorMember);
         g_selectionAnchorSlot = -1;
+        if (hadSelectedJobs)
+        {
+            SyncRecipientsToSelectedJobs();
+        }
+        // An already-empty job selection can still have a direct portrait or
+        // squad selection. ApplyCardSelectionStates refreshes both layers
+        // without changing that direct recipient set.
         ApplyCardSelectionStates();
     }
 
@@ -725,7 +739,20 @@
 
     void ClearJobSelectionForRecipientInteraction()
     {
-        ClearJobSelection();
+        if (g_selectedJobs.empty() &&
+            !g_selectionAnchorMember.valid &&
+            g_selectionAnchorSlot < 0)
+        {
+            return;
+        }
+
+        // The selected jobs supplied the initial recipient set. When the
+        // player switches to direct recipient selection, keep those owners so
+        // Ctrl-click can add or remove a portrait or squad from that set.
+        g_selectedJobs.clear();
+        ResetHandleIdentity(&g_selectionAnchorMember);
+        g_selectionAnchorSlot = -1;
+        ApplyCardSelectionStates();
     }
 
     void OnEmptyPressed(MyGUI::Widget*, int, int, MyGUI::MouseButton button)
@@ -743,7 +770,8 @@
             // job card.
             if (g_selectedJobs.size() > 1)
             {
-                ClearRecipientSelectionForJobInteraction();
+                // Its derived recipient set remains synchronized with the
+                // selected cards.
                 return;
             }
             ClearJobSelection();
@@ -997,10 +1025,10 @@
         }
         const MemberSnapshot& member = *memberPointer;
         const JobRowSnapshot& job = member.jobs[slot];
-        // Job-card selection and recipient selection are separate action
-        // modes. Entering the job mode clears any selected people/squads so
-        // a later button press cannot act on a stale mixed selection.
-        ClearRecipientSelectionForJobInteraction();
+        // Job-card selection derives its recipient set from the owning
+        // members. Direct portrait and squad selection still use their own
+        // interaction path and may clear the job cards.
+        ResetBottomSquadSelectionTracking();
         MyGUI::InputManager& input = MyGUI::InputManager::getInstance();
         const bool control = input.isControlPressed();
         const bool plain = !control && !input.isShiftPressed();
@@ -1147,7 +1175,7 @@
                 }
                 g_selectionAnchorMember = sourceMember.identity;
                 g_selectionAnchorSlot = g_drag.slot;
-                ApplyCardSelectionStates();
+                ApplySynchronizedJobSelectionStates();
             }
             // deferredPlainClick deliberately performs no selection change:
             // a plain click on a member of a multi-set now keeps that set.
@@ -1418,7 +1446,8 @@
             g_changingScroll = true;
             if (g_horizontalScroll != NULL)
             {
-                g_horizontalScroll->setScrollPosition(
+                SetThemeScrollBarPosition(
+                    g_horizontalScroll,
                     static_cast<size_t>(g_horizontalOffset));
             }
             g_changingScroll = false;
@@ -1438,7 +1467,8 @@
         g_changingScroll = true;
         if (g_verticalScroll != NULL)
         {
-            g_verticalScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_verticalScroll,
                 static_cast<size_t>(g_verticalOffset));
         }
         g_changingScroll = false;
@@ -1723,11 +1753,18 @@
             historyLineCount += messageLineCount;
         }
 
+        // The log owns the only visible nested ScrollView scrollbar. Use
+        // Kenshi's large-slider ScrollView layout in Dark UI mode because
+        // MyGUI deliberately keeps nested skin scrollbars private.
+        const char* messageLogScrollSkin =
+            IsDarkUIFriendlyFontColorsEnabled() ?
+                "Kenshi_ScrollViewEmptyLight" : "Kenshi_ScrollView";
+        const MyGUI::IntCoord messageLogScrollCoord(
+            16, 44, clientSize.width - 32,
+            std::max(100, clientSize.height - 104));
         MyGUI::ScrollView* scroll = client->createWidget<MyGUI::ScrollView>(
-            "Kenshi_ScrollView",
-            MyGUI::IntCoord(
-                16, 44, clientSize.width - 32,
-                std::max(100, clientSize.height - 104)),
+            messageLogScrollSkin,
+            messageLogScrollCoord,
             MyGUI::Align::Stretch,
             "KJM_MessageLogScroll");
         g_messageLogScroll = scroll;
@@ -1740,7 +1777,51 @@
             view.height,
             static_cast<int>(historyLineCount) * 22 + 20);
         scroll->setCanvasSize(canvasWidth, canvasHeight);
-        scroll->setVisibleVScroll(canvasHeight > view.height);
+        const bool showVerticalScroll = canvasHeight > view.height;
+        scroll->setVisibleVScroll(showVerticalScroll);
+
+        // ScrollView keeps its skin scrollbars private. Its large native skin
+        // supplies the track and handle; add the same dark outline as the
+        // explicit manager bars around its 32-pixel slider column. Do not add
+        // a foreground track overlay here because it could show through the
+        // private translucent handle.
+        if (showVerticalScroll && IsDarkUIFriendlyFontColorsEnabled())
+        {
+            const int scrollBarWidth = 32;
+            const int scrollBarLeft =
+                messageLogScrollCoord.left +
+                messageLogScrollCoord.width - scrollBarWidth;
+            const int scrollBarTop = messageLogScrollCoord.top;
+            const int scrollBarHeight = messageLogScrollCoord.height;
+            CreateThemeScrollBarEdge(
+                client,
+                MyGUI::IntCoord(
+                    scrollBarLeft, scrollBarTop,
+                    scrollBarWidth, 2),
+                MyGUI::Align::Top);
+            CreateThemeScrollBarEdge(
+                client,
+                MyGUI::IntCoord(
+                    scrollBarLeft,
+                    scrollBarTop + std::max(0, scrollBarHeight - 2),
+                    scrollBarWidth,
+                    2),
+                MyGUI::Align::Top);
+            CreateThemeScrollBarEdge(
+                client,
+                MyGUI::IntCoord(
+                    scrollBarLeft, scrollBarTop,
+                    2, scrollBarHeight),
+                MyGUI::Align::Top);
+            CreateThemeScrollBarEdge(
+                client,
+                MyGUI::IntCoord(
+                    scrollBarLeft + scrollBarWidth - 2,
+                    scrollBarTop,
+                    2,
+                    scrollBarHeight),
+                MyGUI::Align::Top);
+        }
 
         MyGUI::Widget* historySurface = scroll->createWidget<MyGUI::Widget>(
             "WhiteSkin",
@@ -2092,6 +2173,7 @@
 
         // Entering recipient mode clears the job-card mode while preserving
         // the existing recipient set so Ctrl can still toggle one person.
+        ResetBottomSquadSelectionTracking();
         ClearJobSelectionForRecipientInteraction();
 
         MyGUI::InputManager* input = MyGUI::InputManager::getInstancePtr();
@@ -2299,6 +2381,7 @@
         if (index >= 0)
         {
             g_selectedJobs.erase(g_selectedJobs.begin() + index);
+            SyncRecipientsToSelectedJobs();
         }
     }
 
@@ -2405,7 +2488,7 @@
                     g_selectedJobs.push_back(remaining[index]);
                 }
             }
-            ApplyCardSelectionStates();
+            ApplySynchronizedJobSelectionStates();
         }
         std::ostringstream status;
         if (interrupted)
@@ -3423,6 +3506,7 @@
                     g_selectedJobs.erase(g_selectedJobs.begin() + index - 1);
                 }
             }
+            SyncRecipientsToSelectedJobs();
             TryNotifyVanillaSelectionUI();
             RefreshSquadView(true);
             SetStatus("All permanent jobs were removed from " + fresh.name + ".");
@@ -3482,12 +3566,14 @@
             g_changingScroll = true;
             if (g_horizontalScroll != NULL)
             {
-                g_horizontalScroll->setScrollPosition(
+                SetThemeScrollBarPosition(
+                    g_horizontalScroll,
                     static_cast<size_t>(g_horizontalOffset));
             }
             if (g_verticalScroll != NULL)
             {
-                g_verticalScroll->setScrollPosition(
+                SetThemeScrollBarPosition(
+                    g_verticalScroll,
                     static_cast<size_t>(g_verticalOffset));
             }
             g_changingScroll = false;

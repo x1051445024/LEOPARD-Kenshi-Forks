@@ -2,11 +2,11 @@
 
 Kenshi Job Management adds an ingame UI for visualizing and editing job queues.
 
-**Version: 0.3.0-alpha**
+**Version: 0.4.0-beta**
 
 ## Disclaimer
 
-This is an alpha release. It has been tested for hours on my machine with ~240 other mods, but I can't promise it's safe for every save/mod list. Back up your save just incase. There isn't currently an undo button.
+This is a beta release. It has been tested for hours on my machine with ~240 other mods, but I can't promise it's safe for every save/mod list. Back up your save just incase. There isn't currently an undo button.
 
 I use Radiant Dark True UI, so the colors may look different with other UI mods. Default settings should be vanilla friendly, there's a dark UI toggle in the options menu.
 
@@ -23,13 +23,13 @@ I use Radiant Dark True UI, so the colors may look different with other UI mods.
 - View every active player squad in Kenshi `TAB`.
 - TAB cycles between active squdas, expanding squad displays automatically and returning them to closed if applicable.
 - Supports copy and paste, dragging and dropping. Multiple jobs dragged onto one character will move any non duplicate jobs, leaving duplicates in place.
-- Select recipients by clicking portraits or the bottom squad selector. (Hold ctrl to select more than one character or squad.)
+- Selecting jobs also selects their owners as recipients. Select recipients directly by clicking portraits or the bottom squad selector. (Hold ctrl to select more than one character or squad.)
 - Add missing Rescue, Put in Bed, Medic, Robotics, and Splinting jobs with the compact Add Medic/Robotics button. `Prioritize Healing` reorders existing healing jobs. (Is this the ideal order??)
 - Use `Remove Invalid Jobs` to clean up unresolved fixed-target jobs. (Should only remove jobs that can't otherwise be performed. Such as mining natural resource deposits after an import).
 
 ### Stations
 
-- Browse all player-owned workstations and assigned natural resource nodes in a grouped grid.
+- Browse all player-owned workstations and assigned natural resource nodes in a grouped grid. Cards use Kenshi's native building icons when available.
 - See exact station names, including renamed buildings, area, assignment count, and issues that may prevent its use. (ex: Not enough power)
 - Click on a station to open a new UI to assign/remove workers.
 - Workers sort by relevant skill. (Highest to lowest, training benches are lowest to highest.)

@@ -14,7 +14,7 @@
         const HandleIdentity& member);
 
     const int STATION_GRID_BANNER_HEIGHT = 38;
-    const int STATION_GRID_SCROLL_SIZE = 20;
+    const int STATION_GRID_SCROLL_SIZE = 33;
     const int STATION_GRID_GROUP_HEADER_HEIGHT = 34;
     const int STATION_GRID_CARD_WIDTH = 214;
     const int STATION_GRID_CARD_HEIGHT = 128;
@@ -608,6 +608,47 @@
         }
     }
 
+    bool TrySetStationNativeIcon(
+        MyGUI::ImageBox* icon,
+        const std::vector<std::string>& candidates)
+    {
+        if (icon == NULL)
+        {
+            return false;
+        }
+        for (size_t index = 0; index < candidates.size(); ++index)
+        {
+            const std::string& candidate = candidates[index];
+            if (candidate.empty() ||
+                !TryEnsureNativeIconTexture(&candidate))
+            {
+                continue;
+            }
+            if (TrySetStationCategoryIcon(icon, candidate.c_str()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool TrySetStationCardIcon(
+        MyGUI::ImageBox* icon,
+        const StationTargetSnapshot& station)
+    {
+        // Prefer Kenshi's exact build-menu artwork.  If a modded or unloaded
+        // candidate is unavailable, keep the established subtype/category
+        // artwork. Do not insert default_icon.png between these fallbacks.
+        if (TrySetStationNativeIcon(icon, station.nativeIconCandidates))
+        {
+            return true;
+        }
+        const char* customResource = GetStationVisualIconResource(
+            station.category, station.visualSubtype);
+        return customResource != NULL && customResource[0] != '\0' &&
+            TrySetStationCategoryIcon(icon, customResource);
+    }
+
     void AttachStationTooltip(MyGUI::Widget* widget, const std::string& text)
     {
         if (widget == NULL || text.empty())
@@ -670,7 +711,7 @@
         const std::string& caption)
     {
         text->setCaption(caption);
-        text->setFontHeight(22);
+        text->setFontHeight(24);
         while (text->getFontHeight() > 10 &&
             (text->getTextSize().width > STATION_GRID_CARD_WIDTH - 20 ||
              text->getTextSize().height > 42))
@@ -700,9 +741,10 @@
             assignment->setCaption(count.str());
             TagThemeSuccessText(assignment);
         }
-        assignment->setFontHeight(28);
-        assignment->setTextAlign(MyGUI::Align::Center);
+        assignment->setFontHeight(30);
+        assignment->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         assignment->setNeedMouseFocus(false);
+        assignment->setNeedKeyFocus(false);
     }
 
     bool IsStationUsableAndUnassigned(
@@ -805,7 +847,8 @@
         text->setCaption(caption);
         text->setFontHeight(initialFontHeight);
         while (text->getFontHeight() > minimumFontHeight &&
-            text->getTextSize().width > text->getWidth() - 4)
+            (text->getTextSize().width > text->getWidth() - 4 ||
+             text->getTextSize().height > text->getHeight()))
         {
             text->setFontHeight(text->getFontHeight() - 1);
         }
@@ -858,8 +901,6 @@
             "KJM_StationCardSurface");
         TagThemeSurface(cardSurface);
 
-        const char* iconResource = GetStationVisualIconResource(
-            station.category, station.visualSubtype);
         const int iconSize = STATION_GRID_CARD_HEIGHT;
         MyGUI::ImageBox* icon = card->createWidget<MyGUI::ImageBox>(
             "ImageBox", MyGUI::IntCoord(
@@ -867,10 +908,13 @@
                 0, iconSize, iconSize),
             MyGUI::Align::Top,
             "KJM_StationCardBackground");
-        icon->setAlpha(0.33f);
+        // Keep the artwork visible enough to identify the station while the
+        // themed tint and labels remain readable above it. The fixed square
+        // bounds and centered x coordinate preserve the source aspect ratio.
+        icon->setAlpha(0.69f);
         icon->setInheritsAlpha(false);
         icon->setNeedMouseFocus(false);
-        if (!TrySetStationCategoryIcon(icon, iconResource))
+        if (!TrySetStationCardIcon(icon, station))
         {
             icon->setVisible(false);
         }
@@ -965,9 +1009,10 @@
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationExactName");
         SetFittedStationGridName(name, station.name);
-        name->setTextAlign(MyGUI::Align::Center);
+        name->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(name);
         name->setNeedMouseFocus(false);
+        name->setNeedKeyFocus(false);
 
         int lineTop = 49;
         // Keep the location row stable when a category filter changes.  The
@@ -982,10 +1027,11 @@
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationArea");
             SetFittedStationSingleLine(
-                area, station.areaName, 13, 9);
-            area->setTextAlign(MyGUI::Align::Center);
+                area, station.areaName, 15, 10);
+            area->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
             TagThemeAccentText(area);
             area->setNeedMouseFocus(false);
+            area->setNeedKeyFocus(false);
             lineTop += 17;
         }
 
@@ -1009,11 +1055,12 @@
                 status,
                 station.blockingStatus.empty() ?
                     "CANNOT WORK" : station.blockingStatus,
-                12, 9);
+                14, 10);
             TagThemeWarningText(status);
         }
-        status->setTextAlign(MyGUI::Align::Center);
+        status->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         status->setNeedMouseFocus(false);
+        status->setNeedKeyFocus(false);
         binding.status = status;
 
         std::ostringstream tooltip;
@@ -1060,7 +1107,8 @@
             static_cast<size_t>(std::max(1, g_stationView.viewportHeight)));
         g_stationView.verticalScroll->setScrollViewPage(
             static_cast<size_t>(StationCardRowStride()));
-        g_stationView.verticalScroll->setScrollPosition(
+        SetThemeScrollBarPosition(
+            g_stationView.verticalScroll,
             static_cast<size_t>(g_stationView.verticalOffset));
         g_stationView.verticalScroll->setEnabled(
             g_stationView.maxVerticalOffset > 0);
@@ -1525,7 +1573,9 @@
             static_cast<size_t>(viewport->getHeight()));
         scroll->setScrollViewPage(
             static_cast<size_t>(STATION_DETAIL_ROW_HEIGHT));
-        scroll->setScrollPosition(static_cast<size_t>(*offset));
+        SetThemeScrollBarPosition(
+            scroll,
+            static_cast<size_t>(*offset));
         scroll->setEnabled(maxOffset > 0);
         *changing = false;
     }
@@ -1898,7 +1948,7 @@
         const int listHeight = panelHeight - listTop - statusHeight - 12;
         const int detailHeaderHeight = 32;
         const int detailPaneGap = 14;
-        const int detailScrollWidth = 20;
+        const int detailScrollWidth = 33;
         const int detailPaneWidth =
             (panelWidth - 24 - detailPaneGap) / 2;
         const int detailViewportWidth =
@@ -1979,6 +2029,7 @@
                 "KJM_StationDetailScroll");
         g_stationView.detailScroll->eventScrollChangePosition +=
             MyGUI::newDelegate(OnStationDetailScroll);
+        TagThemeScrollBar(g_stationView.detailScroll);
 
         g_stationView.detailAvailableViewport =
             g_stationView.modalPanel->createWidget<MyGUI::Widget>(
@@ -2008,6 +2059,7 @@
                 "KJM_StationAvailableScroll");
         g_stationView.detailAvailableScroll->eventScrollChangePosition +=
             MyGUI::newDelegate(OnStationAvailableScroll);
+        TagThemeScrollBar(g_stationView.detailAvailableScroll);
         g_stationView.detailStatus =
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
@@ -2370,6 +2422,7 @@
                 "KJM_StationGridScroll");
         g_stationView.verticalScroll->eventScrollChangePosition +=
             MyGUI::newDelegate(OnStationVerticalScroll);
+        TagThemeScrollBar(g_stationView.verticalScroll);
         g_stationView.emptyText =
             g_stationView.root->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
@@ -2465,7 +2518,8 @@
         g_stationView.changingScroll = true;
         if (g_stationView.verticalScroll != NULL)
         {
-            g_stationView.verticalScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_stationView.verticalScroll,
                 static_cast<size_t>(g_stationView.verticalOffset));
         }
         g_stationView.changingScroll = false;
@@ -2547,7 +2601,8 @@
         g_stationView.detailScrollChanging = true;
         if (g_stationView.detailScroll != NULL)
         {
-            g_stationView.detailScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_stationView.detailScroll,
                 static_cast<size_t>(g_stationView.detailOffset));
         }
         g_stationView.detailScrollChanging = false;
@@ -2571,7 +2626,8 @@
         g_stationView.detailAvailableScrollChanging = true;
         if (g_stationView.detailAvailableScroll != NULL)
         {
-            g_stationView.detailAvailableScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_stationView.detailAvailableScroll,
                 static_cast<size_t>(
                     g_stationView.detailAvailableOffset));
         }

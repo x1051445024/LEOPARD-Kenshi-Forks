@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Kenshi Job Management, 0.1.0-alpha squad queue editor.
+// Kenshi Job Management, 0.4.0-beta squad queue editor.
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -97,7 +97,7 @@
 namespace
 {
     const char* const PLUGIN_NAME = "Kenshi Job Management";
-    const char* const PLUGIN_VERSION = "0.1.0-alpha";
+    const char* const PLUGIN_VERSION = "0.4.0-beta";
     // Keep failed station-assignment recovery bounded while the Stations tab
     // is active. The paused Squad Jobs board refreshes only at explicit UI or
     // mutation boundaries.
@@ -111,13 +111,16 @@ namespace
     // The status frame now keeps three timestamped message lines. Reserve
     // enough bottom-bar height for that frame and the compact action buttons.
     const int ACTION_HEIGHT = 82;
-    const int SCROLL_SIZE = 20;
-    const int SQUAD_SELECTOR_HEIGHT = 54;
+    // Give the scrollbars a larger cross-axis hit area than Kenshi's compact
+    // native 16-20 pixel controls. ThemePalette also enforces a larger thumb
+    // length and draws the optional dark-mode contrast treatment.
+    const int SCROLL_SIZE = 33;
+    const int SQUAD_SELECTOR_HEIGHT = 71;
     const int SQUAD_SELECTOR_LABEL_WIDTH = 76;
     const int SQUAD_SELECTOR_BUTTON_WIDTH = 150;
     const int SQUAD_SELECTOR_BUTTON_HEIGHT = 34;
     const int SQUAD_SELECTOR_BUTTON_GAP = 4;
-    const int SQUAD_SELECTOR_SCROLL_HEIGHT = 16;
+    const int SQUAD_SELECTOR_SCROLL_HEIGHT = 33;
     // Keep the member rows compact enough to show a full squad without
     // wasting vertical space.  Card dimensions are intentionally modest:
     // the original tick-button skin was being stretched over a very large

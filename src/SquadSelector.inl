@@ -75,10 +75,16 @@
                 static_cast<size_t>(
                     SQUAD_SELECTOR_BUTTON_WIDTH +
                     SQUAD_SELECTOR_BUTTON_GAP));
-            g_squadSelectorScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_squadSelectorScroll,
                 static_cast<size_t>(g_squadSelectorOffset));
-            g_squadSelectorScroll->setEnabled(
-                g_squadSelectorMaximumOffset > 0);
+            const bool hasOverflow =
+                g_squadSelectorMaximumOffset > 0;
+            g_squadSelectorScroll->setEnabled(hasOverflow);
+            // This bar exists only for an overflowing squad-button row. A
+            // disabled empty bar looks like a second jobs scrollbar and has
+            // no useful interaction, so remove it until it is needed.
+            g_squadSelectorScroll->setVisible(hasOverflow);
         }
         g_squadSelectorChangingScroll = false;
         ApplySquadSelectorOffset();
@@ -224,7 +230,8 @@
             g_squadSelectorChangingScroll = true;
             if (g_squadSelectorScroll != NULL)
             {
-                g_squadSelectorScroll->setScrollPosition(
+                SetThemeScrollBarPosition(
+                    g_squadSelectorScroll,
                     static_cast<size_t>(g_squadSelectorOffset));
             }
             g_squadSelectorChangingScroll = false;
@@ -394,6 +401,7 @@
                 "KJM_SquadSelectorScroll");
         g_squadSelectorScroll->eventScrollChangePosition +=
             MyGUI::newDelegate(OnSquadSelectorScroll);
+        TagThemeScrollBar(g_squadSelectorScroll);
         BindSquadSelectorMouseWheelTree(g_squadSelectorRoot);
         UpdateSquadSelectorScrollRange();
     }
@@ -455,7 +463,15 @@
             (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
         if (control)
         {
+            const bool wasFullySelected = !squad->members.empty() &&
+                GetSquadRecipientSelectionCount(*squad) ==
+                    squad->members.size();
             ToggleSquadRecipients(*squad);
+            SetBottomSquadSelected(squadIdentity, !wasFullySelected);
+            if (ApplyBottomSquadSelectionCollapseState())
+            {
+                g_squadGroupRebuildRequested = true;
+            }
             ApplyRecipientSelectionStates();
             UpdateSquadSelectorSelection();
             UpdateSquadHeading();
@@ -463,10 +479,19 @@
         }
 
         SelectOnlySquadRecipients(*squad);
+        ResetBottomSquadSelectionTracking();
+        SetBottomSquadSelected(squadIdentity, true);
+        const bool switchCurrentSquad =
+            !SameHandleIdentity(squadIdentity, g_squad.identity);
+        if (ApplyBottomSquadSelectionCollapseState() &&
+            !switchCurrentSquad)
+        {
+            g_squadGroupRebuildRequested = true;
+        }
         ApplyRecipientSelectionStates();
         UpdateSquadSelectorSelection();
         UpdateSquadHeading();
-        if (!SameHandleIdentity(squadIdentity, g_squad.identity))
+        if (switchCurrentSquad)
         {
             g_pendingSquadSelectionIdentity = squadIdentity;
             g_squadSelectorSelectionPending = true;
@@ -514,7 +539,8 @@
         g_squadSelectorChangingScroll = true;
         if (g_squadSelectorScroll != NULL)
         {
-            g_squadSelectorScroll->setScrollPosition(
+            SetThemeScrollBarPosition(
+                g_squadSelectorScroll,
                 static_cast<size_t>(g_squadSelectorOffset));
         }
         g_squadSelectorChangingScroll = false;
@@ -565,7 +591,12 @@
             StoreCurrentSquadCache();
         }
         CancelDrag();
+        const bool hadSelectedJobs = !g_selectedJobs.empty();
         g_selectedJobs.clear();
+        if (hadSelectedJobs)
+        {
+            SyncRecipientsToSelectedJobs();
+        }
         ResetHandleIdentity(&g_selectionAnchorMember);
         g_selectionAnchorSlot = -1;
         g_horizontalOffset = 0;
@@ -603,6 +634,10 @@
         {
             SetStatus("That squad is no longer available. The current squad was not changed.");
             RefreshSquadSelectorRoster(false);
+            if (!SquadWidgetStructureMatchesBoard())
+            {
+                g_squadGroupRebuildRequested = true;
+            }
             return false;
         }
         if (!RefreshSquadView(true))

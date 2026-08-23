@@ -200,6 +200,10 @@
         hand handle;
         HandleIdentity areaIdentity;
         std::string areaName;
+        // Native Kenshi icon names are copied while the BUILDING/GameData
+        // pointers are still inside the guarded scanner leaf.  The UI keeps
+        // only these value strings and resolves them through Ogre later.
+        std::vector<std::string> nativeIconCandidates;
         int zoneX;
         int zoneY;
         StationCategory category;
@@ -1264,6 +1268,90 @@
 
     bool StationStringIdEquals(const GameData* data, const char* expected);
 
+    std::string StationIconBaseName(const std::string& path)
+    {
+        const std::string::size_type separator =
+            path.find_last_of("/\\");
+        return separator == std::string::npos ?
+            path : path.substr(separator + 1);
+    }
+
+    bool IsStationDefaultIconCandidate(const std::string& name)
+    {
+        // default_icon.png is Kenshi's generic placeholder. Do not let it
+        // replace the manager's exact subtype/category artwork.
+        return name == "default_icon.png";
+    }
+
+    __declspec(noinline) bool CallReadStationNativeIconCandidates(
+        Building* building,
+        std::vector<std::string>* candidatesOut)
+    {
+        if (building == NULL || candidatesOut == NULL)
+        {
+            return false;
+        }
+        try
+        {
+            candidatesOut->clear();
+            GameData* data = building->getGameData();
+            if (data == NULL || !data->isValid())
+            {
+                return false;
+            }
+
+            if (data->filesdata.count("icon") != 0)
+            {
+                const std::string icon = StationIconBaseName(
+                    data->filesdata.find("icon")->second);
+                if (!icon.empty() &&
+                    !IsStationDefaultIconCandidate(icon))
+                {
+                    candidatesOut->push_back(icon);
+                }
+            }
+            if (!data->stringID.empty())
+            {
+                const std::string buildMenuIcon = data->stringID + ".png";
+                if (!IsStationDefaultIconCandidate(buildMenuIcon) &&
+                    (candidatesOut->empty() ||
+                     candidatesOut->front() != buildMenuIcon))
+                {
+                    candidatesOut->push_back(buildMenuIcon);
+                }
+            }
+            return !candidatesOut->empty();
+        }
+        catch (...)
+        {
+            candidatesOut->clear();
+            return false;
+        }
+    }
+
+    __declspec(noinline) bool TryReadStationNativeIconCandidates(
+        Building* building,
+        std::vector<std::string>* candidatesOut)
+    {
+        if (candidatesOut == NULL)
+        {
+            return false;
+        }
+        candidatesOut->clear();
+        bool copied = false;
+        __try
+        {
+            copied = CallReadStationNativeIconCandidates(
+                building, candidatesOut);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            candidatesOut->clear();
+            copied = false;
+        }
+        return copied;
+    }
+
     bool StationIsWellBuilding(
         const GameData* buildingData,
         const GameData* functionalityData);
@@ -2310,6 +2398,13 @@
             station.relevantSkillName =
                 station.category == STATION_OTHER ? "Unknown" : "None";
         }
+
+        // Capture only value strings.  GameData and Building pointers never
+        // enter StationTargetSnapshot or survive this guarded enrichment
+        // call.  A missing/faulting native icon source keeps the normal
+        // custom subtype/category artwork path intact.
+        TryReadStationNativeIconCandidates(
+            building, &station.nativeIconCandidates);
 
         *stationOut = station;
         *includeOut = true;

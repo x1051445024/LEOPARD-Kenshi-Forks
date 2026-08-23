@@ -51,6 +51,85 @@
     bool g_jobEscortOutIconAvailable = false;
     bool g_jobForagingAnimalsIconAvailable = false;
 
+    struct NativeIconTextureCacheEntry
+    {
+        std::string textureName;
+        bool available;
+
+        NativeIconTextureCacheEntry() : available(false) {}
+    };
+
+    // A station type can appear on many cards. Cache both successful and
+    // failed native lookups so rebuilding a large board does not repeatedly
+    // enter Ogre's synchronous texture loader or exception path.
+    std::vector<NativeIconTextureCacheEntry> g_nativeIconTextureCache;
+
+    // Kenshi's native build-menu textures live in the Icons resource group.
+    // Keep the load behind both C++ and SEH guards because a missing texture
+    // can make Ogre throw or fault while resolving the resource name.
+    __declspec(noinline) bool CallEnsureNativeIconTexture(
+        const std::string* textureName)
+    {
+        if (textureName == NULL || textureName->empty())
+        {
+            return false;
+        }
+        try
+        {
+            Ogre::TextureManager* textures =
+                Ogre::TextureManager::getSingletonPtr();
+            if (textures == NULL)
+            {
+                return false;
+            }
+            const Ogre::TexturePtr texture = textures->load(
+                *textureName, "Icons");
+            return !texture.isNull();
+        }
+        catch (...)
+        {
+            return false;
+        }
+    }
+
+    __declspec(noinline) bool TryLoadNativeIconTextureGuarded(
+        const std::string* textureName)
+    {
+        bool loaded = false;
+        __try
+        {
+            loaded = CallEnsureNativeIconTexture(textureName);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            loaded = false;
+        }
+        return loaded;
+    }
+
+    bool TryEnsureNativeIconTexture(
+        const std::string* textureName)
+    {
+        if (textureName == NULL || textureName->empty())
+        {
+            return false;
+        }
+        for (size_t index = 0;
+             index < g_nativeIconTextureCache.size(); ++index)
+        {
+            if (g_nativeIconTextureCache[index].textureName == *textureName)
+            {
+                return g_nativeIconTextureCache[index].available;
+            }
+        }
+
+        NativeIconTextureCacheEntry entry;
+        entry.textureName = *textureName;
+        entry.available = TryLoadNativeIconTextureGuarded(textureName);
+        g_nativeIconTextureCache.push_back(entry);
+        return entry.available;
+    }
+
     const char* GetStationCategoryIconResource(StationCategory category)
     {
         if (!g_stationIconLocationRegistered)

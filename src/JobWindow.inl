@@ -575,7 +575,7 @@
                 "KJM_SquadWindow");
             g_window->setMovable(false);
             g_window->setAutoAlpha(false);
-            g_window->setCaption("Kenshi Job Management 0.1.0-alpha");
+            g_window->setCaption("Kenshi Job Management 0.4.0-beta");
             g_window->eventWindowButtonPressed +=
                 MyGUI::newDelegate(OnWindowButtonPressed);
 
@@ -699,6 +699,7 @@
                 "KJM_VScroll");
             g_verticalScroll->eventScrollChangePosition +=
                 MyGUI::newDelegate(OnVerticalScroll);
+            TagThemeScrollBar(g_verticalScroll);
 
             g_horizontalScroll = g_squadTabRoot->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_ScrollBarH",
@@ -711,6 +712,7 @@
                 "KJM_HScroll");
             g_horizontalScroll->eventScrollChangePosition +=
                 MyGUI::newDelegate(OnHorizontalScroll);
+            TagThemeScrollBar(g_horizontalScroll);
 
             const int squadSelectorTop =
                 bodyTop + g_bodyHeight + SCROLL_SIZE + PAD;
@@ -1145,7 +1147,19 @@
             // A native TAB transition wins if it arrives in the same update
             // as a queued button click. Never perform two squad changes from
             // one manager tick.
+            const bool cancelledBottomSelection =
+                g_squadSelectorSelectionPending;
+            const HandleIdentity cancelledBottomSquad =
+                g_pendingSquadSelectionIdentity;
             CancelPendingSquadSelectorSelection();
+            if (cancelledBottomSelection)
+            {
+                // The queued plain bottom click selected only this squad and
+                // made it the sole expanded group. TAB cancels that complete
+                // interaction, then restores the normal active-squad default.
+                ResetRecipientSelection();
+                SetSquadCollapsed(cancelledBottomSquad, true);
+            }
             ApplyNativeTabSquadCollapseTransition();
             if (!RefreshSquadView(true))
             {
