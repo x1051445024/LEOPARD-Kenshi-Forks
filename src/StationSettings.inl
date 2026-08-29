@@ -7,21 +7,22 @@
     struct StationCategoryDefinition
     {
         StationCategory category;
+        const char* localizationKey;
         const char* name;
         bool defaultEnabled;
     };
 
     const StationCategoryDefinition STATION_CATEGORY_DEFINITIONS[] =
     {
-        { STATION_CRAFTING, "Crafting", true },
-        { STATION_REFINING, "Refining", true },
-        { STATION_FARMING, "Farming", true },
-        { STATION_MINING, "Mining", true },
-        { STATION_RESEARCH, "Research", true },
-        { STATION_TRAINING, "Training", false },
-        { STATION_STORAGE_HAULING, "Storage / Hauling", false },
-        { STATION_DEFENSE, "Defense", false },
-        { STATION_OTHER, "Other / Unclassified", true }
+        { STATION_CRAFTING, "station.category.crafting", "Crafting", true },
+        { STATION_REFINING, "station.category.refining", "Refining", true },
+        { STATION_FARMING, "station.category.farming", "Farming", true },
+        { STATION_MINING, "station.category.mining", "Mining", true },
+        { STATION_RESEARCH, "station.category.research", "Research", true },
+        { STATION_TRAINING, "station.category.training", "Training", false },
+        { STATION_STORAGE_HAULING, "station.category.storage_hauling", "Storage / Hauling", false },
+        { STATION_DEFENSE, "station.category.defense", "Defense", false },
+        { STATION_OTHER, "station.category.other", "Other / Unclassified", true }
     };
 
     const size_t STATION_CATEGORY_DEFINITION_COUNT =

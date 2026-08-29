@@ -668,16 +668,32 @@
         {
             return;
         }
-        std::ostringstream caption;
-        caption << (IsStationCategoryCollapsed(group.category) ? "+ " : "- ")
-                << GetStationCategoryName(group.category) << "  |  "
-                << group.stations.size() << " station";
-        if (group.stations.size() != 1)
+        const std::string category =
+            (IsStationCategoryCollapsed(group.category) ? "+ " : "- ") +
+            GetStationCategoryName(group.category);
+        const bool singular = group.stations.size() == 1;
+        const std::string count = StationIntegerString(
+            static_cast<int>(group.stations.size()));
+        if (singular)
         {
-            caption << "s";
+            header->setCaption(LocalizeFormat(
+                "station.group.header.one",
+                "{category}  |  {count} station  |  {unassigned} unassigned",
+                "{category}", category,
+                "{count}", count,
+                "{unassigned}",
+                StationIntegerString(group.unassignedCount)));
         }
-        caption << "  |  " << group.unassignedCount << " unassigned";
-        header->setCaption(caption.str());
+        else
+        {
+            header->setCaption(LocalizeFormat(
+                "station.group.header.many",
+                "{category}  |  {count} stations  |  {unassigned} unassigned",
+                "{category}", category,
+                "{count}", count,
+                "{unassigned}",
+                StationIntegerString(group.unassignedCount)));
+        }
     }
 
     void CreateStationGroupHeader(const StationGridGroup& group)
@@ -1054,7 +1070,8 @@
             SetFittedStationSingleLine(
                 status,
                 station.blockingStatus.empty() ?
-                    "CANNOT WORK" : station.blockingStatus,
+                    Localize("station.status.cannot_work", "CANNOT WORK") :
+                    station.blockingStatus,
                 14, 10);
             TagThemeWarningText(status);
         }
@@ -1064,26 +1081,38 @@
         binding.status = status;
 
         std::ostringstream tooltip;
-        tooltip << station.name << "\nCategory: "
-                << GetStationCategoryName(station.category);
+        tooltip << station.name << "\n"
+                << LocalizeFormat(
+                    "station.tooltip.category", "Category: {value}",
+                    "{value}", GetStationCategoryName(station.category));
         if (!station.areaName.empty())
         {
-            tooltip << "\nArea: " << station.areaName;
+            tooltip << "\n" << LocalizeFormat(
+                "station.tooltip.area", "Area: {value}", "{value}",
+                station.areaName);
         }
-        tooltip << "\nRelevant skill: "
-                << (station.relevantSkillName.empty() ? "None" :
-                    station.relevantSkillName);
+        tooltip << "\n" << LocalizeFormat(
+            "station.tooltip.relevant_skill", "Relevant skill: {value}",
+            "{value}", station.relevantSkillName.empty() ?
+                Localize("station.skill.none", "None") :
+                station.relevantSkillName);
         if (!station.assignmentSupported)
         {
-            tooltip << "\nAssignment: Not supported for this station";
+            tooltip << "\n" << Localize(
+                "station.tooltip.assignment_unsupported",
+                "Assignment: Not supported for this station");
         }
         if (!station.blockingStatus.empty())
         {
-            tooltip << "\nCannot work: " << station.blockingStatus;
+            tooltip << "\n" << LocalizeFormat(
+                "station.tooltip.cannot_work", "Cannot work: {value}",
+                "{value}", station.blockingStatus);
         }
         else if (!station.blockingStatusKnown)
         {
-            tooltip << "\nWork status: Unavailable";
+            tooltip << "\n" << Localize(
+                "station.tooltip.work_status_unavailable",
+                "Work status: Unavailable");
         }
         AttachStationTooltip(card, tooltip.str());
         g_stationView.virtualWidgets.push_back(card);
@@ -1174,31 +1203,45 @@
             snapshot.ownershipResolutionIncomplete ||
             snapshot.rosterIncomplete || snapshot.targetsFailed > 0 ||
             !snapshot.errors.empty();
-        std::ostringstream caption;
+        std::string caption;
         int themeRole = 0; // 0 success, 1 accent, 2 warning.
         if (snapshot.truncated)
         {
-            caption << "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE";
-            caption << "  |  " << snapshot.targetsFailed
-                    << " target(s) failed";
+            caption = LocalizeFormat(
+                "station.banner.truncated",
+                "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE  |  {failed} target(s) failed",
+                "{failed}", StationIntegerString(static_cast<int>(
+                    snapshot.targetsFailed)));
             themeRole = 2;
         }
         else if (!snapshot.complete)
         {
-            caption << "PARTIAL SCAN - RESULTS INCOMPLETE  |  "
-                    << snapshot.targetsCompleted << " of " << candidateCount
-                    << " candidates read";
-            caption << "  |  " << snapshot.targetsFailed
-                    << " target(s) failed";
+            caption = LocalizeFormat(
+                "station.banner.partial",
+                "PARTIAL SCAN - RESULTS INCOMPLETE  |  {completed} of {candidate} candidates read  |  {failed} target(s) failed",
+                "{completed}", StationIntegerString(
+                    static_cast<int>(snapshot.targetsCompleted)),
+                "{candidate}", StationIntegerString(
+                    static_cast<int>(candidateCount)),
+                "{failed}", StationIntegerString(static_cast<int>(
+                    snapshot.targetsFailed)));
             themeRole = scanFault ? 2 : 1;
         }
         else if (scanFault)
         {
-            caption << "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE";
             if (snapshot.targetsFailed > 0)
             {
-                caption << "  |  " << snapshot.targetsFailed
-                        << " target(s) failed";
+                caption = LocalizeFormat(
+                    "station.banner.fault_failed",
+                    "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE  |  {failed} target(s) failed",
+                    "{failed}", StationIntegerString(
+                        static_cast<int>(snapshot.targetsFailed)));
+            }
+            else
+            {
+                caption = Localize(
+                    "station.banner.fault",
+                    "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE");
             }
             themeRole = 2;
         }
@@ -1209,9 +1252,12 @@
             {
                 visibleCount += g_stationView.groups[index].stations.size();
             }
-            caption << visibleCount << " PLAYER STATIONS";
+            caption = LocalizeFormat(
+                "station.banner.count", "{count} PLAYER STATIONS",
+                "{count}", StationIntegerString(
+                    static_cast<int>(visibleCount)));
         }
-        g_stationView.scanBanner->setCaption(caption.str());
+        g_stationView.scanBanner->setCaption(caption);
         if (themeRole == 2)
         {
             TagThemeWarningText(g_stationView.scanBanner);
@@ -1406,7 +1452,8 @@
             }
             if (person.name.empty())
             {
-                person.name = "Unknown person";
+                person.name = Localize(
+                    "station.person.unknown", "Unknown person");
             }
             g_stationView.assignedPeople.push_back(person);
         }
@@ -1470,24 +1517,40 @@
         const StationTargetSnapshot& station,
         bool addCandidate)
     {
-        std::ostringstream caption;
-        caption << person.name << "  |  ";
+        std::string skillCaption = station.relevantSkillName;
         if (!station.relevantSkillName.empty())
         {
-            caption << station.relevantSkillName << ' ';
+            skillCaption += " ";
         }
         if (person.relevantSkillKnown)
         {
-            caption << person.relevantSkill;
+            skillCaption += StationIntegerString(person.relevantSkill);
         }
         else
         {
-            caption << "unknown";
+            skillCaption += Localize("station.skill.unknown", "Unknown");
         }
-        caption << "  |  " << person.totalJobs << " total job";
-        if (person.totalJobs != 1)
+        const bool singular = person.totalJobs == 1;
+        const std::string jobCount =
+            StationIntegerString(person.totalJobs);
+        std::string personCaption;
+        if (singular)
         {
-            caption << 's';
+            personCaption = LocalizeFormat(
+                "station.person.caption.one",
+                "{name}  |  {skill}  |  {jobs} total job",
+                "{name}", person.name,
+                "{skill}", skillCaption,
+                "{jobs}", jobCount);
+        }
+        else
+        {
+            personCaption = LocalizeFormat(
+                "station.person.caption.many",
+                "{name}  |  {skill}  |  {jobs} total jobs",
+                "{name}", person.name,
+                "{skill}", skillCaption,
+                "{jobs}", jobCount);
         }
         // A run of spaces in a proportional font did not reserve a reliable
         // portrait column. Keep the button caption empty and render text in a
@@ -1510,7 +1573,7 @@
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonText" :
                 "KJM_StationAssignedPersonText");
-        SetFittedStationSingleLine(label, caption.str(), 16, 13);
+        SetFittedStationSingleLine(label, personCaption, 16, 13);
         label->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(label);
         label->setColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
@@ -1536,8 +1599,10 @@
             row->eventKeyButtonPressed +=
                 MyGUI::newDelegate(OnStationAddKey);
             AttachStationTooltip(row,
-                caption.str() +
-                "\n\nClick or press Enter to request assignment. Scrolling never assigns.");
+                LocalizeFormat(
+                    "station.person.available_tooltip",
+                    "{caption}\n\nClick or press Enter to request assignment. Scrolling never assigns.",
+                    "{caption}", personCaption));
         }
         else
         {
@@ -1546,8 +1611,10 @@
             row->eventMouseButtonPressed +=
                 MyGUI::newDelegate(OnStationAssignedPressed);
             AttachStationTooltip(row,
-                caption.str() +
-                "\n\nRight-click to request removal from this station.");
+                LocalizeFormat(
+                    "station.person.assigned_tooltip",
+                    "{caption}\n\nRight-click to request removal from this station.",
+                    "{caption}", personCaption));
         }
     }
 
@@ -1672,20 +1739,22 @@
         BuildStationDetailPeople(*station);
         if (g_stationView.detailAssignedHeader != NULL)
         {
-            std::ostringstream assignedCaption;
-            assignedCaption << "ASSIGNED WORKERS ("
-                            << g_stationView.assignedPeople.size() << ")";
             g_stationView.detailAssignedHeader->setCaption(
-                assignedCaption.str());
+                LocalizeFormat(
+                    "station.detail.assigned_header",
+                    "ASSIGNED WORKERS ({count})", "{count}",
+                    StationIntegerString(static_cast<int>(
+                        g_stationView.assignedPeople.size()))));
             ApplyThemeStandardText(g_stationView.detailAssignedHeader);
         }
         if (g_stationView.detailAvailableHeader != NULL)
         {
-            std::ostringstream availableCaption;
-            availableCaption << "AVAILABLE WORKERS ("
-                             << g_stationView.addPeople.size() << ")";
             g_stationView.detailAvailableHeader->setCaption(
-                availableCaption.str());
+                LocalizeFormat(
+                    "station.detail.available_header",
+                    "AVAILABLE WORKERS ({count})", "{count}",
+                    StationIntegerString(static_cast<int>(
+                        g_stationView.addPeople.size()))));
             ApplyThemeStandardText(g_stationView.detailAvailableHeader);
         }
 
@@ -1699,7 +1768,8 @@
                         g_stationView.detailCanvas->getWidth() - 16,
                         35), MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAssignedPeople");
-            empty->setCaption("UNASSIGNED");
+            empty->setCaption(Localize(
+                "station.detail.unassigned", "UNASSIGNED"));
             TagThemeAccentText(empty);
             empty->setNeedMouseFocus(false);
             empty->setNeedKeyFocus(false);
@@ -1738,8 +1808,9 @@
                         52),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationAssignmentUnsupported");
-            unsupported->setCaption(
-                "This station does not expose a verified permanent-job mapping.");
+            unsupported->setCaption(Localize(
+                "station.detail.assignment_unsupported",
+                "This station does not expose a verified permanent-job mapping."));
             TagThemeWarningText(unsupported);
             unsupported->setNeedMouseFocus(false);
             unsupported->setNeedKeyFocus(false);
@@ -1756,7 +1827,9 @@
                         34),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAddCandidates");
-            none->setCaption("No loaded readable unassigned characters.");
+            none->setCaption(Localize(
+                "station.detail.no_candidates",
+                "No loaded readable unassigned characters."));
             TagThemeStandardText(none);
             none->setNeedMouseFocus(false);
             none->setNeedKeyFocus(false);
@@ -1917,31 +1990,46 @@
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailSummary");
         TagThemeStandardText(summary);
-        std::ostringstream summaryCaption;
-        summaryCaption << GetStationCategoryName(station->category)
-                       << "  |  Relevant skill: "
-                       << (station->relevantSkillName.empty() ? "None" :
-                           station->relevantSkillName);
+        const std::string relevantSkill =
+            station->relevantSkillName.empty() ?
+                Localize("station.skill.none", "None") :
+                station->relevantSkillName;
+        std::string summaryCaption = LocalizeFormat(
+            "station.detail.summary", "{category}  |  Relevant skill: {skill}",
+            "{category}", GetStationCategoryName(station->category),
+            "{skill}", relevantSkill);
         if (!station->areaName.empty())
         {
-            summaryCaption << "\nArea: " << station->areaName;
+            summaryCaption += "\n";
+            summaryCaption += LocalizeFormat(
+                "station.tooltip.area", "Area: {value}", "{value}",
+                station->areaName);
         }
         if (!station->blockingStatus.empty())
         {
-            summaryCaption << "\nCannot work: " << station->blockingStatus;
+            summaryCaption += "\n";
+            summaryCaption += LocalizeFormat(
+                "station.tooltip.cannot_work", "Cannot work: {value}",
+                "{value}", station->blockingStatus);
             TagThemeWarningText(summary);
         }
         else if (!station->blockingStatusKnown)
         {
-            summaryCaption << "\nWork status: Unavailable";
+            summaryCaption += "\n";
+            summaryCaption += Localize(
+                "station.tooltip.work_status_unavailable",
+                "Work status: Unavailable");
         }
         if (!station->assignmentSupported)
         {
-            summaryCaption << "\nAssignment: Not supported for this station";
+            summaryCaption += "\n";
+            summaryCaption += Localize(
+                "station.tooltip.assignment_unsupported",
+                "Assignment: Not supported for this station");
         }
-        summary->setCaption(summaryCaption.str());
+        summary->setCaption(summaryCaption);
         summary->setFontHeight(14);
-        AttachStationTooltip(summary, summaryCaption.str());
+        AttachStationTooltip(summary, summaryCaption);
 
         const int listTop = 114;
         const int statusHeight = 30;
@@ -2246,8 +2334,12 @@
             {
                 g_stationView.emptyText->setCaption(
                     g_stationView.snapshot->complete ?
-                    "No stations match the current category filters." :
-                    "Partial scan in progress. No matching stations are available yet.");
+                    Localize(
+                        "station.empty.filtered",
+                        "No stations match the current category filters.") :
+                    Localize(
+                        "station.empty.partial",
+                        "Partial scan in progress. No matching stations are available yet."));
             }
         }
         RefreshStationVirtualWidgets();
@@ -2539,7 +2631,9 @@
                 category, !IsStationCategoryCollapsed(category)))
         {
             SetStatus(
-                "The category was changed, but settings.ini could not be saved.");
+                Localize(
+                    "station.status.category_save_failed",
+                    "The category was changed, but settings.ini could not be saved."));
         }
         // Rebuild only after this header callback returns. The current header
         // belongs to the virtual widget tree that the rebuild destroys.

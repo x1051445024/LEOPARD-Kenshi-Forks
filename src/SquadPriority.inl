@@ -85,24 +85,24 @@
         return SQUAD_PRIORITY_NONE;
     }
 
-    const char* SquadPriorityRoleName(int role)
+    std::string SquadPriorityRoleName(int role)
     {
         switch (role)
         {
         case SQUAD_PRIORITY_RESCUE:
-            return "Find and Rescue";
+            return Localize("job.role.rescue", "Find and Rescue");
         case SQUAD_PRIORITY_PUT_IN_BED:
-            return "Find and Put in Bed";
+            return Localize("job.role.put_in_bed", "Find and Put in Bed");
         case SQUAD_PRIORITY_MEDIC:
-            return "Medic";
+            return Localize("job.role.medic", "Medic");
         case SQUAD_PRIORITY_ROBOTICS:
-            return "Robotics";
+            return Localize("job.role.robotics", "Robotics");
         case SQUAD_PRIORITY_SPLINTING:
-            return "Splinting";
+            return Localize("job.role.splinting", "Splinting");
         case SQUAD_PRIORITY_ENGINEERING:
-            return "Engineering";
+            return Localize("job.role.engineering", "Engineering");
         default:
-            return "other jobs";
+            return Localize("job.role.other", "other jobs");
         }
     }
 
@@ -344,7 +344,8 @@
     void SetSquadPriorityFailure(
         SquadPriorityResult* resultOut,
         const std::string& memberName,
-        const char* message)
+        const char* localizationKey,
+        const char* englishDefault)
     {
         if (resultOut == NULL)
         {
@@ -352,8 +353,20 @@
         }
         resultOut->interrupted = true;
         resultOut->failedMember = memberName;
-        resultOut->message = message == NULL ? "Priority update interrupted." :
-            message;
+        if (localizationKey == NULL && englishDefault == NULL)
+        {
+            resultOut->message = Localize(
+                "status.priority.interrupted",
+                "Priority update interrupted.");
+        }
+        else
+        {
+            resultOut->message = Localize(
+                localizationKey == NULL ?
+                    "status.priority.interrupted" : localizationKey,
+                englishDefault == NULL ?
+                    "Priority update interrupted." : englishDefault);
+        }
     }
 
     bool TryApplySquadPriorityToMember(
@@ -375,6 +388,7 @@
             SetSquadPriorityFailure(
                 resultOut,
                 "",
+                "status.priority.squad_changed",
                 "Squad membership changed while priorities were being applied.");
             return false;
         }
@@ -407,6 +421,7 @@
             SetSquadPriorityFailure(
                 resultOut,
                 freshMember.name,
+                "status.priority.queue_prepare_failed",
                 "A permanent-job queue could not be prepared for priority changes.");
             return false;
         }
@@ -427,6 +442,7 @@
                 SetSquadPriorityFailure(
                     resultOut,
                     freshMember.name,
+                    "status.priority.queue_changed",
                     "The permanent-job queue changed while priorities were being applied.");
                 return false;
             }
@@ -454,6 +470,7 @@
                 SetSquadPriorityFailure(
                     resultOut,
                     freshMember.name,
+                    "status.priority.squad_or_queue_changed",
                     "The squad or permanent-job queue changed before a priority move.");
                 return false;
             }
@@ -481,6 +498,7 @@
                 SetSquadPriorityFailure(
                     resultOut,
                     freshMember.name,
+                    "status.priority.squad_changed_verification",
                     "The squad changed while verifying a priority move.");
                 return false;
             }
@@ -494,12 +512,22 @@
                 !SameSquadPriorityQueueStructure(
                     working, verifiedMember.jobs))
             {
-                SetSquadPriorityFailure(
-                    resultOut,
-                    freshMember.name,
-                    moveAccepted
-                        ? "A priority move could not be verified; no further members were changed."
-                        : "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed.");
+                if (moveAccepted)
+                {
+                    SetSquadPriorityFailure(
+                        resultOut,
+                        freshMember.name,
+                        "status.priority.move_unverified",
+                        "A priority move could not be verified; no further members were changed.");
+                }
+                else
+                {
+                    SetSquadPriorityFailure(
+                        resultOut,
+                        freshMember.name,
+                        "status.priority.move_rejected",
+                        "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed.");
+                }
                 return false;
             }
 
@@ -527,25 +555,32 @@
             message << result.message;
             if (!result.failedMember.empty())
             {
-                message << " Member: " << result.failedMember << ".";
+                message << " " << LocalizeFormat(
+                    "status.priority.failed_member",
+                    "Member: {member}.",
+                    "{member}", result.failedMember);
             }
         }
         else if (result.changedMembers == 0)
         {
-            message << "No rescue, medical, robotics, splinting, or engineering jobs needed reordering.";
+            message << Localize(
+                "status.priority.no_changes",
+                "No rescue, medical, robotics, splinting, or engineering jobs needed reordering.");
         }
         else
         {
-            message << "Priority order applied to " << result.changedMembers
-                    << " squad member" <<
-                (result.changedMembers == 1 ? "" : "s") << ".";
+            message << LocalizeFormat(
+                "status.priority.applied",
+                "Priority order applied to {count} squad members.",
+                "{count}", IntegerString(result.changedMembers));
         }
 
         if (result.skippedMembers != 0)
         {
-            message << " Skipped " << result.skippedMembers
-                    << " unavailable or unreadable member" <<
-                (result.skippedMembers == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "status.priority.skipped",
+                "Skipped unavailable or unreadable members: {count}.",
+                "{count}", IntegerString(result.skippedMembers));
         }
         return message.str();
     }
@@ -569,14 +604,18 @@
             {
                 resultOut->interrupted = true;
                 resultOut->message =
-                    "The selected squad is no longer current or available.";
+                    Localize(
+                        "status.priority.squad_unavailable",
+                        "The selected squad is no longer current or available.");
                 return false;
             }
             if (initial.incomplete)
             {
                 resultOut->interrupted = true;
                 resultOut->message =
-                    "The selected squad roster exceeds the safe batch limit. No priorities were changed.";
+                    Localize(
+                        "status.priority.roster_limit",
+                        "The selected squad roster exceeds the safe batch limit. No priorities were changed.");
                 return false;
             }
 
@@ -606,7 +645,9 @@
             resultOut->success = false;
             resultOut->interrupted = true;
             resultOut->message =
-                "Priority update stopped because its snapshot could not be allocated.";
+                Localize(
+                    "status.priority.snapshot_failed",
+                    "Priority update stopped because its snapshot could not be allocated.");
             return false;
         }
     }

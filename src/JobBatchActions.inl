@@ -2500,27 +2500,40 @@
             !nameOut->empty();
     }
 
-    const char* JobBatchCleanupFailureStageText(
+    std::string JobBatchCleanupFailureStageText(
         JobBatchCleanupFailureStage stage)
     {
         switch (stage)
         {
         case JOB_BATCH_CLEANUP_STAGE_INITIAL_CAPTURE:
-            return "initial malformed-row capture";
+            return Localize(
+                "batch.cleanup_stage.initial_capture",
+                "initial malformed-row capture");
         case JOB_BATCH_CLEANUP_STAGE_PLAN:
-            return "cleanup plan";
+            return Localize(
+                "batch.cleanup_stage.plan", "cleanup plan");
         case JOB_BATCH_CLEANUP_STAGE_QUEUE_CHANGED:
-            return "exact queue precheck";
+            return Localize(
+                "batch.cleanup_stage.queue_changed",
+                "exact queue precheck");
         case JOB_BATCH_CLEANUP_STAGE_RAW_REMOVE:
-            return "native exact-slot removal";
+            return Localize(
+                "batch.cleanup_stage.raw_remove",
+                "native exact-slot removal");
         case JOB_BATCH_CLEANUP_STAGE_VERIFY_ERASE:
-            return "immediate erase verification";
+            return Localize(
+                "batch.cleanup_stage.verify_erase",
+                "immediate erase verification");
         case JOB_BATCH_CLEANUP_STAGE_RETHINK:
-            return "AI rethink";
+            return Localize(
+                "batch.cleanup_stage.rethink", "AI rethink");
         case JOB_BATCH_CLEANUP_STAGE_VERIFY_RETHINK:
-            return "post-rethink queue verification";
+            return Localize(
+                "batch.cleanup_stage.verify_rethink",
+                "post-rethink queue verification");
         default:
-            return "unspecified cleanup stage";
+            return Localize(
+                "batch.cleanup_stage.unknown", "unspecified cleanup stage");
         }
     }
 
@@ -2532,36 +2545,59 @@
         switch (outcome.code)
         {
         case JOB_BATCH_SUCCESS:
-            message << (completedAction == NULL ?
-                "Job action completed." : completedAction);
+            if (completedAction == NULL)
+            {
+                message << Localize(
+                    "batch.result.action_completed",
+                    "Job action completed.");
+            }
+            else
+            {
+                message << completedAction;
+            }
             break;
         case JOB_BATCH_NOTHING_TO_DO:
-            message << "No jobs needed changes.";
+            message << Localize(
+                "batch.result.no_changes", "No jobs needed changes.");
             break;
         case JOB_BATCH_DISABLED:
-            message << "This job action is disabled in the current build.";
+            message << Localize(
+                "batch.result.disabled",
+                "This job action is disabled in the current build.");
             break;
         case JOB_BATCH_CLIPBOARD_EMPTY:
-            message << "Copy one or more jobs before pasting.";
+            message << Localize(
+                "batch.result.clipboard_empty",
+                "Copy one or more jobs before pasting.");
             break;
         case JOB_BATCH_DUPLICATE:
-            message << "The destination already has one of the selected jobs. No jobs were moved.";
+            message << Localize(
+                "batch.result.duplicate",
+                "The destination already has one of the selected jobs. No jobs were moved.");
             break;
         case JOB_BATCH_DESTINATION_FULL:
-            message << "A destination job queue is at the safety limit.";
+            message << Localize(
+                "batch.result.destination_full",
+                "A destination job queue is at the safety limit.");
             break;
         case JOB_BATCH_SOURCE_CHANGED:
         case JOB_BATCH_DESTINATION_CHANGED:
-            message << "A selected member or job queue changed before the action completed. Review the affected members and try again.";
+            message << Localize(
+                "batch.result.queue_changed",
+                "A selected member or job queue changed before the action completed. Review the affected members and try again.");
             break;
         case JOB_BATCH_SOURCE_CHANGED_DUPLICATE_REMAINS:
         case JOB_BATCH_REMOVE_FAILED_DUPLICATE_REMAINS:
-            message << "The move stopped after destination copies were added. Review the affected job queues before another change.";
+            message << Localize(
+                "batch.result.duplicate_remains",
+                "The move stopped after destination copies were added. Review the affected job queues before another change.");
             break;
         case JOB_BATCH_ADD_UNEXPECTED_REVIEW:
         case JOB_BATCH_PRIORITY_FAILED_REVIEW:
         case JOB_BATCH_ALLOCATION_FAILED_REVIEW:
-            message << "The job action stopped after an unverified result. Review the affected job queues before another change.";
+            message << Localize(
+                "batch.result.unverified",
+                "The job action stopped after an unverified result. Review the affected job queues before another change.");
             break;
         case JOB_BATCH_INVALID_REMOVAL_FAILED_REVIEW:
             if (outcome.cleanupFailureStage ==
@@ -2569,85 +2605,95 @@
                 outcome.cleanupFailureStage ==
                     JOB_BATCH_CLEANUP_STAGE_VERIFY_RETHINK)
             {
-                message << "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change.";
+                message << Localize(
+                    "batch.result.invalid_cleanup_rethink_unverified",
+                    "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change.");
             }
             else
             {
-                message << "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change.";
+                message << Localize(
+                    "batch.result.invalid_cleanup_unverified",
+                    "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change.");
             }
             break;
         case JOB_BATCH_CAPTURE_FAILED:
-            message << "A selected job queue could not be read safely. No further jobs were changed.";
+            message << Localize(
+                "batch.result.capture_failed",
+                "A selected job queue could not be read safely. No further jobs were changed.");
             break;
         case JOB_BATCH_ADD_REJECTED:
             if (outcome.failedHealingRole >= JOB_BATCH_HEAL_RESCUE &&
                 outcome.failedHealingRole <= JOB_BATCH_HEAL_SPLINTING)
             {
-                const char* roleName = "healing";
-                switch (outcome.failedHealingRole)
-                {
-                case JOB_BATCH_HEAL_RESCUE: roleName = "Rescue"; break;
-                case JOB_BATCH_HEAL_PUT_IN_BED: roleName = "Put in Bed"; break;
-                case JOB_BATCH_HEAL_MEDIC: roleName = "Medic"; break;
-                case JOB_BATCH_HEAL_ROBOTICS: roleName = "Robotics"; break;
-                case JOB_BATCH_HEAL_SPLINTING: roleName = "Splinting"; break;
-                default: break;
-                }
-                message << "Kenshi rejected the " << roleName <<
-                    " permanent job. No further jobs were changed.";
+                const std::string roleName = SquadPriorityRoleName(
+                    outcome.failedHealingRole);
+                message << LocalizeFormat(
+                    "batch.result.healing_rejected_role",
+                    "Kenshi rejected the {role} permanent job. No further jobs were changed.",
+                    "{role}", roleName);
             }
             else
             {
-                message << "Kenshi rejected a permanent job. No further jobs were changed.";
+                message << Localize(
+                    "batch.result.healing_rejected",
+                    "Kenshi rejected a permanent job. No further jobs were changed.");
             }
             break;
         default:
-            message << "The selected job action is no longer valid.";
+            message << Localize(
+                "batch.result.invalid_request",
+                "The selected job action is no longer valid.");
             break;
         }
 
         if (outcome.appendedBundles != 0)
         {
-            message << " Appended " << outcome.appendedBundles <<
-                " job bundle" <<
-                (outcome.appendedBundles == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.appended",
+                "Appended job bundles: {count}.",
+                "{count}", IntegerString(outcome.appendedBundles));
         }
         if (outcome.skippedDuplicateBundles != 0)
         {
-            message << " Skipped " << outcome.skippedDuplicateBundles <<
-                " duplicate" <<
-                (outcome.skippedDuplicateBundles == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.skipped_duplicates",
+                "Skipped duplicate bundles: {count}.",
+                "{count}", IntegerString(outcome.skippedDuplicateBundles));
         }
         if (outcome.addedHealingJobs != 0)
         {
-            message << " Added " << outcome.addedHealingJobs <<
-                " healing job" <<
-                (outcome.addedHealingJobs == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.added_healing",
+                "Added healing jobs: {count}.",
+                "{count}", IntegerString(outcome.addedHealingJobs));
         }
         if (outcome.movedPriorityRows != 0)
         {
-            message << " Reordered " << outcome.movedPriorityRows <<
-                " job" <<
-                (outcome.movedPriorityRows == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.reordered",
+                "Reordered jobs: {count}.",
+                "{count}", IntegerString(outcome.movedPriorityRows));
         }
         if (outcome.removedRows != 0)
         {
-            message << " Removed " << outcome.removedRows <<
-                " source row" <<
-                (outcome.removedRows == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.removed_source_rows",
+                "Removed source rows: {count}.",
+                "{count}", IntegerString(outcome.removedRows));
         }
         if (outcome.removedInvalidRows != 0)
         {
-            message << " Removed " << outcome.removedInvalidRows <<
-                " invalid job row" <<
-                (outcome.removedInvalidRows == 1 ? "" : "s") << ".";
+            message << " " << LocalizeFormat(
+                "batch.result.removed_invalid_rows",
+                "Removed invalid job rows: {count}.",
+                "{count}", IntegerString(outcome.removedInvalidRows));
         }
         if (outcome.interrupted && outcome.completedRecipients != 0)
         {
-            message << " Completed " << outcome.completedRecipients <<
-                " recipient" <<
-                (outcome.completedRecipients == 1 ? "" : "s") <<
-                " before stopping.";
+            message << " " << LocalizeFormat(
+                "batch.result.completed_recipients",
+                "Completed recipients before stopping: {count}.",
+                "{count}", IntegerString(outcome.completedRecipients));
         }
         if (outcome.invalidCleanup && outcome.interrupted)
         {
@@ -2655,25 +2701,35 @@
             if (TryResolveJobBatchMemberName(
                     outcome.failedMember, &failedMemberName))
             {
-                message << " Member: " << failedMemberName << ".";
+                message << " " << LocalizeFormat(
+                    "batch.result.failed_member",
+                    "Member: {member}.",
+                    "{member}", failedMemberName);
             }
             if (outcome.failedBundle >= 0)
             {
-                message << " Failed bundle: " <<
-                    (outcome.failedBundle + 1) << ".";
+                message << " " << LocalizeFormat(
+                    "batch.result.failed_bundle",
+                    "Failed bundle: {bundle}.",
+                    "{bundle}", IntegerString(
+                        static_cast<size_t>(outcome.failedBundle + 1)));
             }
             if (outcome.cleanupFailureStage !=
                 JOB_BATCH_CLEANUP_STAGE_NONE)
             {
-                message << " Stage: " <<
-                    JobBatchCleanupFailureStageText(
-                        outcome.cleanupFailureStage) << ".";
+                message << " " << LocalizeFormat(
+                    "batch.result.failure_stage",
+                    "Stage: {stage}.",
+                    "{stage}", JobBatchCleanupFailureStageText(
+                        outcome.cleanupFailureStage));
             }
         }
         if (outcome.interrupted &&
             (outcome.destinationChanged || outcome.sourceChanged))
         {
-            message << " Verified earlier changes remain; no rollback was attempted.";
+            message << " " << Localize(
+                "batch.result.no_rollback",
+                "Verified earlier changes remain; no rollback was attempted.");
         }
         const std::string result = message.str();
         if (outcome.invalidCleanup && outcome.interrupted)

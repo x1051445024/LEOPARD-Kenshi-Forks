@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Kenshi Job Management, 0.4.0-beta squad queue editor.
+// Kenshi Job Management, 0.5.0-beta squad queue editor.
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -50,6 +50,7 @@
 #include <kenshi/GameWorld.h>
 #include <kenshi/Globals.h>
 #include <kenshi/InputHandler.h>
+#include <kenshi/LocaleInfo.h>
 #include <kenshi/MedicalSystem.h>
 #include <kenshi/Platoon.h>
 #include <kenshi/PlayerInterface.h>
@@ -73,6 +74,7 @@
 #include <mygui/MyGUI_ScrollView.h>
 #include <mygui/MyGUI_TextBox.h>
 #include <mygui/MyGUI_TextIterator.h>
+#include <mygui/MyGUI_UString.h>
 #include <mygui/MyGUI_Widget.h>
 #include <mygui/MyGUI_Window.h>
 
@@ -90,6 +92,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -97,7 +100,7 @@
 namespace
 {
     const char* const PLUGIN_NAME = "Kenshi Job Management";
-    const char* const PLUGIN_VERSION = "0.4.0-beta";
+    const char* const PLUGIN_VERSION = "0.5.0-beta";
     // Keep failed station-assignment recovery bounded while the Stations tab
     // is active. The paused Squad Jobs board refreshes only at explicit UI or
     // mutation boundaries.
@@ -462,6 +465,7 @@ namespace
     struct SkillDefinition
     {
         StatsEnumerated stat;
+        const char* localizationKey;
         const char* fallbackName;
     };
 
@@ -615,6 +619,7 @@ namespace
     void RefreshStatusMessageFrame();
     void ShowToast(const std::string& message);
 
+#include "Localization.inl"
 #include "RuntimeAccess.inl"
 #include "ThemePalette.inl"
 #include "SquadPriority.inl"

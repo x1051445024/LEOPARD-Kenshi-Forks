@@ -104,7 +104,9 @@
             g_stationScan.ownershipResolutionIncomplete = true;
             AddStationScanError(
                 &g_stationScan,
-                "The player-station scan stopped before every candidate was read.");
+                Localize(
+                    "status.station_scan.stopped_before_candidates",
+                    "The player-station scan stopped before every candidate was read."));
             succeeded = false;
         }
         if (!succeeded)
@@ -157,7 +159,9 @@
         {
             AddStationScanError(
                 &g_stationScan,
-                "The synchronous player-station scan was interrupted safely.");
+                Localize(
+                    "status.station_scan.interrupted",
+                    "The synchronous player-station scan was interrupted safely."));
         }
         catch (...)
         {
@@ -555,6 +559,7 @@
             return;
         }
 
+        PrepareLocalizationForWindow();
         LoadStationCategorySettings();
         LoadThemePaletteSettings();
         if (!TryCaptureAndPauseGame())
@@ -575,7 +580,9 @@
                 "KJM_SquadWindow");
             g_window->setMovable(false);
             g_window->setAutoAlpha(false);
-            g_window->setCaption("Kenshi Job Management 0.4.0-beta");
+            g_window->setCaption(LocalizeFormat(
+                "ui.window.title", "Kenshi Job Management {version}",
+                "{version}", PLUGIN_VERSION));
             g_window->eventWindowButtonPressed +=
                 MyGUI::newDelegate(OnWindowButtonPressed);
 
@@ -627,7 +634,8 @@
                     TOP_HEIGHT - 6),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_SquadHeading");
-            g_squadText->setCaption("Current squad");
+            g_squadText->setCaption(Localize(
+                "ui.squad.current", "Current squad"));
             g_squadText->setTextAlign(MyGUI::Align::Center);
             g_squadText->setNeedMouseFocus(false);
             TagThemeStandardText(g_squadText);
@@ -637,7 +645,9 @@
                 MyGUI::IntCoord(PAD, PAD + TOP_HEIGHT, g_memberWidth, HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_MemberHeader");
-            memberHeader->setCaption("SQUAD MEMBER  |  TOP STATS");
+            memberHeader->setCaption(Localize(
+                "ui.squad.member_stats_header",
+                "SQUAD MEMBER  |  TOP STATS"));
             memberHeader->setTextAlign(MyGUI::Align::Center);
             memberHeader->setNeedMouseFocus(false);
             TagThemeStandardText(memberHeader);
@@ -743,8 +753,10 @@
                 MyGUI::IntCoord(PAD, actionTop, 190, 40),
                 MyGUI::Align::Left | MyGUI::Align::Bottom,
                 "KJM_RemoveSelected");
-            g_removeButton->setCaption("Remove Job(s)");
-            g_removeButton->setFontHeight(14);
+            SetFittedButtonCaption(
+                g_removeButton,
+                Localize("ui.action.remove_jobs", "Remove Job(s)"),
+                14, 10, 14);
             g_removeButton->setTextAlign(MyGUI::Align::Center);
             g_removeButton->setEnabled(false);
             g_removeButton->eventMouseButtonClick += MyGUI::newDelegate(OnRemoveClicked);
@@ -775,8 +787,12 @@
                     MyGUI::IntCoord(PAD + 414, actionTop, 190, 40),
                     MyGUI::Align::Left | MyGUI::Align::Bottom,
                     "KJM_PrioritizeCoreJobs");
-            g_prioritizeCoreJobsButton->setCaption("Prioritize Healing");
-            g_prioritizeCoreJobsButton->setFontHeight(14);
+            SetFittedButtonCaption(
+                g_prioritizeCoreJobsButton,
+                Localize(
+                    "ui.action.prioritize_healing",
+                    "Prioritize Healing"),
+                14, 10, 14);
             g_prioritizeCoreJobsButton->setTextAlign(MyGUI::Align::Center);
             g_prioritizeCoreJobsButton->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnPrioritizeCoreJobsClicked);
@@ -791,9 +807,13 @@
                         invalidButtonWidth, 40),
                     MyGUI::Align::Left | MyGUI::Align::Bottom,
                     "KJM_RemoveInvalidJobs");
-            g_removeInvalidJobsButton->setCaption("Remove Invalid Jobs");
-            g_removeInvalidJobsButton->setFontHeight(
-                invalidButtonWidth < 160 ? 12 : 14);
+            SetFittedButtonCaption(
+                g_removeInvalidJobsButton,
+                Localize(
+                    "ui.action.remove_invalid_jobs",
+                    "Remove Invalid Jobs"),
+                invalidButtonWidth < 160 ? 12 : 14,
+                9, 14);
             g_removeInvalidJobsButton->setTextAlign(MyGUI::Align::Center);
             g_removeInvalidJobsButton->setEnabled(false);
             g_removeInvalidJobsButton->eventMouseButtonClick +=
@@ -805,7 +825,10 @@
                 MyGUI::IntCoord(optionsLeft, actionTop, optionsWidth, 40),
                 MyGUI::Align::Left | MyGUI::Align::Bottom,
                 "KJM_Options");
-            g_optionsButton->setCaption("Options");
+            SetFittedButtonCaption(
+                g_optionsButton,
+                Localize("ui.action.options", "Options"),
+                16, 10, 14);
             g_optionsButton->eventMouseButtonClick += MyGUI::newDelegate(OnOptionsClicked);
             TagThemeButtonText(g_optionsButton);
 
@@ -814,7 +837,10 @@
                 MyGUI::IntCoord(size.width - PAD - 120, actionTop, 120, 40),
                 MyGUI::Align::Right | MyGUI::Align::Bottom,
                 "KJM_Close");
-            g_closeButton->setCaption("Close");
+            SetFittedButtonCaption(
+                g_closeButton,
+                Localize("ui.action.close", "Close"),
+                16, 10, 14);
             g_closeButton->eventMouseButtonClick += MyGUI::newDelegate(OnCloseClicked);
             TagThemeButtonText(g_closeButton);
 
@@ -938,7 +964,10 @@
                 MyGUI::IntCoord(PAD, PAD, 138, 36),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_SquadTabButton");
-            g_squadTabButton->setCaption("Squad Jobs");
+            SetFittedButtonCaption(
+                g_squadTabButton,
+                Localize("ui.tab.squad_jobs", "Squad Jobs"),
+                16, 10, 14);
             g_squadTabButton->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnSquadTabClicked);
             TagThemeButtonText(g_squadTabButton);
@@ -947,7 +976,10 @@
                 MyGUI::IntCoord(PAD + 146, PAD, 138, 36),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationTabButton");
-            g_stationTabButton->setCaption("Stations");
+            SetFittedButtonCaption(
+                g_stationTabButton,
+                Localize("ui.tab.stations", "Stations"),
+                16, 10, 14);
             g_stationTabButton->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnStationTabClicked);
             TagThemeButtonText(g_stationTabButton);
@@ -977,7 +1009,8 @@
                         MyGUI::IntCoord(22, 0, 48, 40),
                         MyGUI::Align::Left | MyGUI::Align::VCenter,
                         "KJM_AddHealingLabel");
-                addLabel->setCaption("Add");
+                addLabel->setCaption(Localize(
+                    "ui.action.add_short", "Add"));
                 addLabel->setFontHeight(14);
                 addLabel->setTextAlign(MyGUI::Align::Center);
                 addLabel->setNeedMouseFocus(false);
@@ -1029,7 +1062,8 @@
                     medicIcon->setVisible(false);
                     roboticsIcon->setVisible(false);
                     addLabel->setCoord(20, 0, 160, 40);
-                    addLabel->setCaption("Add Healing");
+                    addLabel->setCaption(Localize(
+                        "ui.action.add_healing", "Add Healing"));
                 }
             }
             RefreshSquadView(true);
@@ -1248,8 +1282,9 @@
             stationViewChanged = true;
             if (g_settingsWriteFailed)
             {
-                SetStatus(
-                    "Station-category options were applied, but settings.ini could not be saved.");
+                SetStatus(Localize(
+                    "status.settings.station_save_failed",
+                    "Station-category options were applied, but settings.ini could not be saved."));
                 g_settingsWriteFailed = false;
             }
         }

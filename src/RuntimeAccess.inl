@@ -1,51 +1,51 @@
 // SPDX-License-Identifier: GPL-3.0-only
     const SkillDefinition SKILL_DEFINITIONS[] =
     {
-        { STAT_STRENGTH,        "Strength" },
-        { STAT_TOUGHNESS,       "Toughness" },
-        { STAT_DEXTERITY,       "Dexterity" },
-        { STAT_PERCEPTION,      "Perception" },
+        { STAT_STRENGTH,        "skill.strength", "Strength" },
+        { STAT_TOUGHNESS,       "skill.toughness", "Toughness" },
+        { STAT_DEXTERITY,       "skill.dexterity", "Dexterity" },
+        { STAT_PERCEPTION,      "skill.perception", "Perception" },
 
-        { STAT_KATANAS,         "Katanas" },
-        { STAT_SABRES,          "Sabres" },
-        { STAT_HACKERS,         "Hackers" },
-        { STAT_HEAVYWEAPONS,    "Heavy weapons" },
-        { STAT_BLUNT,           "Blunt" },
-        { STAT_POLEARMS,        "Polearms" },
+        { STAT_KATANAS,         "skill.katanas", "Katanas" },
+        { STAT_SABRES,          "skill.sabres", "Sabres" },
+        { STAT_HACKERS,         "skill.hackers", "Hackers" },
+        { STAT_HEAVYWEAPONS,    "skill.heavy_weapons", "Heavy weapons" },
+        { STAT_BLUNT,           "skill.blunt", "Blunt" },
+        { STAT_POLEARMS,        "skill.polearms", "Polearms" },
 
-        { STAT_MELEE_ATTACK,    "Melee attack" },
-        { STAT_MELEE_DEFENCE,   "Melee defence" },
-        { STAT_DODGE,           "Dodge" },
-        { STAT_MARTIALARTS,     "Martial arts" },
-        { STAT_WEAPONS,         "Weapons" },
-        { STAT_MASSCOMBAT,      "Mass combat" },
+        { STAT_MELEE_ATTACK,    "skill.melee_attack", "Melee attack" },
+        { STAT_MELEE_DEFENCE,   "skill.melee_defence", "Melee defence" },
+        { STAT_DODGE,           "skill.dodge", "Dodge" },
+        { STAT_MARTIALARTS,     "skill.martial_arts", "Martial arts" },
+        { STAT_WEAPONS,         "skill.weapons", "Weapons" },
+        { STAT_MASSCOMBAT,      "skill.mass_combat", "Mass combat" },
 
-        { STAT_TURRETS,         "Turrets" },
-        { STAT_CROSSBOWS,       "Crossbows" },
-        { STAT_FRIENDLY_FIRE,   "Precision shooting" },
+        { STAT_TURRETS,         "skill.turrets", "Turrets" },
+        { STAT_CROSSBOWS,       "skill.crossbows", "Crossbows" },
+        { STAT_FRIENDLY_FIRE,   "skill.precision_shooting", "Precision shooting" },
 
-        { STAT_STEALTH,         "Stealth" },
-        { STAT_LOCKPICKING,     "Lockpicking" },
-        { STAT_THIEVING,        "Thievery" },
-        { STAT_ASSASSINATION,   "Assassination" },
+        { STAT_STEALTH,         "skill.stealth", "Stealth" },
+        { STAT_LOCKPICKING,     "skill.lockpicking", "Lockpicking" },
+        { STAT_THIEVING,        "skill.thievery", "Thievery" },
+        { STAT_ASSASSINATION,   "skill.assassination", "Assassination" },
 
-        { STAT_ATHLETICS,       "Athletics" },
-        { STAT_SWIMMING,        "Swimming" },
-        { STAT_SURVIVAL,        "Survival" },
+        { STAT_ATHLETICS,       "skill.athletics", "Athletics" },
+        { STAT_SWIMMING,        "skill.swimming", "Swimming" },
+        { STAT_SURVIVAL,        "skill.survival", "Survival" },
 
-        { STAT_MEDIC,           "Field medic" },
-        { STAT_HIVEMEDIC,       "Hive medic" },
-        { STAT_VET,             "Veterinary" },
-        { STAT_ENGINEERING,     "Engineer" },
-        { STAT_ROBOTICS,        "Robotics" },
-        { STAT_SCIENCE,         "Science" },
-        { STAT_FARMING,         "Farming" },
-        { STAT_COOKING,         "Cooking" },
+        { STAT_MEDIC,           "skill.field_medic", "Field medic" },
+        { STAT_HIVEMEDIC,       "skill.hive_medic", "Hive medic" },
+        { STAT_VET,             "skill.veterinary", "Veterinary" },
+        { STAT_ENGINEERING,     "skill.engineer", "Engineer" },
+        { STAT_ROBOTICS,        "skill.robotics", "Robotics" },
+        { STAT_SCIENCE,         "skill.science", "Science" },
+        { STAT_FARMING,         "skill.farming", "Farming" },
+        { STAT_COOKING,         "skill.cooking", "Cooking" },
 
-        { STAT_SMITHING_WEAPON, "Weapon smith" },
-        { STAT_SMITHING_ARMOUR, "Armour smith" },
-        { STAT_SMITHING_BOW,    "Crossbow smith" },
-        { STAT_LABOURING,       "Labouring" }
+        { STAT_SMITHING_WEAPON, "skill.weapon_smith", "Weapon smith" },
+        { STAT_SMITHING_ARMOUR, "skill.armour_smith", "Armour smith" },
+        { STAT_SMITHING_BOW,    "skill.crossbow_smith", "Crossbow smith" },
+        { STAT_LABOURING,       "skill.labouring", "Labouring" }
     };
 
     const size_t SKILL_DEFINITION_COUNT =
@@ -159,6 +159,19 @@
                     << g_recentStatusMessages[index].text;
         }
         g_statusText->setCaption(caption.str().c_str());
+
+        // Keep all three latest messages visible when a translation is wider
+        // than English. Restore the preferred size first so a later short
+        // message does not remain needlessly small.
+        int fontHeight = g_statusText->getHeight() <= 42 ? 11 : 13;
+        g_statusText->setFontHeight(fontHeight);
+        while (fontHeight > 9 &&
+            (g_statusText->getTextSize().width > g_statusText->getWidth() ||
+             g_statusText->getTextSize().height > g_statusText->getHeight()))
+        {
+            --fontHeight;
+            g_statusText->setFontHeight(fontHeight);
+        }
     }
 
     void RecordRecentManagerMessage(const std::string& message)
@@ -1117,7 +1130,8 @@
         }
         if (rowOut->jobLabel.empty())
         {
-            rowOut->jobLabel = "Unknown permanent job";
+            rowOut->jobLabel = Localize(
+                "job.label.unknown_permanent", "Unknown permanent job");
         }
 
         rowOut->hasTarget = static_cast<bool>(*targetOut);
@@ -1233,7 +1247,9 @@
         {
             if (SKILL_DEFINITIONS[index].stat == stat)
             {
-                *nameOut = SKILL_DEFINITIONS[index].fallbackName;
+                *nameOut = Localize(
+                    SKILL_DEFINITIONS[index].localizationKey,
+                    SKILL_DEFINITIONS[index].fallbackName);
                 return true;
             }
         }
@@ -1269,7 +1285,8 @@
             const int value = static_cast<int>(std::floor(raw));
             if (name.empty())
             {
-                name = definition.fallbackName;
+                name = Localize(
+                    definition.localizationKey, definition.fallbackName);
             }
             SkillValue skill;
             skill.stat = definition.stat;
@@ -1286,6 +1303,65 @@
         }
     }
 
+    __declspec(noinline) bool TryGetBlockingConditionGuarded(
+        Character* character,
+        const char** localizationKeyOut,
+        const char** englishDefaultOut)
+    {
+        if (character == NULL || localizationKeyOut == NULL ||
+            englishDefaultOut == NULL)
+        {
+            return false;
+        }
+        *localizationKeyOut = NULL;
+        *englishDefaultOut = NULL;
+
+        __try
+        {
+            if (character->isDead())
+            {
+                *localizationKeyOut = "condition.dead";
+                *englishDefaultOut = "Dead";
+            }
+            else if (character->getMedical() != NULL &&
+                     character->getMedical()->isProbablyDying())
+            {
+                *localizationKeyOut = "condition.dying";
+                *englishDefaultOut = "Dying";
+            }
+            else if (character->getProneState() == PS_PLAYING_DEAD)
+            {
+                *localizationKeyOut = "condition.playing_dead";
+                *englishDefaultOut = "Playing dead";
+            }
+            else if (character->isLiterallyUnconciousNotPretending())
+            {
+                *localizationKeyOut = "condition.unconscious";
+                *englishDefaultOut = "Unconscious";
+            }
+            else if (character->inSomething == IN_PRISON)
+            {
+                *localizationKeyOut = "condition.imprisoned";
+                *englishDefaultOut = "Imprisoned";
+            }
+            else if (character->isBeingCarried())
+            {
+                *localizationKeyOut = "condition.carried";
+                *englishDefaultOut = "Carried";
+            }
+            else if (character->isKidnapped())
+            {
+                *localizationKeyOut = "condition.kidnapped";
+                *englishDefaultOut = "Kidnapped";
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            return false;
+        }
+        return true;
+    }
+
     bool TryGetBlockingCondition(Character* character, std::string* conditionOut)
     {
         if (character == NULL || conditionOut == NULL)
@@ -1293,44 +1369,18 @@
             return false;
         }
         conditionOut->clear();
-
-        __try
-        {
-            if (character->isDead())
-            {
-                *conditionOut = "Dead";
-            }
-            else if (character->getMedical() != NULL &&
-                     character->getMedical()->isProbablyDying())
-            {
-                *conditionOut = "Dying";
-            }
-            else if (character->getProneState() == PS_PLAYING_DEAD)
-            {
-                *conditionOut = "Playing dead";
-            }
-            else if (character->isLiterallyUnconciousNotPretending())
-            {
-                *conditionOut = "Unconscious";
-            }
-            else if (character->inSomething == IN_PRISON)
-            {
-                *conditionOut = "Imprisoned";
-            }
-            else if (character->isBeingCarried())
-            {
-                *conditionOut = "Carried";
-            }
-            else if (character->isKidnapped())
-            {
-                *conditionOut = "Kidnapped";
-            }
-            return true;
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER)
+        const char* localizationKey = NULL;
+        const char* englishDefault = NULL;
+        if (!TryGetBlockingConditionGuarded(
+                character, &localizationKey, &englishDefault))
         {
             return false;
         }
+        if (localizationKey != NULL)
+        {
+            *conditionOut = Localize(localizationKey, englishDefault);
+        }
+        return true;
     }
 
     bool BuildMemberSnapshot(const hand& member, MemberSnapshot* snapshotOut)
@@ -1346,8 +1396,10 @@
         Character* character = NULL;
         if (!TryResolveCharacter(member, &character))
         {
-            result.name = "Unavailable member";
-            result.condition = "Unavailable";
+            result.name = Localize(
+                "member.label.unavailable", "Unavailable member");
+            result.condition = Localize(
+                "member.label.unavailable_condition", "Unavailable");
             *snapshotOut = result;
             return false;
         }
@@ -1355,7 +1407,8 @@
         result.loaded = true;
         if (!TryGetCharacterName(character, &result.name) || result.name.empty())
         {
-            result.name = "Unnamed squad member";
+            result.name = Localize(
+                "member.label.unnamed", "Unnamed squad member");
         }
         TryGetBlockingCondition(character, &result.condition);
         BuildTopSkills(character, &result.skills);
@@ -1373,7 +1426,9 @@
             count = MAX_SAFE_JOB_ROWS;
             result.truncated = true;
             result.queueAvailable = false;
-            result.condition = "Queue exceeds safety limit (read-only)";
+            result.condition = Localize(
+                "member.condition.queue_limit",
+                "Queue exceeds safety limit (read-only)");
         }
 
         result.jobs.reserve(static_cast<size_t>(count));
@@ -1403,16 +1458,19 @@
                     // The target handle is live even if Kenshi has no
                     // display name for it.  Do not classify that as an
                     // invalid target.
-                    row.targetLabel = "Unnamed target";
+                    row.targetLabel = Localize(
+                        "target.label.unnamed", "Unnamed target");
                 }
                 else
                 {
-                    row.targetLabel = "Target unavailable";
+                    row.targetLabel = Localize(
+                        "target.label.unavailable", "Target unavailable");
                 }
             }
             else if (row.fixedTarget)
             {
-                row.targetLabel = "Target unavailable";
+                row.targetLabel = Localize(
+                    "target.label.unavailable", "Target unavailable");
             }
             result.jobs.push_back(row);
         }
@@ -1945,7 +2003,9 @@
                 {
                     next.members[index].loaded = false;
                     next.members[index].queueAvailable = false;
-                    next.members[index].condition = "Cached / unloaded";
+                    next.members[index].condition = Localize(
+                        "member.condition.cached_unloaded",
+                        "Cached / unloaded");
                     ++next.members[index].revision;
                 }
             }
@@ -1973,7 +2033,9 @@
                     member.identity = memberIdentity;
                     member.loaded = false;
                     member.queueAvailable = false;
-                    member.condition = "Cached / unavailable";
+                    member.condition = Localize(
+                        "member.condition.cached_unavailable",
+                        "Cached / unavailable");
                     ++member.revision;
                 }
                 else
@@ -1983,7 +2045,8 @@
                     member.loaded = false;
                     member.queueAvailable = false;
                     member.jobs.clear();
-                    member.condition = "Unavailable";
+                    member.condition = Localize(
+                        "member.label.unavailable_condition", "Unavailable");
                 }
             }
 
@@ -2170,7 +2233,9 @@
                         member.identity = memberIdentity;
                         member.loaded = false;
                         member.queueAvailable = false;
-                        member.condition = "Cached / unavailable";
+                        member.condition = Localize(
+                            "member.condition.cached_unavailable",
+                            "Cached / unavailable");
                     }
                     else
                     {
@@ -2179,7 +2244,9 @@
                         member.loaded = false;
                         member.queueAvailable = false;
                         member.jobs.clear();
-                        member.condition = "Unavailable";
+                        member.condition = Localize(
+                            "member.label.unavailable_condition",
+                            "Unavailable");
                     }
                     ++unavailableMemberCount;
                 }
@@ -2248,7 +2315,9 @@
                 MemberSnapshot& member = squad.members[memberIndex];
                 member.loaded = false;
                 member.queueAvailable = false;
-                member.condition = "Cached / unavailable";
+                member.condition = Localize(
+                    "member.condition.cached_unavailable",
+                    "Cached / unavailable");
                 ++member.revision;
             }
         }

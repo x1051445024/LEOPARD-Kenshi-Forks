@@ -333,6 +333,30 @@
         return changed;
     }
 
+    void SetFittedButtonCaption(
+        MyGUI::Button* button,
+        const std::string& caption,
+        int preferredFontHeight,
+        int minimumFontHeight,
+        int horizontalPadding)
+    {
+        if (button == NULL)
+        {
+            return;
+        }
+        button->setCaption(caption);
+        int fontHeight = preferredFontHeight;
+        button->setFontHeight(fontHeight);
+        const int availableWidth = std::max(
+            1, button->getWidth() - horizontalPadding);
+        while (fontHeight > minimumFontHeight &&
+            button->getTextSize().width > availableWidth)
+        {
+            --fontHeight;
+            button->setFontHeight(fontHeight);
+        }
+    }
+
     void UpdateRemoveButton()
     {
         if (g_removeButton == NULL)
@@ -342,8 +366,10 @@
         // Keep this caption short enough for the fixed action-bar button.
         // The selected count remains visible through the card selection and
         // status/tooltip channels, while the action name stays readable.
-        g_removeButton->setCaption("Remove Job(s)");
-        g_removeButton->setFontHeight(14);
+        SetFittedButtonCaption(
+            g_removeButton,
+            Localize("ui.action.remove_jobs", "Remove Job(s)"),
+            14, 10, 14);
         g_removeButton->setEnabled(JobCardSelectionMode());
     }
 
@@ -676,68 +702,7 @@
         const std::string& label,
         size_t maxCharacters)
     {
-        if (label.empty() || maxCharacters == 0)
-        {
-            return label;
-        }
-
-        std::string wrapped;
-        std::string line;
-        size_t cursor = 0;
-        while (cursor < label.size())
-        {
-            while (cursor < label.size() &&
-                (label[cursor] == ' ' || label[cursor] == '\t'))
-            {
-                ++cursor;
-            }
-            if (cursor >= label.size())
-            {
-                break;
-            }
-
-            size_t end = cursor;
-            while (end < label.size() &&
-                label[end] != ' ' && label[end] != '\t')
-            {
-                ++end;
-            }
-            std::string word = label.substr(cursor, end - cursor);
-            if (!word.empty())
-            {
-                const size_t required = line.empty()
-                    ? word.size()
-                    : line.size() + 1 + word.size();
-                if (!line.empty() && required > maxCharacters)
-                {
-                    if (!wrapped.empty())
-                    {
-                        wrapped += '\n';
-                    }
-                    wrapped += line;
-                    line.clear();
-                }
-                if (line.empty())
-                {
-                    line = word;
-                }
-                else
-                {
-                    line += ' ';
-                    line += word;
-                }
-            }
-            cursor = end;
-        }
-        if (!line.empty())
-        {
-            if (!wrapped.empty())
-            {
-                wrapped += '\n';
-            }
-            wrapped += line;
-        }
-        return wrapped;
+        return WrapUtf8Text(label, maxCharacters, NULL);
     }
 
     void SetFittedCardJobCaption(
@@ -755,7 +720,7 @@
         // leaving rawLabel untouched for tooltips, matching, and mutation.
         if (displayLabel.compare(0, 9, "Operating") == 0)
         {
-            displayLabel = "Operating...";
+            displayLabel = Localize("job.label.operating", "Operating...");
         }
         text->setCaption(displayLabel.c_str());
 
@@ -1324,11 +1289,13 @@
     {
         if (!member.loaded)
         {
-            return "Stats unavailable";
+            return Localize(
+                "member.stats.unavailable", "Stats unavailable");
         }
         if (member.skills.empty())
         {
-            return "No stats above 1";
+            return Localize(
+                "member.stats.none_above_one", "No stats above 1");
         }
         if (firstSkill >= member.skills.size())
         {
@@ -1392,8 +1359,12 @@
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_EmptyQueue");
             widgets.emptyJobs->setNeedMouseFocus(false);
-            widgets.emptyJobs->setCaption(
-                member.queueAvailable ? "[No permanent jobs]" : "Queue unavailable (read-only)");
+            widgets.emptyJobs->setCaption(member.queueAvailable ?
+                Localize(
+                    "member.queue.empty", "[No permanent jobs]") :
+                Localize(
+                    "member.queue.unavailable_readonly",
+                    "Queue unavailable (read-only)"));
             TagThemeStandardText(widgets.emptyJobs);
             // Keep queue text fully opaque when the parent row is dimmed for
             // Jobs OFF or an unavailable queue.
@@ -1453,14 +1424,21 @@
                 "KJM_JobCardSurface");
             TagThemeSurface(cardSurface);
 
-            std::ostringstream tooltip;
-            tooltip << member.name << " | Priority " << (slot + 1)
-                    << "\n" << StripLeadingPriorityPrefix(row.jobLabel);
+            std::string targetLine;
             if (showTarget)
             {
-                tooltip << "\nTarget: " << row.targetLabel;
+                targetLine = LocalizeFormat(
+                    "tooltip.job.target", "\nTarget: {target}",
+                    "{target}", row.targetLabel);
             }
-            card.card->setUserString("KJM_ToolTip", tooltip.str());
+            const std::string tooltip = LocalizeFormat(
+                "tooltip.job",
+                "{member} | Priority {priority}\n{job}{target_line}",
+                "{member}", member.name,
+                "{priority}", IntegerString(slot + 1),
+                "{job}", StripLeadingPriorityPrefix(row.jobLabel),
+                "{target_line}", targetLine);
+            card.card->setUserString("KJM_ToolTip", tooltip);
 
             // Reuse the square category artwork from the Stations tab. The
             // card is wider than it is tall, so keep the source at its native
@@ -1717,8 +1695,12 @@
         widgets.skills->setCaption(skillCaption.c_str());
         ApplyThemeStandardText(widgets.skills);
 
-        widgets.jobsToggle->setCaption(member.jobsEnabled ? "Jobs: ON" : "Jobs: OFF");
-        widgets.jobsToggle->setFontHeight(12);
+        SetFittedButtonCaption(
+            widgets.jobsToggle,
+            member.jobsEnabled ?
+                Localize("ui.jobs.toggle_on", "Jobs: ON") :
+                Localize("ui.jobs.toggle_off", "Jobs: OFF"),
+            12, 9, 10);
         widgets.jobsToggle->setTextAlign(MyGUI::Align::Center);
         ApplyThemeButtonText(widgets.jobsToggle);
         widgets.jobsToggle->setEnabled(member.queueAvailable);
@@ -1911,8 +1893,10 @@
             MyGUI::IntCoord(114, ROW_HEIGHT - 23, 122, 20),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_ClearMember");
-        widgets.clearButton->setCaption("Clear Queue");
-        widgets.clearButton->setFontHeight(12);
+        SetFittedButtonCaption(
+            widgets.clearButton,
+            Localize("ui.action.clear_queue", "Clear Queue"),
+            12, 9, 10);
         widgets.clearButton->setTextAlign(MyGUI::Align::Center);
         TagThemeButtonText(widgets.clearButton);
         widgets.clearButton->setUserString("KJM_Member", IntegerString(memberIndex));
@@ -1979,9 +1963,9 @@
                     HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_PriorityHeader");
-            std::ostringstream caption;
-            caption << "Priority " << (slot + 1);
-            label->setCaption(caption.str().c_str());
+            label->setCaption(LocalizeFormat(
+                "ui.priority.label", "Priority {number}",
+                "{number}", IntegerString(slot + 1)));
             label->setTextAlign(MyGUI::Align::Center);
             label->setNeedMouseFocus(false);
             TagThemeStandardText(label);
@@ -2243,11 +2227,14 @@
             MyGUI::IntCoord(0, y, g_memberWidth, SQUAD_GROUP_HEADER_HEIGHT),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_SquadGroupHeader");
-        std::ostringstream caption;
-        caption << (collapsed ? "+  " : "-  ")
-                << (squad.name.empty() ? "Squad" : squad.name)
-                << "  |  " << squad.members.size();
-        group.memberHeader->setCaption(caption.str());
+        const std::string caption = LocalizeFormat(
+            "ui.squad.group_header",
+            "{toggle}  {squad}  |  Members: {members}",
+            "{toggle}", collapsed ? "+" : "-",
+            "{squad}", squad.name.empty() ?
+                Localize("ui.squad.generic", "Squad") : squad.name,
+            "{members}", IntegerString(squad.members.size()));
+        group.memberHeader->setCaption(caption);
         group.memberHeader->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Center);
         group.memberHeader->setFontHeight(17);
         TagThemeButtonText(group.memberHeader);
@@ -2272,7 +2259,8 @@
                                 SQUAD_GROUP_HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_SquadGroupJobCaption");
-        jobCaption->setCaption(selected ? "CURRENT SQUAD" : "");
+        jobCaption->setCaption(selected ? Localize(
+            "ui.squad.current_marker", "CURRENT SQUAD") : "");
         jobCaption->setFontHeight(15);
         jobCaption->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Center);
         TagThemeAccentText(jobCaption);
@@ -2387,32 +2375,39 @@
         }
         if (g_squadText != NULL)
         {
-            std::ostringstream caption;
-            caption << (g_squad.name.empty() ? "Current squad" : g_squad.name)
-                    << "  |  " << g_squad.members.size() << " member";
-            if (g_squad.members.size() != 1)
-            {
-                caption << "s";
-            }
+            std::string snapshot;
             if (!g_squad.live)
             {
-                caption << "  |  read-only snapshot";
+                snapshot = Localize(
+                    "ui.squad.readonly_marker",
+                    "  |  Read-only snapshot");
             }
+            std::string squadCount;
             if (g_allSquads.squads.size() > 1)
             {
-                caption << "  |  " << g_allSquads.squads.size() << " squads";
+                squadCount = LocalizeFormat(
+                    "ui.squad.squad_count", "  |  Squads: {count}",
+                    "{count}", IntegerString(g_allSquads.squads.size()));
             }
+            std::string rosterState;
             if (g_allSquads.incomplete)
             {
-                caption << "  |  roster incomplete";
+                rosterState = Localize(
+                    "ui.squad.roster_incomplete",
+                    "  |  Roster incomplete");
             }
-            caption << "  |  " << g_selectedRecipients.size()
-                    << " recipient";
-            if (g_selectedRecipients.size() != 1)
-            {
-                caption << "s";
-            }
-            g_squadText->setCaption(caption.str().c_str());
+            const std::string caption = LocalizeFormat(
+                "ui.squad.heading",
+                "{squad}  |  Members: {members}{snapshot}{squad_count}{roster_state}  |  Recipients: {recipients}",
+                "{squad}", g_squad.name.empty() ?
+                    Localize("ui.squad.current", "Current squad") :
+                    g_squad.name,
+                "{members}", IntegerString(g_squad.members.size()),
+                "{snapshot}", snapshot,
+                "{squad_count}", squadCount,
+                "{roster_state}", rosterState,
+                "{recipients}", IntegerString(g_selectedRecipients.size()));
+            g_squadText->setCaption(caption);
         }
 
         if (g_emptyText != NULL)
@@ -2420,10 +2415,13 @@
             if (g_allSquads.squads.empty())
             {
                 g_emptyText->setVisible(true);
-                g_emptyText->setCaption(
-                    g_squad.unavailable
-                        ? "The active squads are unavailable and have no session snapshot."
-                        : "There are no active squads with job-manageable members.");
+                g_emptyText->setCaption(g_squad.unavailable ?
+                    Localize(
+                        "ui.squad.empty.unavailable",
+                        "The active squads are unavailable and have no session snapshot.") :
+                    Localize(
+                        "ui.squad.empty.no_manageable_members",
+                        "There are no active squads with job-manageable members."));
             }
             else
             {
@@ -2441,8 +2439,9 @@
 
         if (!TrySkipDeadCurrentSquad())
         {
-            SetStatus(
-                "No active squad is available. Kenshi's __DEAD__ holding squad is hidden.");
+            SetStatus(Localize(
+                "status.squad.dead_hidden",
+                "No active squad is available. Kenshi's __DEAD__ holding squad is hidden."));
             return false;
         }
 
@@ -2458,7 +2457,9 @@
                 &currentName,
                 &currentActive))
         {
-            SetStatus("Kenshi did not expose a current squad. No jobs were changed.");
+            SetStatus(Localize(
+                "status.squad.current_unavailable",
+                "Kenshi did not expose a current squad. No jobs were changed."));
             return false;
         }
         HandleIdentity currentIdentity;
@@ -2481,7 +2482,9 @@
             // Empty or temporarily omitted squads are not part of the active
             // nonempty board. Retain the established current-squad fallback
             // for that exceptional case.
-            SetStatus("Kenshi did not expose a current squad. No jobs were changed.");
+            SetStatus(Localize(
+                "status.squad.current_unavailable",
+                "Kenshi did not expose a current squad. No jobs were changed."));
             return false;
         }
         else
@@ -2515,8 +2518,9 @@
         if (g_drag.armed && (force || boardChanged || currentChanged))
         {
             CancelDrag();
-            SetStatus(
-                "A squad or queue changed during the drag. Review it and try again.");
+            SetStatus(Localize(
+                "status.drag.squad_or_queue_changed",
+                "A squad or queue changed during the drag. Review it and try again."));
         }
 
         // Callers use force to request an immediate live refresh after a
@@ -2604,8 +2608,9 @@
         }
         if (!refreshed)
         {
-            SetStatus(
-                "The squad roster refresh failed. Cached rows are read-only until the next refresh.");
+            SetStatus(Localize(
+                "status.squad.refresh_failed_cached",
+                "The squad roster refresh failed. Cached rows are read-only until the next refresh."));
         }
         return refreshed || !g_allSquads.squads.empty();
     }

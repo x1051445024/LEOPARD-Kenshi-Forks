@@ -8,8 +8,6 @@
     // Keep this control as the source of truth and place the plug-in button
     // beside it, rather than creating a second top-level HUD window.
     const char* const HUD_MANAGER_BUTTON_NAME = "KJM_HudJobManagerButton";
-    const char* const HUD_MANAGER_BUTTON_TOOLTIP =
-        "Open Job Manager (Ctrl+J)";
     const char* const HUD_MANAGER_BUTTON_ICON_TEXTURE = "kjm-hud-icon.png";
     const int HUD_MANAGER_BUTTON_GAP = 2;
     const int HUD_MANAGER_BUTTON_MIN_JOBS_WIDTH = 40;
@@ -366,7 +364,9 @@
             managerButton->setEnabled(true);
             managerButton->setCaption("JM");
             managerButton->setUserString(
-                "KJM_ToolTip", HUD_MANAGER_BUTTON_TOOLTIP);
+                "KJM_ToolTip", Localize(
+                    "ui.hud.open_manager_tooltip",
+                    "Open Job Manager (Ctrl+J)"));
             managerButton->setNeedToolTip(true);
             managerButton->eventToolTip +=
                 MyGUI::newDelegate(OnCardToolTip);

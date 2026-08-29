@@ -2,7 +2,7 @@
 
 Kenshi Job Management adds an ingame UI for visualizing and editing job queues.
 
-**Version: 0.4.0-beta**
+**Version: 0.5.0-beta**
 
 ## Disclaimer
 
@@ -14,6 +14,13 @@ I use Radiant Dark True UI, so the colors may look different with other UI mods.
 
 - Kenshi Steam 1.0.65+
 - RE_Kenshi 0.3.4 or newer;
+
+## Languages
+
+The manager follows Kenshi's selected language. It includes German, Japanese,
+Russian, and Simplified Chinese (`zh_CN`). English remains the built-in
+fallback if a translation file is missing or invalid. Restart Kenshi after you
+change the game language.
 
 ## Features
 

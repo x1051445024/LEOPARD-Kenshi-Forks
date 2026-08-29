@@ -15,6 +15,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\Localization.inl">
+      <Filter>Source Files</Filter>
+    </None>
     <None Include="src\RuntimeAccess.inl">
       <Filter>Source Files</Filter>
     </None>
@@ -51,6 +54,10 @@
     <None Include="mod\KenshiJobManagement.mod">
       <Filter>Mod Package</Filter>
     </None>
+    <None Include="mod\locale\de_DE.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\ja_JP.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\ru_RU.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\zh_CN.lang"><Filter>Mod Package</Filter></None>
     <None Include="mod\gui\station-crafting.png"><Filter>Mod Package</Filter></None>
     <None Include="mod\gui\station-copper-alloy-plates.png"><Filter>Mod Package</Filter></None>
     <None Include="mod\gui\station-copper-ore.png"><Filter>Mod Package</Filter></None>

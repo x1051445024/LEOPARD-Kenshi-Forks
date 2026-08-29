@@ -34,6 +34,9 @@
         }
 
         g_playerInterface = player;
+        // LocaleManager is valid only after Kenshi's original update. Poll at
+        // a low rate and load the plug-in catalog before creating HUD text.
+        TickLocalization();
         // Reacquire the native mainbar after vanilla has rebuilt/updated it.
         // The button callback only sets a request flag, so opening the
         // manager is also deferred until this post-vanilla point.

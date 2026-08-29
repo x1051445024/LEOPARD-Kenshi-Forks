@@ -317,19 +317,30 @@
         }
     };
 
-    const char* GetStationCategoryName(StationCategory category)
+    std::string GetStationCategoryName(StationCategory category)
     {
         switch (category)
         {
-        case STATION_CRAFTING: return "Crafting";
-        case STATION_REFINING: return "Refining";
-        case STATION_FARMING: return "Farming";
-        case STATION_MINING: return "Mining";
-        case STATION_RESEARCH: return "Research";
-        case STATION_TRAINING: return "Training";
-        case STATION_STORAGE_HAULING: return "Storage / Hauling";
-        case STATION_DEFENSE: return "Defense";
-        default: return "Other / Unclassified";
+        case STATION_CRAFTING:
+            return Localize("station.category.crafting", "Crafting");
+        case STATION_REFINING:
+            return Localize("station.category.refining", "Refining");
+        case STATION_FARMING:
+            return Localize("station.category.farming", "Farming");
+        case STATION_MINING:
+            return Localize("station.category.mining", "Mining");
+        case STATION_RESEARCH:
+            return Localize("station.category.research", "Research");
+        case STATION_TRAINING:
+            return Localize("station.category.training", "Training");
+        case STATION_STORAGE_HAULING:
+            return Localize(
+                "station.category.storage_hauling", "Storage / Hauling");
+        case STATION_DEFENSE:
+            return Localize("station.category.defense", "Defense");
+        default:
+            return Localize(
+                "station.category.other", "Other / Unclassified");
         }
     }
 
@@ -634,7 +645,9 @@
             state->ownedBuildingRecords.clear();
             AddStationScanError(
                 state,
-                "Player station ownership records could not be read safely.");
+                Localize(
+                    "status.station_scan.ownership_read_failed",
+                    "Player station ownership records could not be read safely."));
             return false;
         }
 
@@ -645,7 +658,9 @@
         {
             AddStationScanError(
                 state,
-                "Player station ownership records reached the 8,192-record safety limit.");
+                Localize(
+                    "status.station_scan.ownership_limit",
+                    "Player station ownership records reached the 8,192-record safety limit."));
         }
         return true;
     }
@@ -739,7 +754,8 @@
 
             StationBaseStatSnapshot stat;
             stat.stat = definition.stat;
-            stat.name = definition.fallbackName;
+            stat.name = Localize(
+                definition.localizationKey, definition.fallbackName);
             stat.rawValue = raw;
             stat.displayValue = static_cast<int>(std::floor(raw));
             statsOut->push_back(stat);
@@ -801,7 +817,8 @@
 
         if (result.name.empty())
         {
-            result.name = "Unavailable member";
+            result.name = Localize(
+                "fallback.member.unavailable", "Unavailable member");
         }
         *memberOut = result;
         return queueRead;
@@ -919,7 +936,8 @@
                 platoon, &result.handle, &active, &unloadedCount, &order))
         {
             result.queueIncomplete = true;
-            result.name = "Unavailable squad";
+            result.name = Localize(
+                "fallback.squad.unavailable", "Unavailable squad");
             *squadOut = result;
             return false;
         }
@@ -927,7 +945,8 @@
         result.loaded = active != NULL;
         if (!TryReadStationSquadName(platoon, active, &result.name))
         {
-            result.name = "Unavailable squad";
+            result.name = Localize(
+                "fallback.squad.unavailable", "Unavailable squad");
             result.queueIncomplete = true;
             success = false;
         }
@@ -995,7 +1014,8 @@
 
         if (result.name.empty())
         {
-            result.name = "Unavailable squad";
+            result.name = Localize(
+                "fallback.squad.unavailable", "Unavailable squad");
         }
         *squadOut = result;
         return success;
@@ -1785,6 +1805,71 @@
         }
     }
 
+    __declspec(noinline) bool TryReadStationBlockingFlagsGuarded(
+        Building* building,
+        bool* destroyedOut,
+        bool* incompleteOut,
+        bool* dismantlingOut,
+        bool* brokenOut,
+        bool* disabledOut,
+        bool* noPowerOut,
+        bool* powerOffOut)
+    {
+        if (building == NULL || destroyedOut == NULL ||
+            incompleteOut == NULL || dismantlingOut == NULL ||
+            brokenOut == NULL || disabledOut == NULL ||
+            noPowerOut == NULL || powerOffOut == NULL)
+        {
+            return false;
+        }
+        *destroyedOut = false;
+        *incompleteOut = false;
+        *dismantlingOut = false;
+        *brokenOut = false;
+        *disabledOut = false;
+        *noPowerOut = false;
+        *powerOffOut = false;
+        __try
+        {
+            if (building->isDestroyed())
+            {
+                *destroyedOut = true;
+                return true;
+            }
+
+            Building::ConstructionState* build = building->getBuildState();
+            if (build != NULL)
+            {
+                *incompleteOut = !build->isComplete;
+                *dismantlingOut = build->isDismantled;
+            }
+
+            UseableStuff* usable = building->getUseableStuff();
+            if (usable != NULL)
+            {
+                *brokenOut = usable->isBroken();
+                *disabledOut = usable->isDisabled();
+                // isOutOfPower() alone is not an outage test. Kenshi resets a
+                // power consumer's current allocation while it is idle, so an
+                // unstaffed bench can report zero local power even when its
+                // town has a large surplus. howMuchPowerDoYouWantNow() is the
+                // remaining live demand after generator/battery allocation.
+                // It is zero for an idle bench and for a fully supplied one.
+                if (usable->isOutOfPower() > 0.001f)
+                {
+                    *powerOffOut = !usable->isPowerOn();
+                    *noPowerOut = !*powerOffOut &&
+                        usable->howMuchPowerDoYouWantNow() > 0.001f;
+                }
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            return false;
+        }
+        return true;
+    }
+
     bool TryGetStationBlockingStatus(
         Building* building,
         bool* destroyedOut,
@@ -1806,70 +1891,45 @@
         bool disabled = false;
         bool noPower = false;
         bool powerOff = false;
-        __try
-        {
-            if (building->isDestroyed())
-            {
-                *destroyedOut = true;
-                return true;
-            }
-
-            Building::ConstructionState* build = building->getBuildState();
-            if (build != NULL)
-            {
-                incomplete = !build->isComplete;
-                dismantling = build->isDismantled;
-            }
-
-            UseableStuff* usable = building->getUseableStuff();
-            if (usable != NULL)
-            {
-                broken = usable->isBroken();
-                disabled = usable->isDisabled();
-                // isOutOfPower() alone is not an outage test. Kenshi resets a
-                // power consumer's current allocation while it is idle, so an
-                // unstaffed bench can report zero local power even when its
-                // town has a large surplus. howMuchPowerDoYouWantNow() is the
-                // remaining live demand after generator/battery allocation.
-                // It is zero for an idle bench and for a fully supplied one.
-                if (usable->isOutOfPower() > 0.001f)
-                {
-                    powerOff = !usable->isPowerOn();
-                    noPower = !powerOff &&
-                        usable->howMuchPowerDoYouWantNow() > 0.001f;
-                }
-            }
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER)
+        if (!TryReadStationBlockingFlagsGuarded(
+                building, destroyedOut, &incomplete, &dismantling,
+                &broken, &disabled, &noPower, &powerOff))
         {
             return false;
         }
 
-        if (incomplete) *statusOut = "INCOMPLETE";
+        if (incomplete)
+        {
+            *statusOut = Localize(
+                "station.status.incomplete", "INCOMPLETE");
+        }
         if (dismantling)
         {
             if (!statusOut->empty()) *statusOut += " / ";
-            *statusOut += "DISMANTLING";
+            *statusOut += Localize(
+                "station.status.dismantling", "DISMANTLING");
         }
         if (broken)
         {
             if (!statusOut->empty()) *statusOut += " / ";
-            *statusOut += "BROKEN";
+            *statusOut += Localize("station.status.broken", "BROKEN");
         }
         if (disabled)
         {
             if (!statusOut->empty()) *statusOut += " / ";
-            *statusOut += "DISABLED";
+            *statusOut += Localize("station.status.disabled", "DISABLED");
         }
         if (powerOff)
         {
             if (!statusOut->empty()) *statusOut += " / ";
-            *statusOut += "POWER OFF";
+            *statusOut += Localize(
+                "station.status.power_off", "POWER OFF");
         }
         if (noPower)
         {
             if (!statusOut->empty()) *statusOut += " / ";
-            *statusOut += "NO POWER";
+            *statusOut += Localize(
+                "station.status.no_power", "NO POWER");
         }
         *blockingOut = !statusOut->empty();
         return true;
@@ -1877,7 +1937,7 @@
 
     void BuildWildernessStationAreaName(std::string* nameOut)
     {
-        *nameOut = "Wilderness";
+        *nameOut = Localize("station.area.wilderness", "Wilderness");
     }
 
     bool TryGetStationArea(
@@ -2101,8 +2161,7 @@
                         job.hasTarget &&
                         SameHandleIdentity(job.target, identity))
                     {
-                        if (!job.targetLabel.empty() &&
-                            job.targetLabel != "Target unavailable")
+                        if (job.targetAvailable && !job.targetLabel.empty())
                         {
                             *labelOut = job.targetLabel;
                         }
@@ -2367,7 +2426,8 @@
         if (destroyed && station.blockingStatus.empty())
         {
             station.blocking = true;
-            station.blockingStatus = "Destroyed";
+            station.blockingStatus = Localize(
+                "station.status.destroyed", "Destroyed");
         }
         if (destroyed)
         {
@@ -2381,8 +2441,12 @@
         {
             station.name = queueEvidence ?
                 (queueTargetLabel.empty() ?
-                    "Unnamed assigned target" : queueTargetLabel) :
-                "Unnamed player station";
+                    Localize(
+                        "station.name.unnamed_assigned_target",
+                        "Unnamed assigned target") : queueTargetLabel) :
+                Localize(
+                    "station.name.unnamed_player_station",
+                    "Unnamed player station");
         }
         TryGetStationArea(
             building, &station.areaIdentity, &station.areaName);
@@ -2391,12 +2455,14 @@
             !TryGetLocalizedStatName(
                 station.relevantStat, &station.relevantSkillName))
         {
-            station.relevantSkillName = "Unknown";
+            station.relevantSkillName = Localize(
+                "station.skill.unknown", "Unknown");
         }
         else if (!station.relevantSkillKnown)
         {
-            station.relevantSkillName =
-                station.category == STATION_OTHER ? "Unknown" : "None";
+            station.relevantSkillName = station.category == STATION_OTHER ?
+                Localize("station.skill.unknown", "Unknown") :
+                Localize("station.skill.none", "None");
         }
 
         // Capture only value strings.  GameData and Building pointers never
@@ -2535,7 +2601,9 @@
                 state->ownershipResolutionIncomplete = true;
                 AddStationScanError(
                     state,
-                    "Some player station ownership records failed validation.");
+                    Localize(
+                        "status.station_scan.ownership_validation_failed",
+                        "Some player station ownership records failed validation."));
             }
             return true;
         }
@@ -2630,7 +2698,9 @@
         {
             state->rosterIncomplete = true;
             AddStationScanError(
-                state, "Player squad roster could not be read completely.");
+                state, Localize(
+                    "status.station_scan.roster_incomplete",
+                    "Player squad roster could not be read completely."));
         }
         // Copy borrowed ownership records into plug-in-owned scalar storage.
         // The list is bracket-validated; live handles are reconstructed later,
@@ -2647,7 +2717,9 @@
         {
             AddStationScanError(
                 state,
-                "Assigned station target list reached its safety limit.");
+                Localize(
+                    "status.station_scan.target_limit",
+                    "Assigned station target list reached its safety limit."));
         }
 
         const size_t resultCapacity = std::min(
@@ -2704,7 +2776,9 @@
         {
             ++state->targetsFailed;
             AddStationScanError(
-                state, "An assigned station target could not be read safely.");
+                state, Localize(
+                    "status.station_scan.target_read_failed",
+                    "An assigned station target could not be read safely."));
         }
         ++state->targetsCompleted;
         const bool presentationBatchComplete =
@@ -2739,7 +2813,9 @@
         {
             state->rosterIncomplete = true;
             AddStationScanError(
-                state, "Station assignments could not be refreshed.");
+                state, Localize(
+                    "status.station_scan.refresh_failed",
+                    "Station assignments could not be refreshed."));
             return false;
         }
         state->squads.swap(freshSquads);
@@ -2757,7 +2833,9 @@
         if (incomplete)
         {
             AddStationScanError(
-                state, "Some loaded squad job data is unavailable.");
+                state, Localize(
+                    "status.station_scan.job_data_unavailable",
+                    "Some loaded squad job data is unavailable."));
         }
 
         CaptureStationOwnedBuildingRecords(player, state);
@@ -2771,7 +2849,9 @@
         if (targetListIncomplete)
         {
             AddStationScanError(
-                state, "Assigned station target list reached its safety limit.");
+                state, Localize(
+                    "status.station_scan.target_limit",
+                    "Assigned station target list reached its safety limit."));
         }
         const size_t resultCapacity = std::min(
             StationScanCandidateCount(*state), STATION_SCAN_TARGET_LIMIT);

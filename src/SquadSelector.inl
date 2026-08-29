@@ -163,7 +163,10 @@
                 recipientCount == squad->members.size();
             std::ostringstream caption;
             caption << (g_squadSelectorEntries[index].name.empty() ?
-                "Unnamed squad" : g_squadSelectorEntries[index].name);
+                Localize(
+                    "squad.placeholder.unnamed_selector",
+                    "Unnamed squad") :
+                g_squadSelectorEntries[index].name);
             if (recipientCount != 0 && squad != NULL)
             {
                 caption << " [" << recipientCount << "/"
@@ -283,7 +286,9 @@
                     "KJM_SquadSelectorButton");
             FitSquadSelectorCaption(
                 button,
-                entry.name.empty() ? "Unnamed squad" : entry.name);
+                entry.name.empty() ? Localize(
+                    "squad.placeholder.unnamed_selector",
+                    "Unnamed squad") : entry.name);
             button->setTextAlign(MyGUI::Align::Center);
             button->setUserString(
                 "KJM_SquadSelectorIndex", IntegerString(index));
@@ -307,7 +312,8 @@
             if (g_squadSelectorEntries.empty() &&
                 g_squadSelectorLabel != NULL)
             {
-                g_squadSelectorLabel->setCaption("SQUADS ?");
+                g_squadSelectorLabel->setCaption(Localize(
+                    "ui.squad_selector.unavailable", "SQUADS ?"));
             }
             return false;
         }
@@ -323,7 +329,9 @@
         if (g_squadSelectorLabel != NULL)
         {
             g_squadSelectorLabel->setCaption(
-                incomplete ? "SQUADS *" : "SQUADS");
+                incomplete ? Localize(
+                    "ui.squad_selector.incomplete", "SQUADS *") :
+                    Localize("ui.squad_selector.label", "SQUADS"));
         }
         if (changed || force ||
             g_squadSelectorButtons.size() !=
@@ -364,7 +372,8 @@
                     SQUAD_SELECTOR_BUTTON_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_SquadSelectorLabel");
-        g_squadSelectorLabel->setCaption("SQUADS");
+        g_squadSelectorLabel->setCaption(Localize(
+            "ui.squad_selector.label", "SQUADS"));
         g_squadSelectorLabel->setFontHeight(16);
         g_squadSelectorLabel->setTextAlign(MyGUI::Align::Center);
         TagThemeStandardText(g_squadSelectorLabel);
@@ -442,13 +451,16 @@
         const SquadSnapshot* squad = FindDisplayedSquad(squadIdentity);
         if (squad == NULL)
         {
-            ShowToast("That squad is not available in the current roster.");
+            ShowToast(Localize(
+                "status.selector.squad_not_in_roster",
+                "That squad is not available in the current roster."));
             return;
         }
         if (!SquadRecipientSelectionAvailable(*squad))
         {
-            ShowToast(
-                "That squad has unavailable job data and cannot be selected yet.");
+            ShowToast(Localize(
+                "status.selector.squad_jobs_unavailable",
+                "That squad has unavailable job data and cannot be selected yet."));
             return;
         }
 
@@ -627,12 +639,16 @@
             g_modal.kind != MODAL_NONE || IsStationDetailOpen() ||
             g_drag.armed || g_pendingAction.type != ACTION_NONE)
         {
-            SetStatus("Squad selection was cancelled because another manager action is active.");
+            SetStatus(Localize(
+                "status.selector.selection_cancelled_busy",
+                "Squad selection was cancelled because another manager action is active."));
             return false;
         }
         if (!TrySelectSquadByIdentity(target))
         {
-            SetStatus("That squad is no longer available. The current squad was not changed.");
+            SetStatus(Localize(
+                "status.selector.squad_gone",
+                "That squad is no longer available. The current squad was not changed."));
             RefreshSquadSelectorRoster(false);
             if (!SquadWidgetStructureMatchesBoard())
             {
@@ -643,7 +659,9 @@
         if (!RefreshSquadView(true))
         {
             PublishUnavailableSquadSelection(target);
-            SetStatus("Kenshi selected the squad, but its jobs are temporarily unavailable.");
+            SetStatus(Localize(
+                "status.selector.selected_jobs_unavailable",
+                "Kenshi selected the squad, but its jobs are temporarily unavailable."));
         }
         else
         {

@@ -57,7 +57,9 @@
             destinationGap < 0 ||
             destinationGap > static_cast<int>(destination->jobs.size()))
         {
-            SetStatus("The source or destination queue is read-only. No jobs were changed.");
+            SetStatus(Localize(
+                "status.queue.readonly",
+                "The source or destination queue is read-only. No jobs were changed."));
             return;
         }
 
@@ -195,7 +197,9 @@
     {
         if (!JobCardSelectionMode())
         {
-            ShowToast("Select one or more jobs before copying.");
+            ShowToast(Localize(
+                "status.clipboard.select_jobs",
+                "Select one or more jobs before copying."));
             return;
         }
         const std::vector<SelectedJob> selected = g_selectedJobs;
@@ -206,20 +210,23 @@
         {
             ClearJobBatchClipboard();
             RefreshSquadView(true);
-            const std::string message =
-                BuildJobBatchActionMessage(outcome, "Jobs copied.") +
-                " Clipboard cleared.";
+            const std::string copied = Localize(
+                "status.clipboard.jobs_copied", "Jobs copied.");
+            const std::string message = BuildJobBatchActionMessage(
+                outcome, copied.c_str()) + Localize(
+                    "status.clipboard.cleared_suffix",
+                    " Clipboard cleared.");
             SetStatus(message);
             ShowToast(message);
             return;
         }
         RefreshSquadView(true);
-        std::ostringstream message;
-        message << "Copied " << outcome.consideredBundles << " job"
-                << (outcome.consideredBundles == 1 ? "" : "s")
-                << ". Select recipients, then press Ctrl+V.";
-        SetStatus(message.str());
-        ShowToast(message.str());
+        const std::string message = LocalizeFormat(
+            "status.clipboard.copy_success",
+            "Copied jobs: {count}. Select recipients, then press Ctrl+V.",
+            "{count}", IntegerString(outcome.consideredBundles));
+        SetStatus(message);
+        ShowToast(message);
     }
 
     void QueueJobBatchPaste()
@@ -230,19 +237,25 @@
         }
         if (!HasJobBatchClipboard())
         {
-            ShowToast("Copy one or more jobs before pasting.");
+            ShowToast(Localize(
+                "status.clipboard.copy_before_paste",
+                "Copy one or more jobs before pasting."));
             return;
         }
         if (!RecipientSelectionMode())
         {
-            ShowToast("Select at least one recipient before pasting.");
+            ShowToast(Localize(
+                "status.clipboard.select_recipient",
+                "Select at least one recipient before pasting."));
             return;
         }
         const std::vector<HandleIdentity> recipients =
             GetSelectedRecipientIdentities();
         if (recipients.empty())
         {
-            ShowToast("Select at least one recipient before pasting.");
+            ShowToast(Localize(
+                "status.clipboard.select_recipient",
+                "Select at least one recipient before pasting."));
             return;
         }
         g_pendingJobBatchUiAction = PendingJobBatchUiAction();
@@ -285,11 +298,13 @@
         g_pendingJobBatchUiAction = PendingJobBatchUiAction();
 
         JobBatchActionOutcome outcome;
-        const char* completed = "Job action completed.";
+        std::string completed = Localize(
+            "status.batch.action_completed", "Job action completed.");
         if (action.type == JOB_BATCH_UI_PASTE)
         {
             PasteJobBatchClipboard(action.recipients, &outcome);
-            completed = "Jobs pasted.";
+            completed = Localize(
+                "status.batch.jobs_pasted", "Jobs pasted.");
         }
         else if (action.type == JOB_BATCH_UI_MOVE)
         {
@@ -305,22 +320,29 @@
                 MoveSelectedJobBatch(
                     selections, action.destination, &outcome);
             }
-            completed = "Jobs moved.";
+            completed = Localize(
+                "status.batch.jobs_moved", "Jobs moved.");
         }
         else if (action.type == JOB_BATCH_UI_ADD_HEALING)
         {
             ApplyJobBatchHealing(action.recipients, true, &outcome);
-            completed = "Healing jobs updated.";
+            completed = Localize(
+                "status.batch.healing_jobs_updated",
+                "Healing jobs updated.");
         }
         else if (action.type == JOB_BATCH_UI_PRIORITIZE_HEALING)
         {
             ApplyJobBatchHealing(action.recipients, false, &outcome);
-            completed = "Healing priorities updated.";
+            completed = Localize(
+                "status.batch.healing_priorities_updated",
+                "Healing priorities updated.");
         }
         else if (action.type == JOB_BATCH_UI_REMOVE_INVALID)
         {
             RemoveInvalidJobBatch(action.recipients, &outcome);
-            completed = "Invalid-job cleanup completed.";
+            completed = Localize(
+                "status.batch.invalid_cleanup_completed",
+                "Invalid-job cleanup completed.");
         }
         else
         {
@@ -337,35 +359,51 @@
         const std::string message =
             action.type == JOB_BATCH_UI_REMOVE_INVALID &&
             outcome.code == JOB_BATCH_NOTHING_TO_DO ?
-                "No removable invalid jobs were found." :
-                BuildJobBatchActionMessage(outcome, completed);
+                Localize(
+                    "status.batch.no_removable_invalid",
+                    "No removable invalid jobs were found.") :
+                BuildJobBatchActionMessage(outcome, completed.c_str());
         SetStatus(message);
         ShowToast(message);
     }
 
-    const char* GeneralTransferStatus(GeneralJobTransferCode code)
+    std::string GeneralTransferStatus(GeneralJobTransferCode code)
     {
         switch (code)
         {
         case GENERAL_TRANSFER_SUCCESS:
-            return "Permanent job moved to the destination member.";
+            return Localize(
+                "status.transfer.success",
+                "Permanent job moved to the destination member.");
         case GENERAL_TRANSFER_DISABLED:
-            return "General job transfer is disabled in this test build.";
+            return Localize(
+                "status.transfer.disabled",
+                "General job transfer is disabled in this test build.");
         case GENERAL_TRANSFER_DUPLICATE:
-            return "The destination already has the same job. No jobs were changed.";
+            return Localize(
+                "status.transfer.duplicate",
+                "The destination already has the same job. No jobs were changed.");
         case GENERAL_TRANSFER_DESTINATION_FULL:
-            return "The destination queue is at the safety limit. No jobs were changed.";
+            return Localize(
+                "status.transfer.destination_full",
+                "The destination queue is at the safety limit. No jobs were changed.");
         case GENERAL_TRANSFER_SOURCE_CHANGED:
         case GENERAL_TRANSFER_DESTINATION_CHANGED:
-            return "A queue changed before the transfer. Review both members and try again.";
+            return Localize(
+                "status.transfer.queue_changed",
+                "A queue changed before the transfer. Review both members and try again.");
         case GENERAL_TRANSFER_ADD_UNEXPECTED_REVIEW:
         case GENERAL_TRANSFER_INSERT_FAILED_REVIEW:
         case GENERAL_TRANSFER_SOURCE_CHANGED_DUPLICATE_REMAINS:
         case GENERAL_TRANSFER_REMOVE_FAILED_DUPLICATE_REMAINS:
         case GENERAL_TRANSFER_REMOVE_UNEXPECTED_REVIEW:
-            return "The transfer was interrupted. Review both queues before another change.";
+            return Localize(
+                "status.transfer.interrupted",
+                "The transfer was interrupted. Review both queues before another change.");
         default:
-            return "Kenshi rejected the job transfer. No further jobs were changed.";
+            return Localize(
+                "status.transfer.rejected",
+                "Kenshi rejected the job transfer. No further jobs were changed.");
         }
     }
 
@@ -399,8 +437,9 @@
                     &destinationSquadIndex, &destinationMemberIndex))
             {
                 RefreshSquadView(true);
-                SetStatus(
-                    "The source or destination left the active player roster. No jobs were changed.");
+                SetStatus(Localize(
+                    "status.transfer.roster_member_left",
+                    "The source or destination left the active player roster. No jobs were changed."));
                 return;
             }
 
@@ -416,8 +455,9 @@
                 !SameQueue(destination->jobs, drop.destinationSequence))
             {
                 RefreshSquadView(true);
-                SetStatus(
-                    "A source or destination queue changed after the drop. No jobs were changed.");
+                SetStatus(Localize(
+                    "status.transfer.queue_changed_after_drop",
+                    "A source or destination queue changed after the drop. No jobs were changed."));
                 return;
             }
 
@@ -434,8 +474,9 @@
                     drop.destinationSequence, request.destinationBefore))
             {
                 RefreshSquadView(true);
-                SetStatus(
-                    "A live queue could not be verified for the transfer. No jobs were changed.");
+                SetStatus(Localize(
+                    "status.transfer.queue_unverified",
+                    "A live queue could not be verified for the transfer. No jobs were changed."));
                 return;
             }
             GeneralJobTransferOutcome outcome;
@@ -992,8 +1033,11 @@
             g_removeButton->setStateSelected(true);
             // Keep the temporary drop target affordance short enough for the
             // button while the normal action remains "Remove Job(s)".
-            g_removeButton->setCaption("DROP TO REMOVE");
-            g_removeButton->setFontHeight(12);
+            SetFittedButtonCaption(
+                g_removeButton,
+                Localize(
+                    "ui.action.drop_to_remove", "DROP TO REMOVE"),
+                12, 9, 14);
         }
     }
 
@@ -1082,7 +1126,9 @@
                 g_drag.startSequence))
         {
             CancelDrag();
-            SetStatus("The queue changed during the drag. Review it and try again.");
+            SetStatus(Localize(
+                "status.drag.queue_changed",
+                "The queue changed during the drag. Review it and try again."));
             return;
         }
         const MyGUI::IntPoint mouse =
@@ -1153,7 +1199,9 @@
                 g_drag.startSequence))
         {
             CancelDrag();
-            SetStatus("The queue changed during the drag. Review it and try again.");
+            SetStatus(Localize(
+                "status.drag.queue_changed",
+                "The queue changed during the drag. Review it and try again."));
             return;
         }
 
@@ -1247,8 +1295,9 @@
             }
             if (destination == NULL || destinationIsSource)
             {
-                ShowToast(
-                    "Move cancelled: choose a member that does not own any selected source job.");
+                ShowToast(Localize(
+                    "status.move.invalid_destination",
+                    "Move cancelled: choose a member that does not own any selected source job."));
             }
             else if (!HasPendingJobBatchUiAction() &&
                      g_pendingAction.type == ACTION_NONE &&
@@ -1270,47 +1319,7 @@
         size_t maximumCharacters,
         size_t* lineCountOut)
     {
-        std::string wrapped;
-        size_t lineCount = 0;
-        size_t sourcePosition = 0;
-        while (sourcePosition <= source.size())
-        {
-            const size_t newline = source.find('\n', sourcePosition);
-            const size_t sourceEnd = newline == std::string::npos ?
-                source.size() : newline;
-            std::string line = source.substr(
-                sourcePosition, sourceEnd - sourcePosition);
-            while (line.size() > maximumCharacters)
-            {
-                size_t split = line.rfind(' ', maximumCharacters);
-                if (split == std::string::npos || split == 0)
-                {
-                    split = maximumCharacters;
-                }
-                wrapped.append(line.substr(0, split));
-                wrapped.push_back('\n');
-                ++lineCount;
-                size_t next = split;
-                while (next < line.size() && line[next] == ' ')
-                {
-                    ++next;
-                }
-                line = line.substr(next);
-            }
-            wrapped.append(line);
-            ++lineCount;
-            if (newline == std::string::npos)
-            {
-                break;
-            }
-            wrapped.push_back('\n');
-            sourcePosition = newline + 1;
-        }
-        if (lineCountOut != NULL)
-        {
-            *lineCountOut = lineCount;
-        }
-        return wrapped;
+        return WrapUtf8Text(source, maximumCharacters, lineCountOut);
     }
 
     void OnCardToolTip(MyGUI::Widget* widget, const MyGUI::ToolTipInfo& info)
@@ -1699,12 +1708,15 @@
         }
         if (g_recentStatusMessages.empty())
         {
-            ShowToast("No recent messages in this session.");
+            ShowToast(Localize(
+                "status.message_log.empty",
+                "No recent messages in this session."));
             return;
         }
+        const std::string modalCaption = Localize(
+            "modal.message_log.title", "Recent Job Manager Messages");
         if (!BeginModal(
-                MODAL_MESSAGE_LOG, 840, 540,
-                "Recent Job Manager Messages"))
+                MODAL_MESSAGE_LOG, 840, 540, modalCaption.c_str()))
         {
             return;
         }
@@ -1721,8 +1733,10 @@
             MyGUI::IntCoord(16, 10, clientSize.width - 32, 26),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MessageLogHelp");
-        help->setCaption(
+        const std::string helpCaption = Localize(
+            "modal.message_log.help",
             "The 10 most recent non-empty timestamped messages from this game session (oldest to newest).");
+        help->setCaption(helpCaption.c_str());
         help->setFontHeight(15);
         help->setTextAlign(MyGUI::Align::Center);
         help->setNeedMouseFocus(false);
@@ -1850,7 +1864,9 @@
                 clientSize.width - 156, clientSize.height - 50, 140, 38),
             MyGUI::Align::Right | MyGUI::Align::Bottom,
             "KJM_MessageLogClose");
-        close->setCaption("Close");
+        const std::string closeCaption = Localize(
+            "ui.action.close", "Close");
+        SetFittedButtonCaption(close, closeCaption, 16, 10, 14);
         close->eventMouseButtonClick += MyGUI::newDelegate(OnOptionClose);
         TagThemeButtonText(close);
         ApplyThemeToTaggedTree(g_modal.window);
@@ -1866,8 +1882,10 @@
             return;
         }
         const MemberSnapshot& member = *memberPointer;
+        const std::string modalCaption = Localize(
+            "modal.clear.title", "Confirm Clear Queue");
         if (!member.queueAvailable || member.jobs.empty() ||
-            !BeginModal(MODAL_CLEAR, 520, 210, "Confirm Clear Queue"))
+            !BeginModal(MODAL_CLEAR, 520, 210, modalCaption.c_str()))
         {
             return;
         }
@@ -1880,10 +1898,12 @@
             MyGUI::IntCoord(18, 18, 484, 78),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_ClearPrompt");
-        std::ostringstream message;
-        message << "Are you sure you wish to remove all jobs?\n\nRemove all "
-                << member.jobs.size() << " permanent jobs from " << member.name << "?";
-        prompt->setCaption(message.str().c_str());
+        const std::string promptCaption = LocalizeFormat(
+            "modal.clear.prompt",
+            "Are you sure you wish to remove all jobs?\n\nRemove all {count} permanent jobs from {member}?",
+            "{count}", IntegerString(member.jobs.size()),
+            "{member}", member.name);
+        prompt->setCaption(promptCaption.c_str());
         prompt->setTextAlign(MyGUI::Align::Center);
         prompt->setNeedMouseFocus(false);
         TagThemeStandardText(prompt);
@@ -1893,7 +1913,9 @@
             MyGUI::IntCoord(88, 115, 150, 38),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_ClearYes");
-        yes->setCaption("Yes");
+        const std::string yesCaption = Localize(
+            "ui.dialog.yes", "Yes");
+        SetFittedButtonCaption(yes, yesCaption, 16, 10, 14);
         yes->eventMouseButtonClick += MyGUI::newDelegate(OnClearYes);
         TagThemeButtonText(yes);
         MyGUI::Button* no = client->createWidget<MyGUI::Button>(
@@ -1901,7 +1923,9 @@
             MyGUI::IntCoord(282, 115, 150, 38),
             MyGUI::Align::Right | MyGUI::Align::Bottom,
             "KJM_ClearNo");
-        no->setCaption("No");
+        const std::string noCaption = Localize(
+            "ui.dialog.no", "No");
+        SetFittedButtonCaption(no, noCaption, 16, 10, 14);
         no->eventMouseButtonClick += MyGUI::newDelegate(OnClearNo);
         TagThemeButtonText(no);
         ApplyThemeToTaggedTree(g_modal.window);
@@ -1955,8 +1979,9 @@
         RefreshOptionButtons();
         if (!saved)
         {
-            SetStatus(
-                "Appearance changed for this session, but settings.ini could not be saved.");
+            SetStatus(Localize(
+                "status.settings.appearance_save_failed",
+                "Appearance changed for this session, but settings.ini could not be saved."));
         }
     }
 
@@ -2013,7 +2038,9 @@
         // option at once. The canvas remains a ScrollView for compatibility
         // with existing input routing, but it no longer needs a scrollbar at
         // the normal supported resolutions.
-        if (!BeginModal(MODAL_OPTIONS, 1000, 600, "Job Manager Options"))
+        const std::string modalCaption = Localize(
+            "modal.options.title", "Job Manager Options");
+        if (!BeginModal(MODAL_OPTIONS, 1000, 600, modalCaption.c_str()))
         {
             return;
         }
@@ -2024,8 +2051,10 @@
             MyGUI::IntCoord(16, 8, clientSize.width - 32, 44),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_OptionsHelp");
-        help->setCaption(
+        const std::string helpCaption = Localize(
+            "modal.options.help",
             "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately.");
+        help->setCaption(helpCaption.c_str());
         help->setTextAlign(MyGUI::Align::Center);
         help->setNeedMouseFocus(false);
         TagThemeStandardText(help);
@@ -2057,7 +2086,9 @@
                 MyGUI::IntCoord(leftColumn, 8, canvasWidth, 30),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_AppearanceSection");
-        appearanceSection->setCaption("APPEARANCE");
+        const std::string appearanceSectionCaption = Localize(
+            "options.appearance.header", "APPEARANCE");
+        appearanceSection->setCaption(appearanceSectionCaption.c_str());
         appearanceSection->setNeedMouseFocus(false);
         TagThemeStandardText(appearanceSection);
 
@@ -2066,7 +2097,10 @@
             MyGUI::IntCoord(leftColumn, 44, columnWidth, 34),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_DarkUiOption");
-        g_darkUiOptionButton->setCaption("Dark UI friendly font colors");
+        const std::string darkUiCaption = Localize(
+            "options.appearance.dark_ui", "Dark UI friendly font colors");
+        SetFittedButtonCaption(
+            g_darkUiOptionButton, darkUiCaption, 15, 10, 20);
         g_darkUiOptionButton->eventMouseButtonClick +=
             MyGUI::newDelegate(OnDarkUiOptionClicked);
         g_darkUiOptionButton->eventMouseWheel +=
@@ -2080,8 +2114,10 @@
                     rightColumn, 42, columnWidth, 42),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_AppearanceHelp");
-        appearanceHelp->setCaption(
+        const std::string appearanceHelpCaption = Localize(
+            "options.appearance.dark_ui.help",
             "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text.");
+        appearanceHelp->setCaption(appearanceHelpCaption.c_str());
         appearanceHelp->setNeedMouseFocus(false);
         TagThemeMutedText(appearanceHelp);
 
@@ -2090,7 +2126,9 @@
             MyGUI::IntCoord(leftColumn, 104, canvasWidth, 30),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationFilterSection");
-        stationSection->setCaption("STATION CATEGORY FILTERS");
+        const std::string stationSectionCaption = Localize(
+            "options.stations.header", "STATION CATEGORY FILTERS");
+        stationSection->setCaption(stationSectionCaption.c_str());
         stationSection->setNeedMouseFocus(false);
         TagThemeStandardText(stationSection);
 
@@ -2109,7 +2147,10 @@
                     x, y, columnWidth, 34),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationCategoryOption");
-            category->setCaption(definition.name);
+            const std::string categoryCaption = Localize(
+                definition.localizationKey, definition.name);
+            SetFittedButtonCaption(
+                category, categoryCaption, 15, 10, 20);
             category->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnStationCategoryOptionClicked);
             category->eventMouseWheel +=
@@ -2132,14 +2173,18 @@
         MyGUI::Button* reset = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1", MyGUI::IntCoord(16, clientSize.height - 50, 160, 38),
             MyGUI::Align::Left | MyGUI::Align::Bottom, "KJM_OptionReset");
-        reset->setCaption("Reset Default");
+        const std::string resetCaption = Localize(
+            "ui.action.reset_default", "Reset Default");
+        SetFittedButtonCaption(reset, resetCaption, 16, 10, 14);
         reset->eventMouseButtonClick += MyGUI::newDelegate(OnOptionReset);
         TagThemeButtonText(reset);
         MyGUI::Button* close = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
             MyGUI::IntCoord(clientSize.width - 156, clientSize.height - 50, 140, 38),
             MyGUI::Align::Right | MyGUI::Align::Bottom, "KJM_OptionClose");
-        close->setCaption("Close");
+        const std::string closeCaption = Localize(
+            "ui.action.close", "Close");
+        SetFittedButtonCaption(close, closeCaption, 16, 10, 14);
         close->eventMouseButtonClick += MyGUI::newDelegate(OnOptionClose);
         TagThemeButtonText(close);
         RefreshOptionButtons();
@@ -2257,21 +2302,27 @@
         }
         if (!RecipientSelectionMode())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         const std::vector<HandleIdentity> recipients =
             GetSelectedRecipientIdentities();
         if (recipients.empty())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         g_pendingJobBatchUiAction = PendingJobBatchUiAction();
         g_pendingJobBatchUiAction.type =
             JOB_BATCH_UI_PRIORITIZE_HEALING;
         g_pendingJobBatchUiAction.recipients = recipients;
-        SetStatus("Applying healing priorities...");
+        SetStatus(Localize(
+            "status.batch.applying_healing_priorities",
+            "Applying healing priorities..."));
     }
 
     void OnAddHealingJobsClicked(MyGUI::Widget*)
@@ -2285,20 +2336,26 @@
         }
         if (!RecipientSelectionMode())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         const std::vector<HandleIdentity> recipients =
             GetSelectedRecipientIdentities();
         if (recipients.empty())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         g_pendingJobBatchUiAction = PendingJobBatchUiAction();
         g_pendingJobBatchUiAction.type = JOB_BATCH_UI_ADD_HEALING;
         g_pendingJobBatchUiAction.recipients = recipients;
-        SetStatus("Adding and prioritizing healing jobs...");
+        SetStatus(Localize(
+            "status.batch.adding_healing_jobs",
+            "Adding and prioritizing healing jobs..."));
     }
 
     void OnRemoveInvalidJobsClicked(MyGUI::Widget*)
@@ -2312,20 +2369,26 @@
         }
         if (!RecipientSelectionMode())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         const std::vector<HandleIdentity> recipients =
             GetSelectedRecipientIdentities();
         if (recipients.empty())
         {
-            ShowToast("Select at least one recipient first.");
+            ShowToast(Localize(
+                "status.selection.no_recipient",
+                "Select at least one recipient first."));
             return;
         }
         g_pendingJobBatchUiAction = PendingJobBatchUiAction();
         g_pendingJobBatchUiAction.type = JOB_BATCH_UI_REMOVE_INVALID;
         g_pendingJobBatchUiAction.recipients = recipients;
-        SetStatus("Removing invalid fixed-target jobs...");
+        SetStatus(Localize(
+            "status.batch.removing_invalid_jobs",
+            "Removing invalid fixed-target jobs..."));
     }
 
     void OnOptionsClicked(MyGUI::Widget*)
@@ -2353,23 +2416,32 @@
 
     std::string DescribeRemovalCandidate(const RemovalCandidate& candidate)
     {
-        std::ostringstream text;
+        std::string memberName;
         const MemberSnapshot* member = FindDisplayedMember(
             candidate.selected.member);
         if (member != NULL)
         {
-            text << member->name;
+            memberName = member->name;
         }
         else
         {
-            text << "Unavailable member";
+            memberName = Localize(
+                "member.label.unavailable", "Unavailable member");
         }
-        text << " / " << candidate.selected.job.jobLabel;
         if (candidate.slot >= 0)
         {
-            text << " / priority " << (candidate.slot + 1);
+            return LocalizeFormat(
+                "status.remove_selected.candidate_with_priority",
+                "{member} / {job} / Priority {priority}",
+                "{member}", memberName,
+                "{job}", candidate.selected.job.jobLabel,
+                "{priority}", IntegerString(candidate.slot + 1));
         }
-        return text.str();
+        return LocalizeFormat(
+            "status.remove_selected.candidate",
+            "{member} / {job}",
+            "{member}", memberName,
+            "{job}", candidate.selected.job.jobLabel);
     }
 
     void EraseSelectedJob(const SelectedJob& completed)
@@ -2490,22 +2562,23 @@
             }
             ApplySynchronizedJobSelectionStates();
         }
-        std::ostringstream status;
         if (interrupted)
         {
-            status << "Deletion queue interrupted after " << completedCount
-                   << " removal" << (completedCount == 1 ? "" : "s")
-                   << ". Failed: " << failedDetail
-                   << ". " << remaining.size() << " job"
-                   << (remaining.size() == 1 ? " remains" : "s remain")
-                   << " selected. Review and try again.";
+            const std::string status = LocalizeFormat(
+                "status.remove_selected.interrupted",
+                "Deletion queue interrupted. Completed removals: {completed}. Failed: {failed}. Remaining selected jobs: {remaining}. Review and try again.",
+                "{completed}", IntegerString(completedCount),
+                "{failed}", failedDetail,
+                "{remaining}", IntegerString(remaining.size()));
+            SetStatus(status);
         }
         else
         {
-            status << "Removed " << completedCount << " permanent job"
-                   << (completedCount == 1 ? "" : "s") << ".";
+            SetStatus(LocalizeFormat(
+                "status.remove_selected.success",
+                "Removed permanent jobs: {count}.",
+                "{count}", IntegerString(completedCount)));
         }
-        SetStatus(status.str());
     }
 
     bool SameStationJobKindAndTarget(
@@ -2795,8 +2868,9 @@
     {
         if (g_pendingAction.type != ACTION_NONE)
         {
-            SetStationActionStatus(
-                "Another job change is pending. Try again after it finishes.");
+            SetStationActionStatus(Localize(
+                "status.station_action.pending",
+                "Another job change is pending. Try again after it finishes."));
             return;
         }
 
@@ -2804,8 +2878,9 @@
         if (!TryCaptureProjectedStationMemberQueue(
                 station, member, &capturedQueue))
         {
-            SetStationActionStatus(
-                "The member queue or station changed. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station_action.queue_or_station_changed",
+                "The member queue or station changed. No jobs were changed."));
             return;
         }
 
@@ -2814,7 +2889,9 @@
         g_pendingAction.member = member;
         g_pendingAction.stationTarget = station;
         g_pendingAction.sequence = capturedQueue;
-        SetStationActionStatus("Validating the station assignment...");
+        SetStationActionStatus(Localize(
+            "status.station_action.validating_assignment",
+            "Validating the station assignment..."));
     }
 
     void RequestRemoveStationAssignment(
@@ -2823,8 +2900,9 @@
     {
         if (g_pendingAction.type != ACTION_NONE)
         {
-            SetStationActionStatus(
-                "Another job change is pending. Try again after it finishes.");
+            SetStationActionStatus(Localize(
+                "status.station_action.pending",
+                "Another job change is pending. Try again after it finishes."));
             return;
         }
 
@@ -2832,8 +2910,9 @@
         if (!TryCaptureProjectedStationMemberQueue(
                 station, member, &capturedQueue))
         {
-            SetStationActionStatus(
-                "The member queue or station changed. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station_action.queue_or_station_changed",
+                "The member queue or station changed. No jobs were changed."));
             return;
         }
 
@@ -2842,7 +2921,9 @@
         g_pendingAction.member = member;
         g_pendingAction.stationTarget = station;
         g_pendingAction.sequence = capturedQueue;
-        SetStationActionStatus("Validating all jobs for this station...");
+        SetStationActionStatus(Localize(
+            "status.station_action.validating_removal",
+            "Validating all jobs for this station..."));
     }
 
     bool SameStationQueuePrefix(
@@ -3013,7 +3094,9 @@
         {
             FinishUnverifiedStationMemberAction(
                 action.stationTarget, action.member,
-                "Station assignment stopped: 0 job changes were verified. The member queue changed or became unavailable.");
+                Localize(
+                    "status.station.assign_stopped_queue",
+                    "Station assignment stopped. Verified job changes: 0. The member queue changed or became unavailable."));
             return;
         }
 
@@ -3024,7 +3107,9 @@
         {
             FinishUnverifiedStationMemberAction(
                 action.stationTarget, action.member,
-                "Station assignment stopped: 0 job changes were verified. The station projection became unavailable.");
+                Localize(
+                    "status.station.assign_stopped_projection",
+                    "Station assignment stopped. Verified job changes: 0. The station projection became unavailable."));
             return;
         }
 
@@ -3038,7 +3123,9 @@
         {
             FinishUnverifiedStationMemberAction(
                 action.stationTarget, action.member,
-                "Station assignment stopped: 0 job changes were verified. The member queue changed immediately before assignment.");
+                Localize(
+                    "status.station.assign_stopped_race",
+                    "Station assignment stopped. Verified job changes: 0. The member queue changed immediately before assignment."));
             return;
         }
 
@@ -3051,20 +3138,23 @@
                 &normalizedTask, &automaticBundle);
         if (addResult == STATION_ADD_INVALID_TARGET)
         {
-            SetStationActionStatus(
-                "The member or exact station is unavailable or is no longer player-managed. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station.invalid_target_or_member",
+                "The member or exact station is unavailable or is no longer player-managed. No jobs were changed."));
             return;
         }
         if (addResult == STATION_ADD_UNSUPPORTED_TASK)
         {
-            SetStationActionStatus(
-                "This station does not expose a supported permanent job. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station.unsupported_job",
+                "This station does not expose a supported permanent job. No jobs were changed."));
             return;
         }
         if (addResult == STATION_ADD_QUEUE_FULL)
         {
-            SetStationActionStatus(
-                "The member queue is too full for this station job. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station.queue_full",
+                "The member queue is too full for this station job. No jobs were changed."));
             return;
         }
 
@@ -3073,7 +3163,9 @@
         {
             FinishUnverifiedStationMemberAction(
                 action.stationTarget, action.member,
-                "The station job was sent, but 0 job changes could be verified because the queue became unavailable. Review the member queue.");
+                Localize(
+                    "status.station.assign_unverified_queue",
+                    "The station job was sent, but verified job changes: 0. The queue became unavailable. Review the member queue."));
             return;
         }
         const bool expectedSuffix = IsExpectedStationAssignmentSuffix(
@@ -3083,7 +3175,9 @@
         {
             FinishStationMemberAction(
                 after, action.stationTarget,
-                "Kenshi changed the queue in an unexpected way. 0 station job changes were verified. Review the member queue before another change.",
+                Localize(
+                    "status.station.assign_unexpected_queue",
+                    "Kenshi changed the queue in an unexpected way. Verified station job changes: 0. Review the member queue before another change."),
                 false);
             return;
         }
@@ -3092,26 +3186,30 @@
         {
             if (SameQueue(before.jobs, after.jobs))
             {
-                SetStationActionStatus(
-                    "Kenshi rejected the station job. No jobs were changed.");
+                SetStationActionStatus(Localize(
+                    "status.station.job_rejected",
+                    "Kenshi rejected the station job. No jobs were changed."));
             }
             else
             {
                 FinishStationMemberAction(
                     after, action.stationTarget,
-                    "Kenshi reported an error after changing the queue. The exact station job change was verified.",
+                    Localize(
+                        "status.station.assign_error_verified",
+                        "Kenshi reported an error after changing the queue. The exact station job change was verified."),
                     true);
             }
             return;
         }
 
         const size_t addedCount = after.jobs.size() - before.jobs.size();
-        std::ostringstream status;
-        status << "Assigned " << after.name << " to this station ("
-               << addedCount << " permanent job"
-               << (addedCount == 1 ? "" : "s") << ").";
+        const std::string status = LocalizeFormat(
+            "status.station.assign_success",
+            "Assigned {member} to this station. Permanent jobs added: {count}.",
+            "{member}", after.name,
+            "{count}", IntegerString(addedCount));
         FinishStationMemberAction(
-            after, action.stationTarget, status.str(), true);
+            after, action.stationTarget, status, true);
     }
 
     void ProcessStationBundleRemovalRequest(const PendingAction& action)
@@ -3122,14 +3220,17 @@
         {
             FinishUnverifiedStationMemberAction(
                 action.stationTarget, action.member,
-                "Station removal stopped after 0 verified jobs. The member queue changed or became unavailable.");
+                Localize(
+                    "status.station.remove_stopped_queue",
+                    "Station removal stopped. Verified job removals: 0. The member queue changed or became unavailable."));
             return;
         }
 
         if (!TryValidateStationActionTargetIdentity(action.stationTarget))
         {
-            SetStationActionStatus(
-                "The station is unavailable or is no longer player-managed. No jobs were changed.");
+            SetStationActionStatus(Localize(
+                "status.station.remove_unavailable",
+                "The station is unavailable or is no longer player-managed. No jobs were changed."));
             return;
         }
 
@@ -3154,13 +3255,12 @@
             if (!TryValidateStationActionTargetIdentity(
                     action.stationTarget))
             {
-                std::ostringstream status;
-                status << "Removal stopped after " << removedCount
-                       << " verified job"
-                       << (removedCount == 1 ? "" : "s")
-                       << ". The exact station is no longer player-managed.";
+                const std::string status = LocalizeFormat(
+                    "status.station.remove_stopped_target",
+                    "Station removal stopped. Verified job removals: {count}. The exact station is no longer player-managed.",
+                    "{count}", IntegerString(removedCount));
                 FinishUnverifiedStationMemberAction(
-                    action.stationTarget, action.member, status.str());
+                    action.stationTarget, action.member, status);
                 return;
             }
 
@@ -3179,13 +3279,12 @@
                     beforeRemove.jobs[slot].target,
                     action.stationTarget))
             {
-                std::ostringstream status;
-                status << "Removal stopped after " << removedCount
-                       << " verified job"
-                       << (removedCount == 1 ? "" : "s")
-                       << ". The exact full queue changed or became unavailable.";
+                const std::string status = LocalizeFormat(
+                    "status.station.remove_stopped_queue_changed",
+                    "Station removal stopped. Verified job removals: {count}. The exact full queue changed or became unavailable.",
+                    "{count}", IntegerString(removedCount));
                 FinishUnverifiedStationMemberAction(
-                    action.stationTarget, action.member, status.str());
+                    action.stationTarget, action.member, status);
                 return;
             }
             const bool removeCallSucceeded =
@@ -3194,13 +3293,12 @@
             MemberSnapshot afterRemove;
             if (!TryBuildLiveMemberByIdentity(action.member, &afterRemove))
             {
-                std::ostringstream status;
-                status << "Removal stopped after " << removedCount
-                       << " verified job"
-                       << (removedCount == 1 ? "" : "s")
-                       << ". The changed queue became unavailable. Review it before another change.";
+                const std::string status = LocalizeFormat(
+                    "status.station.remove_stopped_unavailable",
+                    "Station removal stopped. Verified job removals: {count}. The changed queue became unavailable. Review it before another change.",
+                    "{count}", IntegerString(removedCount));
                 FinishUnverifiedStationMemberAction(
-                    action.stationTarget, action.member, status.str());
+                    action.stationTarget, action.member, status);
                 return;
             }
 
@@ -3213,39 +3311,42 @@
             }
             if (!removeCallSucceeded || !exactRemoval)
             {
-                std::ostringstream status;
-                status << "Removal stopped after " << removedCount
-                       << " verified job"
-                       << (removedCount == 1 ? "" : "s") << ". ";
-                if (!exactRemoval)
-                {
-                    status << "The queue changed in an unexpected way.";
-                }
-                else
-                {
-                    status << "Kenshi reported an error after the removal.";
-                }
-                status << " Review it before another change.";
+                const std::string status = !exactRemoval ?
+                    LocalizeFormat(
+                        "status.station.remove_stopped_unexpected",
+                        "Station removal stopped. Verified job removals: {count}. The queue changed in an unexpected way. Review it before another change.",
+                        "{count}", IntegerString(removedCount)) :
+                    LocalizeFormat(
+                        "status.station.remove_stopped_error",
+                        "Station removal stopped. Verified job removals: {count}. Kenshi reported an error after the removal. Review it before another change.",
+                        "{count}", IntegerString(removedCount));
                 FinishStationMemberAction(
-                    current, action.stationTarget, status.str(), false);
+                    current, action.stationTarget, status, false);
                 return;
             }
         }
 
-        std::ostringstream status;
         if (removedCount == 0)
         {
-            status << current.name << " has no permanent jobs for this station.";
+            FinishStationMemberAction(
+                current, action.stationTarget,
+                LocalizeFormat(
+                    "status.station.remove_none",
+                    "{member} has no permanent jobs for this station.",
+                    "{member}", current.name),
+                true);
         }
         else
         {
-            status << "Removed all " << removedCount
-                   << " permanent station job"
-                   << (removedCount == 1 ? "" : "s") << " from "
-                   << current.name << ".";
+            FinishStationMemberAction(
+                current, action.stationTarget,
+                LocalizeFormat(
+                    "status.station.remove_success",
+                    "Removed permanent station jobs: {count}. Member: {member}.",
+                    "{count}", IntegerString(removedCount),
+                    "{member}", current.name),
+                true);
         }
-        FinishStationMemberAction(
-            current, action.stationTarget, status.str(), true);
     }
 
     void FinishStationTransfer(const std::string& status)
@@ -3291,12 +3392,16 @@
             !SameHandleIdentity(action.job.target, action.stationTarget) ||
             action.stationTarget.type != BUILDING)
         {
-            SetStatus("The station target is unavailable. No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_target_unavailable",
+                "The station target is unavailable. No jobs were changed."));
             return;
         }
         if (SameHandleIdentity(action.member, action.destinationMember))
         {
-            SetStatus("Choose a different member. No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_same_member",
+                "Choose a different member. No jobs were changed."));
             return;
         }
 
@@ -3306,8 +3411,9 @@
             !SameQueue(source.jobs, action.sequence))
         {
             g_stationAssignmentsDirty = g_stationScan.started;
-            SetStatus(
-                "The source queue changed or became unavailable. No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_source_changed",
+                "The source queue changed or became unavailable. No jobs were changed."));
             return;
         }
         if (!TryBuildLiveMemberByIdentity(
@@ -3315,17 +3421,18 @@
             !SameQueue(destination.jobs, action.destinationSequence))
         {
             g_stationAssignmentsDirty = g_stationScan.started;
-            SetStatus(
-                "The destination queue changed or became unavailable. No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_destination_changed",
+                "The destination queue changed or became unavailable. No jobs were changed."));
             return;
         }
         if (destination.jobs.size() >=
             static_cast<size_t>(MAX_SAFE_JOB_ROWS))
         {
             g_stationAssignmentsDirty = g_stationScan.started;
-            SetStatus(
-                "The destination queue is at the 64-job safety limit. "
-                "No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_destination_full",
+                "The destination queue is at the 64-job safety limit. No jobs were changed."));
             return;
         }
 
@@ -3336,8 +3443,12 @@
         {
             g_stationAssignmentsDirty = g_stationScan.started;
             SetStatus(sourceSlot < 0 ?
-                "The exact source job is no longer available. No jobs were changed." :
-                "That member already has the same job for this station. No jobs were changed.");
+                Localize(
+                    "status.station.transfer_source_missing",
+                    "The exact source job is no longer available. No jobs were changed.") :
+                Localize(
+                    "status.station.transfer_duplicate",
+                    "That member already has the same job for this station. No jobs were changed."));
             return;
         }
 
@@ -3346,7 +3457,9 @@
                 action.stationTarget))
         {
             g_stationAssignmentsDirty = g_stationScan.started;
-            SetStatus("Kenshi rejected the destination job. No jobs were changed.");
+            SetStatus(Localize(
+                "status.station.transfer_destination_rejected",
+                "Kenshi rejected the destination job. No jobs were changed."));
             return;
         }
 
@@ -3358,8 +3471,9 @@
                 action.job.taskType, action.stationTarget))
         {
             FinishStationTransfer(
-                "The destination could not be verified after adding the job. "
-                "The source was not changed; review both queues.");
+                Localize(
+                    "status.station.transfer_destination_unverified",
+                    "The destination could not be verified after adding the job. The source was not changed; review both queues."));
             return;
         }
 
@@ -3370,8 +3484,9 @@
             !SameQueue(sourceBeforeRemove.jobs, action.sequence))
         {
             FinishStationTransfer(
-                "The destination job was added, but the source queue changed. "
-                "The source was not removed; a duplicate may remain.");
+                Localize(
+                    "status.station.transfer_source_changed_after_add",
+                    "The destination job was added, but the source queue changed. The source was not removed; a duplicate may remain."));
             return;
         }
         const int verifiedSourceSlot =
@@ -3380,8 +3495,9 @@
             !TryRemovePermajob(sourceBeforeRemove.handle, verifiedSourceSlot))
         {
             FinishStationTransfer(
-                "The destination job was added, but Kenshi rejected the source removal. "
-                "A duplicate remains; review both queues.");
+                Localize(
+                    "status.station.transfer_source_remove_rejected",
+                    "The destination job was added, but Kenshi rejected the source removal. A duplicate remains; review both queues."));
             return;
         }
 
@@ -3392,18 +3508,22 @@
                 sourceAfter.jobs))
         {
             FinishStationTransfer(
-                "The destination job was added, but the source removal could not be verified. "
-                "Review both queues before making another change.");
+                Localize(
+                    "status.station.transfer_source_remove_unverified",
+                    "The destination job was added, but the source removal could not be verified. Review both queues before making another change."));
             return;
         }
 
-        std::ostringstream status;
         // The exact job label is stable even if the station column is filtered
         // before the next snapshot refresh.
-        status << "Moved " << StripLeadingPriorityPrefix(action.job.jobLabel)
-               << " from " << source.name << " to " << destination.name << ".";
+        const std::string status = LocalizeFormat(
+            "status.station.transfer_success",
+            "Moved {job} from {source} to {destination}.",
+            "{job}", StripLeadingPriorityPrefix(action.job.jobLabel),
+            "{source}", source.name,
+            "{destination}", destination.name);
         FinishSuccessfulStationTransfer(
-            status.str(), sourceAfter, destinationAfter);
+            status, sourceAfter, destinationAfter);
     }
 
     void ProcessPendingAction()
@@ -3443,7 +3563,9 @@
         if (!TryBuildFreshRosterMemberByIdentity(action.member, &fresh))
         {
             RefreshSquadView(true);
-            SetStatus("The member queue is unavailable. No jobs were changed.");
+            SetStatus(Localize(
+                "status.member.queue_unavailable",
+                "The member queue is unavailable. No jobs were changed."));
             return;
         }
 
@@ -3451,13 +3573,17 @@
         {
             if (!TrySetJobsEnabled(fresh.handle, !fresh.jobsEnabled))
             {
-                SetStatus("Kenshi rejected the Jobs toggle. No jobs were changed.");
+                SetStatus(Localize(
+                    "status.jobs.toggle_rejected",
+                    "Kenshi rejected the Jobs toggle. No jobs were changed."));
                 return;
             }
             TryNotifyVanillaSelectionUI();
             RefreshSquadView(true);
-            SetStatus(fresh.jobsEnabled ? "Jobs disabled for this member." :
-                                          "Jobs enabled for this member.");
+            SetStatus(fresh.jobsEnabled ? Localize(
+                "status.jobs.disabled", "Jobs disabled for this member.") :
+                Localize(
+                    "status.jobs.enabled", "Jobs enabled for this member."));
             return;
         }
 
@@ -3466,7 +3592,9 @@
             if (!SameQueue(fresh.jobs, action.sequence))
             {
                 RefreshSquadView(true);
-                SetStatus("The queue changed during the drag. Review it and try again.");
+                SetStatus(Localize(
+                    "status.drag.queue_changed",
+                    "The queue changed during the drag. Review it and try again."));
                 return;
             }
             const int source = FindJobSlot(fresh, action.job);
@@ -3475,12 +3603,16 @@
                 !TryMovePermajob(fresh.handle, source, action.targetSlot))
             {
                 RefreshSquadView(true);
-                SetStatus("Kenshi rejected the queue reorder. No other jobs were changed.");
+                SetStatus(Localize(
+                    "status.jobs.reorder_rejected",
+                    "Kenshi rejected the queue reorder. No other jobs were changed."));
                 return;
             }
             TryNotifyVanillaSelectionUI();
             RefreshSquadView(true);
-            SetStatus("Permanent-job priority updated.");
+            SetStatus(Localize(
+                "status.jobs.priority_updated",
+                "Permanent-job priority updated."));
             return;
         }
 
@@ -3489,12 +3621,16 @@
             if (!SameQueue(fresh.jobs, action.sequence))
             {
                 RefreshSquadView(true);
-                SetStatus("The queue changed after confirmation. Clear Queue was cancelled.");
+                SetStatus(Localize(
+                    "status.clear.queue_changed",
+                    "The queue changed after confirmation. Clear Queue was cancelled."));
                 return;
             }
             if (!TryClearPermajobs(fresh.handle))
             {
-                SetStatus("Kenshi rejected Clear Queue. No jobs were changed.");
+                SetStatus(Localize(
+                    "status.clear.rejected",
+                    "Kenshi rejected Clear Queue. No jobs were changed."));
                 return;
             }
             for (size_t index = g_selectedJobs.size(); index > 0; --index)
@@ -3509,7 +3645,10 @@
             SyncRecipientsToSelectedJobs();
             TryNotifyVanillaSelectionUI();
             RefreshSquadView(true);
-            SetStatus("All permanent jobs were removed from " + fresh.name + ".");
+            SetStatus(LocalizeFormat(
+                "status.clear.success",
+                "All permanent jobs were removed from {member}.",
+                "{member}", fresh.name));
         }
     }
 
