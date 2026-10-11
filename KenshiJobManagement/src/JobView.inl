@@ -1449,12 +1449,9 @@
             // readable above it.
             if (roleIconResource != NULL || hasStationArtworkTarget)
             {
-                // LEOPARD: inside the frame; with no target line the
-                // picture goes under the caption instead of behind it.
-                const int iconTop = showTarget ?
-                    FRAME_FILL : FRAME_Y + S(40);
-                const int iconSize = std::max(S(16),
-                    CARD_HEIGHT - FRAME_FILL - iconTop);
+                // LEOPARD: the whole card height, as in the original.
+                const int iconTop = 0;
+                const int iconSize = CARD_HEIGHT;
                 const int iconLeft = (CARD_WIDTH - iconSize) / 2;
                 card.categoryIcon =
                     card.card->createWidget<MyGUI::ImageBox>(
@@ -1601,7 +1598,7 @@
                 // The normal 20pt preset is clear for short work types;
                 // SetFittedCardJobCaption scales and wraps longer labels.
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(FRAME_X, FRAME_Y, CARD_WIDTH - 2 * FRAME_X, S(38)),
+                MyGUI::IntCoord(FRAME_X, FRAME_Y - S(4), CARD_WIDTH - 2 * FRAME_X, S(38)),
                 MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_CardJob");
             if (card.job->getFontHeight() > 0)
@@ -1609,7 +1606,7 @@
                 StepFontUp(card.job);
             }
             SetFittedCardJobCaption(card.job, row.jobLabel);
-            card.job->setTextAlign(MyGUI::Align::Center);
+            card.job->setTextAlign(MyGUI::Align::HCenter | MyGUI::Align::Top);
             // Use pure white for the primary card text.  Kenshi's default
             // warm gray is difficult to read against the dark card skin.
             TagThemeStandardText(card.job);

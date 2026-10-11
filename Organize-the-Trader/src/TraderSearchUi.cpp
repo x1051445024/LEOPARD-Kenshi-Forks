@@ -17,6 +17,7 @@
 #include <mygui/MyGUI_Button.h>
 #include <mygui/MyGUI_ComboBox.h>
 #include <mygui/MyGUI_EditBox.h>
+#include <mygui/MyGUI_FontManager.h>
 #include <mygui/MyGUI_Gui.h>
 #include <mygui/MyGUI_InputManager.h>
 #include <mygui/MyGUI_TextBox.h>
@@ -75,6 +76,67 @@ MyGUI::IntCoord InlineSearchCoord(MyGUI::Widget* parent)
     return MyGUI::IntCoord(coord.left, coord.top, coord.width, coord.height);
 }
 
+// LEOPARD: the game's combo box keeps its text line at a fixed 20 px from
+// the top (Kenshi_ComboBox: Client 10 5 130 20), so in the shorter sort row
+// of the vanilla interface the text sat low and was cut. Stretch the text
+// line over the whole box and centre it.
+void FitSortComboText(MyGUI::ComboBox* combo)
+{
+    if (combo == 0) return;
+    MyGUI::Widget* client = combo->getClientWidget();
+    if (client != 0)
+    {
+        const int right = combo->getWidth() >= 60 ? 26 : 18;
+        const MyGUI::IntCoord want(8, 0, combo->getWidth() - 8 - right, combo->getHeight());
+        if (want.width > 10 && client->getCoord() != want) client->setCoord(want);
+    }
+    combo->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
+}
+
+// Width of the longest item in the combo's font.
+int SortComboItemsWidth(MyGUI::ComboBox* combo)
+{
+    MyGUI::FontManager* fonts = MyGUI::FontManager::getInstancePtr();
+    MyGUI::IFont* font = fonts == 0 ? 0 : fonts->getByName(combo->getFontName());
+    if (font == 0) return 0;
+    float scale = 1.0f;
+    if (combo->getFontHeight() > 0 && font->getDefaultHeight() > 0)
+        scale = static_cast<float>(combo->getFontHeight()) / font->getDefaultHeight();
+    int widest = 0;
+    for (size_t i = 0; i < combo->getItemCount(); ++i)
+    {
+        const MyGUI::UString& item = combo->getItemNameAt(i);
+        float width = 0.0f;
+        for (MyGUI::UString::const_iterator c = item.begin(); c != item.end(); ++c)
+        {
+            MyGUI::GlyphInfo* glyph = font->getGlyphInfo(*c);
+            if (glyph != 0) width += glyph->advance + glyph->bearingX;
+        }
+        const int px = static_cast<int>(width * scale + 0.5f);
+        if (px > widest) widest = px;
+    }
+    return widest;
+}
+
+// The drop-down list is as wide as the combo, and on the vanilla interface
+// the combo is narrow - item names were cut. An open list takes the key
+// focus (ComboBox::showList) and is the combo's own child: widen it to the
+// longest item.
+void WidenOpenSortList()
+{
+    MyGUI::Widget* sort = FindSortControlsContainer();
+    MyGUI::InputManager* input = MyGUI::InputManager::getInstancePtr();
+    if (sort == 0 || input == 0) return;
+    MyGUI::Widget* focus = input->getKeyFocusWidget();
+    if (focus == 0 || !focus->getVisible()) return;
+    MyGUI::Widget* owner = focus->getParent();
+    if (owner == 0 || owner->getName() != "OTT_SortModeCombo") return;
+    MyGUI::ComboBox* combo = owner->castType<MyGUI::ComboBox>(false);
+    if (combo == 0) return;
+    const int want = SortComboItemsWidth(combo) + 30;
+    if (focus->getWidth() < want) focus->setSize(want, focus->getHeight());
+}
+
 void PositionInlineControls()
 {
     MyGUI::Widget* owner = FindLiveDockOwner(true);
@@ -104,7 +166,11 @@ void PositionInlineControls()
             MyGUI::Widget* label = FindNamedDescendantRecursive(sort, "OTT_SortLabel", false);
             const int height = button.height > 22 ? button.height - 4 : 18;
             if (label != 0) label->setCoord(6, 2, 52, height);
-            if (combo != 0) combo->setCoord(62, 2, width - 98, height);
+            if (combo != 0)
+            {
+                combo->setCoord(62, 2, width - 98, height);
+                FitSortComboText(combo->castType<MyGUI::ComboBox>(false));
+            }
             if (direction != 0) direction->setCoord(width - 30, 2, 28, height);
         }
     }
@@ -1689,6 +1755,7 @@ bool BuildControlsScaffold(
     sortModeCombo->addItem(MyGUI::UString(Tr("Stack weight")));
     sortModeCombo->addItem(MyGUI::UString(Tr("Price / weight")));
     sortModeCombo->setIndexSelected(ResolveSortModeComboIndex(g_sortMode));
+    FitSortComboText(sortModeCombo);
     sortModeCombo->eventComboAccept += MyGUI::newDelegate(&OnSortModeComboAccepted);
 
     MyGUI::Button* sortDirectionButton = sortContainer->createWidget<MyGUI::Button>(
@@ -2522,6 +2589,7 @@ void TickPhase2ControlsScaffold()
 {
     TickSearchContainerDrag();
     TickSortContainerDrag();
+    WidenOpenSortList();
 
     if (IsDiagnosticsHotkeyPressedEdge())
     {

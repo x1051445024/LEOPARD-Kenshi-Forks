@@ -937,11 +937,11 @@
         cardSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(cardSurface);
 
-        const int iconSize = STATION_GRID_CARD_HEIGHT - 2 * FRAME_FILL;
+        const int iconSize = STATION_GRID_CARD_HEIGHT;
         MyGUI::ImageBox* icon = card->createWidget<MyGUI::ImageBox>(
             "ImageBox", MyGUI::IntCoord(
                 (STATION_GRID_CARD_WIDTH - iconSize) / 2,
-                FRAME_FILL, iconSize, iconSize),
+                0, iconSize, iconSize),
             MyGUI::Align::Top,
             "KJM_StationCardBackground");
         // Keep the artwork visible enough to identify the station while the
@@ -1042,11 +1042,11 @@
 
         MyGUI::TextBox* name = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(FRAME_X, FRAME_Y, STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(42)),
+            MyGUI::IntCoord(FRAME_X, FRAME_Y - S(4), STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(42)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationExactName");
         SetFittedStationGridName(name, station.name);
-        name->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
+        name->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Top);
         TagThemeStandardText(name);
         name->setNeedMouseFocus(false);
         name->setNeedKeyFocus(false);
@@ -1381,12 +1381,12 @@
         {
             return;
         }
-        const int pad = S(2) + 10 + S(4);   // surface + frame + gap
+        const int pad = S(2) + 10 + S(1);   // surface + frame + gap
         const int size = std::max(S(20), row->getHeight() - 2 * pad);
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
-                pad + S(2), (row->getHeight() - size) / 2, size, size),
+                pad + S(2), (row->getHeight() - size) / 2 - S(2), size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
