@@ -99,13 +99,10 @@
             return;
         }
         button->setCaption(caption.c_str());
-        int fontHeight = S(14);
-        button->setFontHeight(fontHeight);
-        while (fontHeight > 10 &&
-            button->getTextSize().width > button->getWidth() - 14)
+        SetFontPx(button, S(15));
+        while (button->getTextSize().width > button->getWidth() - S(14) &&
+            StepFontDown(button))
         {
-            --fontHeight;
-            button->setFontHeight(fontHeight);
         }
     }
 
@@ -374,7 +371,7 @@
                 "KJM_SquadSelectorLabel");
         g_squadSelectorLabel->setCaption(Localize(
             "ui.squad_selector.label", "SQUADS"));
-        g_squadSelectorLabel->setFontHeight(S(16));
+        SetFontPx(g_squadSelectorLabel, S(16));
         g_squadSelectorLabel->setTextAlign(MyGUI::Align::Center);
         TagThemeStandardText(g_squadSelectorLabel);
 

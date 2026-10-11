@@ -350,15 +350,12 @@
         minimumFontHeight = S(std::max(minimumFontHeight, 13));
         horizontalPadding = S(horizontalPadding);
         button->setCaption(caption);
-        int fontHeight = preferredFontHeight;
-        button->setFontHeight(fontHeight);
+        SetFontPx(button, preferredFontHeight);
         const int availableWidth = std::max(
             1, button->getWidth() - horizontalPadding);
-        while (fontHeight > minimumFontHeight &&
-            button->getTextSize().width > availableWidth)
+        while (button->getTextSize().width > availableWidth &&
+            StepFontDown(button, minimumFontHeight))
         {
-            --fontHeight;
-            button->setFontHeight(fontHeight);
         }
     }
 
@@ -741,10 +738,10 @@
             return;
         }
 
-        if (text->getTextSize().width > maxWidth && fontHeight > 16)
+        if (text->getTextSize().width > maxWidth && fontHeight > S(16))
         {
-            fontHeight = S(16);
-            text->setFontHeight(fontHeight);
+            SetFontPx(text, S(16));
+            fontHeight = text->getFontHeight();
         }
 
         if (text->getTextSize().width <= maxWidth)
@@ -763,10 +760,10 @@
             return;
         }
 
-        if (fontHeight > 14)
+        if (fontHeight > S(14))
         {
-            fontHeight = S(14);
-            text->setFontHeight(fontHeight);
+            SetFontPx(text, S(14));
+            fontHeight = text->getFontHeight();
         }
         if (text->getTextSize().width <= maxWidth &&
             text->getTextSize().height <= 38)
@@ -778,12 +775,10 @@
         // compact card has 38 pixels for this caption; a small fallback font
         // keeps every generated line inside that region without changing the
         // row height or moving the target/arrow layout.
-        while (fontHeight > 10 &&
-            (text->getTextSize().width > maxWidth ||
-             text->getTextSize().height > 38))
+        while ((text->getTextSize().width > maxWidth ||
+             text->getTextSize().height > S(38)) &&
+            StepFontDown(text))
         {
-            --fontHeight;
-            text->setFontHeight(fontHeight);
         }
     }
 
@@ -1274,10 +1269,9 @@
         // Target names stay on one line so the arrow remains visually tied
         // to its target.  Reduce only the target font when a narrow card
         // meets an unusually long renamed building.
-        while (fontHeight > 10 && text->getTextSize().width > maxWidth)
+        (void)fontHeight;
+        while (text->getTextSize().width > maxWidth && StepFontDown(text))
         {
-            --fontHeight;
-            text->setFontHeight(fontHeight);
         }
     }
 
@@ -1363,7 +1357,7 @@
                 MyGUI::IntCoord(S(10), S(20), g_jobWidth - S(20), S(40)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_EmptyQueue");
-            widgets.emptyJobs->setFontHeight(S(16));
+            SetFontPx(widgets.emptyJobs, S(16));
             widgets.emptyJobs->setNeedMouseFocus(false);
             widgets.emptyJobs->setCaption(member.queueAvailable ?
                 Localize(
@@ -1424,10 +1418,11 @@
             // queue card on an explicit palette surface while keeping the
             // button itself, its state, and all drag callbacks unchanged.
             MyGUI::Widget* cardSurface = card.card->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "Kenshi_GenericTextBoxFlatSkin",
                 MyGUI::IntCoord(S(3), S(3), CARD_WIDTH - S(6), CARD_HEIGHT - S(6)),
                 MyGUI::Align::Stretch,
                 "KJM_JobCardSurface");
+            cardSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
             TagThemeSurface(cardSurface);
 
             std::string targetLine;
@@ -1601,7 +1596,7 @@
                 "KJM_CardJob");
             if (card.job->getFontHeight() > 0)
             {
-                card.job->setFontHeight(card.job->getFontHeight() + 1);
+                StepFontUp(card.job);
             }
             SetFittedCardJobCaption(card.job, row.jobLabel);
             card.job->setTextAlign(MyGUI::Align::Center);
@@ -1620,7 +1615,7 @@
                 "KJM_CardArrow");
             if (card.arrow->getFontHeight() > 0)
             {
-                card.arrow->setFontHeight(card.arrow->getFontHeight() + 1);
+                StepFontUp(card.arrow);
             }
             card.arrow->setCaption(showTarget ? "V" : "");
             card.arrow->setTextAlign(MyGUI::Align::Center);
@@ -1637,7 +1632,7 @@
                 "KJM_CardTarget");
             if (card.target->getFontHeight() > 0)
             {
-                card.target->setFontHeight(card.target->getFontHeight() + 1);
+                StepFontUp(card.target);
             }
             if (showTarget)
             {
@@ -1778,10 +1773,11 @@
         // labels remain readable after a live theme toggle.
         MyGUI::Widget* memberSurface =
             widgets.memberRoot->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "Kenshi_GenericTextBoxFlatSkin",
                 MyGUI::IntCoord(S(3), S(3), g_memberWidth - S(6), ROW_HEIGHT - S(6)),
                 MyGUI::Align::Stretch,
                 "KJM_MemberRowSurface");
+            memberSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(memberSurface);
 
         widgets.recipientMarker =
@@ -1854,7 +1850,7 @@
                 MEMBER_TEXT_LEFT, S(8), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(25)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberName");
-        widgets.name->setFontHeight(S(21));
+        SetFontPx(widgets.name, S(21));
         widgets.name->setNeedMouseFocus(false);
         TagThemeStandardText(widgets.name);
         widgets.condition = widgets.memberRoot->createWidget<MyGUI::TextBox>(
@@ -1863,7 +1859,7 @@
                 MEMBER_TEXT_LEFT, S(33), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(16)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberCondition");
-        widgets.condition->setFontHeight(S(15));
+        SetFontPx(widgets.condition, S(15));
         widgets.condition->setNeedMouseFocus(false);
         TagThemeWarningText(widgets.condition);
         widgets.highestSkill = widgets.memberRoot->createWidget<MyGUI::TextBox>(
@@ -1872,7 +1868,7 @@
                 MEMBER_TEXT_LEFT, S(49), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(18)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberHighestSkill");
-        widgets.highestSkill->setFontHeight(S(18));
+        SetFontPx(widgets.highestSkill, S(18));
         widgets.highestSkill->setTextAlign(
             MyGUI::Align::Left | MyGUI::Align::Top);
         widgets.highestSkill->setNeedMouseFocus(false);
@@ -1883,7 +1879,7 @@
                 MEMBER_TEXT_LEFT, S(67), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(32)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberSkills");
-        widgets.skills->setFontHeight(S(16));
+        SetFontPx(widgets.skills, S(16));
         widgets.skills->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Top);
         widgets.skills->setNeedMouseFocus(false);
         TagThemeStandardText(widgets.skills);
@@ -1972,7 +1968,7 @@
                     HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_PriorityHeader");
-            label->setFontHeight(S(16));
+            SetFontPx(label, S(16));
             label->setCaption(LocalizeFormat(
                 "ui.priority.label", "Priority {number}",
                 "{number}", IntegerString(slot + 1)));
@@ -2246,7 +2242,7 @@
             "{members}", IntegerString(squad.members.size()));
         group.memberHeader->setCaption(caption);
         group.memberHeader->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Center);
-        group.memberHeader->setFontHeight(S(17));
+        SetFontPx(group.memberHeader, S(17));
         TagThemeButtonText(group.memberHeader);
         group.memberHeader->setStateSelected(selected);
         group.memberHeader->setUserString(
@@ -2255,10 +2251,11 @@
             MyGUI::newDelegate(OnSquadGroupToggle);
 
         group.jobHeader = g_jobCanvas->createWidget<MyGUI::Widget>(
-            "WhiteSkin",
+            "Kenshi_GenericTextBoxFlatSkin",
             MyGUI::IntCoord(0, y, canvasWidth, SQUAD_GROUP_HEADER_HEIGHT),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_SquadGroupJobHeader");
+        group.jobHeader->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeBackground(group.jobHeader);
         group.jobHeader->setAlpha(selected ? 0.96f : 0.82f);
         group.jobHeader->setNeedMouseFocus(false);
@@ -2271,7 +2268,7 @@
                 "KJM_SquadGroupJobCaption");
         jobCaption->setCaption(selected ? Localize(
             "ui.squad.current_marker", "CURRENT SQUAD") : "");
-        jobCaption->setFontHeight(S(15));
+        SetFontPx(jobCaption, S(15));
         jobCaption->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Center);
         TagThemeAccentText(jobCaption);
         jobCaption->setNeedMouseFocus(false);

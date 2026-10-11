@@ -17,6 +17,7 @@
 #include <HoldKey.h>
 #include <IniDefaults.h>
 #include <GameTheme.h>
+#include <mygui/MyGUI_FontManager.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 

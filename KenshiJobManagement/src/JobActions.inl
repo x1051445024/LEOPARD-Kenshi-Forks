@@ -1340,11 +1340,12 @@
         if (g_tooltip == NULL)
         {
             g_tooltip = gui->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "Kenshi_FloatingPanelSkin",
                 MyGUI::IntCoord(0, 0, S(520), S(104)),
                 MyGUI::Align::Default,
                 "ToolTip",
                 "KJM_ToolTip");
+            g_tooltip->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
             TagThemeBackground(g_tooltip);
             g_tooltip->setNeedMouseFocus(false);
             g_tooltipText = g_tooltip->createWidget<MyGUI::TextBox>(
@@ -1360,7 +1361,7 @@
         // last line off at any scale above 1.
         if (g_tooltipText != NULL)
         {
-            g_tooltipText->setFontHeight(S(15));
+            SetFontPx(g_tooltipText, S(15));
         }
         const MyGUI::IntSize view =
             MyGUI::RenderManager::getInstance().getViewSize();
@@ -1663,11 +1664,12 @@
             const MyGUI::IntSize clientSize = modalClient->getSize();
             MyGUI::Widget* modalSurface =
                 modalClient->createWidget<MyGUI::Widget>(
-                    "WhiteSkin",
+                    "PanelEmpty",
                     MyGUI::IntCoord(
                         0, 0, clientSize.width, clientSize.height),
                     MyGUI::Align::Stretch,
                     "KJM_ModalClientSurface");
+                modalSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
             TagThemeSurface(modalSurface);
         }
         MyGUI::InputManager::getInstance().addWidgetModal(g_modal.window);
@@ -1750,7 +1752,7 @@
             "modal.message_log.help",
             "The 10 most recent non-empty timestamped messages from this game session (oldest to newest).");
         help->setCaption(helpCaption.c_str());
-        help->setFontHeight(S(15));
+        SetFontPx(help, S(15));
         help->setTextAlign(MyGUI::Align::Center);
         help->setNeedMouseFocus(false);
         TagThemeStandardText(help);
@@ -1851,10 +1853,11 @@
         }
 
         MyGUI::Widget* historySurface = scroll->createWidget<MyGUI::Widget>(
-            "WhiteSkin",
+            "Kenshi_GenericTextBoxFlatSkin",
             MyGUI::IntCoord(0, 0, canvasWidth, canvasHeight),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_MessageLogSurface");
+        historySurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeStatusFrame(historySurface);
         historySurface->setNeedMouseFocus(true);
         historySurface->eventMouseWheel +=
@@ -1866,7 +1869,7 @@
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_MessageLogText");
         history->setCaption(historyCaption.str().c_str());
-        history->setFontHeight(S(16));
+        SetFontPx(history, S(16));
         history->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Top);
         history->setNeedMouseFocus(false);
         TagThemeStandardText(history);
@@ -2060,7 +2063,7 @@
             MyGUI::IntCoord(S(16), S(8), clientSize.width - S(32), S(44)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_OptionsHelp");
-        help->setFontHeight(S(15));
+        SetFontPx(help, S(15));
         const std::string helpCaption = Localize(
             "modal.options.help",
             "Which station categories the Stations tab shows.\nChanges are saved and apply immediately.");
@@ -2116,13 +2119,19 @@
             MyGUI::Button* category = scroll->createWidget<MyGUI::Button>(
                 "Kenshi_TickButton1",
                 MyGUI::IntCoord(
-                    x, y, columnWidth, S(34)),
+                    x, y + (S(34) - 26) / 2, columnWidth, 26),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationCategoryOption");
             const std::string categoryCaption = Localize(
                 definition.localizationKey, definition.name);
             SetFittedButtonCaption(
                 category, categoryCaption, 15, 10, 20);
+            // The skin's lamp stretches with the height: native 26 px tall,
+            // so the caption font stays at most the 20 px game font.
+            if (category->getFontHeight() > 20)
+            {
+                SetFontPx(category, 20);
+            }
             category->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnStationCategoryOptionClicked);
             category->eventMouseWheel +=
@@ -2136,10 +2145,11 @@
         scroll->setCanvasSize(
             canvasWidth, S(46) + 5 * S(40) + S(8));
         MyGUI::Widget* optionsSurface = scroll->createWidget<MyGUI::Widget>(
-            "WhiteSkin",
+            "PanelEmpty",
             MyGUI::IntCoord(0, 0, canvasWidth, S(46) + 5 * S(40) + S(8)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_OptionsSurface");
+        optionsSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(optionsSurface);
 
         MyGUI::Button* reset = client->createWidget<MyGUI::Button>(

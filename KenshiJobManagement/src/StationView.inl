@@ -707,7 +707,7 @@
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationCategoryHeader");
         SetStationGroupHeaderCaption(header, group);
-        header->setFontHeight(S(16));
+        SetFontPx(header, S(16));
         header->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         header->setUserString(
             "KJM_StationCategory", StationIntegerString(group.category));
@@ -731,27 +731,25 @@
         const int maxWidth = STATION_GRID_CARD_WIDTH - S(20);
         const int maxHeight = S(42);
         text->setCaption(caption);
-        text->setFontHeight(S(24));
-        while (text->getFontHeight() > S(17) &&
-            text->getTextSize().width > maxWidth)
+        SetFontPx(text, S(24));
+        while (text->getTextSize().width > maxWidth &&
+            StepFontDown(text, S(17)))
         {
-            text->setFontHeight(text->getFontHeight() - 1);
         }
         if (text->getTextSize().width <= maxWidth)
         {
             return;
         }
-        text->setFontHeight(S(17));
+        SetFontPx(text, S(17));
         const int perChar = std::max(1, text->getTextSize().width /
             std::max<int>(1, static_cast<int>(LocalizationTextColumns(MyGUI::UString(caption)))));
         const std::string wrapped = WrapUtf8Text(
             caption, static_cast<size_t>(std::max(6, maxWidth / perChar)), NULL);
         text->setCaption(wrapped);
-        while (text->getFontHeight() > S(13) &&
-            (text->getTextSize().width > maxWidth ||
-             text->getTextSize().height > maxHeight))
+        while ((text->getTextSize().width > maxWidth ||
+             text->getTextSize().height > maxHeight) &&
+            StepFontDown(text, S(13)))
         {
-            text->setFontHeight(text->getFontHeight() - 1);
         }
     }
 
@@ -776,7 +774,7 @@
             assignment->setCaption(count.str());
             TagThemeSuccessText(assignment);
         }
-        assignment->setFontHeight(S(30));
+        SetFontPx(assignment, S(30));
         assignment->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         assignment->setNeedMouseFocus(false);
         assignment->setNeedKeyFocus(false);
@@ -883,12 +881,11 @@
         initialFontHeight = S(initialFontHeight);
         minimumFontHeight = S(std::max(minimumFontHeight, 13));
         text->setCaption(caption);
-        text->setFontHeight(initialFontHeight);
-        while (text->getFontHeight() > minimumFontHeight &&
-            (text->getTextSize().width > text->getWidth() - S(4) ||
-             text->getTextSize().height > text->getHeight()))
+        SetFontPx(text, initialFontHeight);
+        while ((text->getTextSize().width > text->getWidth() - S(4) ||
+             text->getTextSize().height > text->getHeight()) &&
+            StepFontDown(text, minimumFontHeight))
         {
-            text->setFontHeight(text->getFontHeight() - 1);
         }
     }
 
@@ -931,12 +928,13 @@
         // button atlas is dark and cannot be lightened reliably by tinting;
         // this child preserves the button hitbox and callback state.
         MyGUI::Widget* cardSurface = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin",
+            "Kenshi_GenericTextBoxFlatSkin",
             MyGUI::IntCoord(
                 S(3), S(3), STATION_GRID_CARD_WIDTH - S(6),
                 STATION_GRID_CARD_HEIGHT - S(6)),
             MyGUI::Align::Stretch,
             "KJM_StationCardSurface");
+        cardSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(cardSurface);
 
         const int iconSize = STATION_GRID_CARD_HEIGHT;
@@ -1580,13 +1578,14 @@
         row->setCaption("");
         TagThemeButtonText(row);
         MyGUI::Widget* rowSurface = row->createWidget<MyGUI::Widget>(
-            "WhiteSkin",
+            "Kenshi_GenericTextBoxFlatSkin",
             MyGUI::IntCoord(S(2), S(2),
                 std::max(1, row->getWidth() - S(4)),
                 std::max(1, row->getHeight() - S(4))),
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonSurface" :
                 "KJM_StationAssignedPersonSurface");
+        rowSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(rowSurface);
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
@@ -1790,7 +1789,7 @@
                         g_stationView.detailCanvas->getWidth() - S(16),
                         S(35)), MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAssignedPeople");
-            empty->setFontHeight(S(16));
+            SetFontPx(empty, S(16));
             empty->setCaption(Localize(
                 "station.detail.unassigned", "UNASSIGNED"));
             TagThemeAccentText(empty);
@@ -1831,7 +1830,7 @@
                         S(52)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationAssignmentUnsupported");
-            unsupported->setFontHeight(S(15));
+            SetFontPx(unsupported, S(15));
             unsupported->setCaption(Localize(
                 "station.detail.assignment_unsupported",
                 "This station does not expose a verified permanent-job mapping."));
@@ -1851,7 +1850,7 @@
                         S(34)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAddCandidates");
-            none->setFontHeight(S(15));
+            SetFontPx(none, S(15));
             none->setCaption(Localize(
                 "station.detail.no_candidates",
                 "No loaded readable unassigned characters."));
@@ -1973,10 +1972,11 @@
         // as the first child so every detail control renders above it.
         MyGUI::Widget* modalBackground =
             g_stationView.modalPanel->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "Kenshi_FloatingPanelSkin",
                 MyGUI::IntCoord(S(4), S(4), panelWidth - S(8), panelHeight - S(8)),
                 MyGUI::Align::Stretch,
                 "KJM_StationDetailBackground");
+            modalBackground->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeBackground(modalBackground);
         modalBackground->setAlpha(1.0f);
         modalBackground->setDepth(100);
@@ -1989,12 +1989,11 @@
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailTitle");
         title->setCaption(station->name);
-        title->setFontHeight(S(23));
+        SetFontPx(title, S(23));
         TagThemeStandardText(title);
-        while (title->getFontHeight() > 15 &&
-            title->getTextSize().width > panelWidth - 70)
+        while (title->getTextSize().width > panelWidth - S(70) &&
+            StepFontDown(title))
         {
-            title->setFontHeight(title->getFontHeight() - 1);
         }
         title->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         AttachStationTooltip(title, station->name);
@@ -2014,7 +2013,7 @@
                 MyGUI::IntCoord(S(14), S(43), panelWidth - S(28), S(66)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailSummary");
-        summary->setFontHeight(S(15));
+        SetFontPx(summary, S(15));
         TagThemeStandardText(summary);
         const std::string relevantSkill =
             station->relevantSkillName.empty() ?
@@ -2054,7 +2053,7 @@
                 "Assignment: Not supported for this station");
         }
         summary->setCaption(summaryCaption);
-        summary->setFontHeight(S(14));
+        SetFontPx(summary, S(14));
         AttachStationTooltip(summary, summaryCaption);
 
         const int listTop = S(114);
@@ -2081,7 +2080,7 @@
                     detailHeaderHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAssignedHeader");
-        g_stationView.detailAssignedHeader->setFontHeight(S(17));
+        SetFontPx(g_stationView.detailAssignedHeader, S(17));
         g_stationView.detailAssignedHeader->setTextAlign(
             MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(g_stationView.detailAssignedHeader);
@@ -2096,7 +2095,7 @@
                     detailHeaderHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAvailableHeader");
-        g_stationView.detailAvailableHeader->setFontHeight(S(17));
+        SetFontPx(g_stationView.detailAvailableHeader, S(17));
         g_stationView.detailAvailableHeader->setTextAlign(
             MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(g_stationView.detailAvailableHeader);
@@ -2183,7 +2182,7 @@
                 "KJM_StationDetailStatus");
         g_stationView.detailStatus->setTextAlign(
             MyGUI::Align::Center | MyGUI::Align::VCenter);
-        g_stationView.detailStatus->setFontHeight(S(13));
+        SetFontPx(g_stationView.detailStatus, S(13));
         TagThemeAccentText(g_stationView.detailStatus);
         g_stationView.detailStatus->setNeedMouseFocus(false);
         g_stationView.detailStatusText.clear();
@@ -2493,7 +2492,7 @@
                 MyGUI::IntCoord(S(4), 0, bounds.width - S(8), S(28)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationScanBanner");
-        g_stationView.scanBanner->setFontHeight(S(16));
+        SetFontPx(g_stationView.scanBanner, S(16));
         g_stationView.scanBanner->setTextAlign(MyGUI::Align::Center);
         TagThemeSuccessText(g_stationView.scanBanner);
         g_stationView.scanBanner->eventToolTip +=

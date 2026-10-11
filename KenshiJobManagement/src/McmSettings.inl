@@ -40,6 +40,181 @@
             g_uiScale = 3.0f;
         }
     }
+    // The game's own fonts at their own sizes. Stretching one font with
+    // setFontHeight beyond its size crumples the glyphs (user, 12.10.2026),
+    // so a size request picks the largest game font not above it, and
+    // fitting steps down one font at a time. Sizes come from the fonts
+    // actually loaded: a translation can replace them (the Russian build's
+    // painted fonts are 25/28/35, vanilla 20/25/28).
+    //
+    // Two ladders, like the game itself: plain text - StandardFont; button
+    // captions - the game's painted button font, falling back to
+    // StandardFont when a caption does not fit a small button.
+    struct KjmFont
+    {
+        const char* name;
+        int px;
+    };
+
+    KjmFont g_textLadder[] =
+    {
+        { "Kenshi_StandardFont_Small", 14 },
+        { "Kenshi_StandardFont_MediumSmall", 16 },
+        { "Kenshi_StandardFont_Medium", 20 },
+        { "Kenshi_StandardFont_Large", 24 }
+    };
+    KjmFont g_buttonLadder[] =
+    {
+        { "Kenshi_StandardFont_Small", 14 },
+        { "Kenshi_StandardFont_MediumSmall", 16 },
+        { "Kenshi_StandardFont_Medium", 20 },
+        { "Kenshi_PaintedTextFont_Small", 20 },
+        { "Kenshi_PaintedTextFont_Medium", 25 },
+        { "Kenshi_PaintedTextFont_Large", 28 }
+    };
+    const int KJM_TEXT_FONTS = sizeof(g_textLadder) / sizeof(g_textLadder[0]);
+    const int KJM_BUTTON_FONTS = sizeof(g_buttonLadder) / sizeof(g_buttonLadder[0]);
+    bool g_fontSizesKnown = false;
+
+    void SortLadder(KjmFont* ladder, int count)
+    {
+        // insertion sort by size; equal sizes keep their order (standard
+        // before painted - the painted one wins a tie in FontIndexForPx)
+        for (int i = 1; i < count; ++i)
+        {
+            const KjmFont item = ladder[i];
+            int j = i - 1;
+            while (j >= 0 && ladder[j].px > item.px)
+            {
+                ladder[j + 1] = ladder[j];
+                --j;
+            }
+            ladder[j + 1] = item;
+        }
+    }
+
+    void LoadFontSizes(KjmFont* ladder, int count)
+    {
+        MyGUI::FontManager* const fonts = MyGUI::FontManager::getInstancePtr();
+        for (int i = 0; fonts != NULL && i < count; ++i)
+        {
+            MyGUI::IFont* const font = fonts->getByName(ladder[i].name);
+            if (font != NULL && font->getDefaultHeight() > 0)
+            {
+                ladder[i].px = font->getDefaultHeight();
+            }
+        }
+        SortLadder(ladder, count);
+    }
+
+    void EnsureFontSizes()
+    {
+        if (g_fontSizesKnown || MyGUI::FontManager::getInstancePtr() == NULL)
+        {
+            return;
+        }
+        g_fontSizesKnown = true;
+        LoadFontSizes(g_textLadder, KJM_TEXT_FONTS);
+        LoadFontSizes(g_buttonLadder, KJM_BUTTON_FONTS);
+    }
+
+    void LadderFor(MyGUI::TextBox* text, KjmFont** ladder, int* count)
+    {
+        EnsureFontSizes();
+        if (text != NULL && text->castType<MyGUI::Button>(false) != NULL)
+        {
+            *ladder = g_buttonLadder;
+            *count = KJM_BUTTON_FONTS;
+        }
+        else
+        {
+            *ladder = g_textLadder;
+            *count = KJM_TEXT_FONTS;
+        }
+    }
+
+    int FontIndexForPx(const KjmFont* ladder, int count, int px)
+    {
+        int best = 0;
+        for (int i = 0; i < count; ++i)
+        {
+            if (ladder[i].px <= px)
+            {
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    int FontIndexOf(MyGUI::TextBox* text, const KjmFont* ladder, int count)
+    {
+        const std::string& name = text->getFontName();
+        for (int i = 0; i < count; ++i)
+        {
+            if (name == ladder[i].name)
+            {
+                return i;
+            }
+        }
+        return FontIndexForPx(ladder, count, text->getFontHeight());
+    }
+
+    void SetFontIndex(MyGUI::TextBox* text, const KjmFont* ladder, int count, int index)
+    {
+        index = index < 0 ? 0 : (index >= count ? count - 1 : index);
+        if (text->getFontName() != ladder[index].name)
+        {
+            text->setFontName(ladder[index].name);
+        }
+        text->setFontHeight(ladder[index].px);
+    }
+
+    // A size request (already scaled with S()) -> the matching game font.
+    void SetFontPx(MyGUI::TextBox* text, int px)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        KjmFont* ladder = NULL;
+        int count = 0;
+        LadderFor(text, &ladder, &count);
+        SetFontIndex(text, ladder, count, FontIndexForPx(ladder, count, px));
+    }
+
+    // One game font smaller; false when already the smallest allowed
+    // (minPx - the smallest size the caller accepts, scaled).
+    bool StepFontDown(MyGUI::TextBox* text, int minPx = 0)
+    {
+        if (text == NULL)
+        {
+            return false;
+        }
+        KjmFont* ladder = NULL;
+        int count = 0;
+        LadderFor(text, &ladder, &count);
+        const int index = FontIndexOf(text, ladder, count);
+        const int minIndex = minPx > 0 ? FontIndexForPx(ladder, count, minPx) : 0;
+        if (index <= 0 || index - 1 < minIndex)
+        {
+            return false;
+        }
+        SetFontIndex(text, ladder, count, index - 1);
+        return true;
+    }
+
+    void StepFontUp(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        KjmFont* ladder = NULL;
+        int count = 0;
+        LadderFor(text, &ladder, &count);
+        SetFontIndex(text, ladder, count, FontIndexOf(text, ladder, count) + 1);
+    }
+
     HoldKey::Key g_hotkey;               // opens / closes the manager
     std::string g_hotkeyText = "CTRL+J";
 

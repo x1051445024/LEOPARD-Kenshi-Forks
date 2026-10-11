@@ -496,6 +496,9 @@
 
     void TagThemeScrollBar(MyGUI::ScrollBar* scrollBar)
     {
+        // LEOPARD: scroll bars keep the game's own skin and colours.
+        (void)scrollBar;
+        return;
         if (scrollBar == NULL)
         {
             return;
@@ -565,6 +568,11 @@
         {
             return;
         }
+        if (widget->isUserString("KJM_Native"))
+        {
+            widget->setColour(MyGUI::Colour::White);   // game skin as it is
+            return;
+        }
         widget->setColour(GetThemePalette().background);
     }
 
@@ -572,6 +580,11 @@
     {
         if (widget == NULL)
         {
+            return;
+        }
+        if (widget->isUserString("KJM_Native"))
+        {
+            widget->setColour(MyGUI::Colour::White);   // game skin as it is
             return;
         }
         widget->setColour(GetThemePalette().statusFrame);

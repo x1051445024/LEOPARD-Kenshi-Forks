@@ -591,20 +591,16 @@
                 MyGUI::newDelegate(OnWindowButtonPressed);
 
             MyGUI::Widget* client = g_window->getClientWidget();
-            // Kenshi_WindowCX places Client inside an opaque native window
-            // body. Hide that body and draw a predictable custom backdrop.
-            MyGUI::Widget* nativeBody = client != NULL ? client->getParent() : NULL;
-            if (nativeBody != NULL && nativeBody != g_window)
-            {
-                client->setInheritsAlpha(false);
-                nativeBody->setAlpha(0.0f);
-            }
+            // LEOPARD: the native window body stays visible - the manager looks
+            // like the game's own windows (vanilla or an interface mod); the
+            // original hid it and painted its own brown backdrop.
             const MyGUI::IntSize size = client->getSize();
             g_background = client->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "PanelEmpty",
                 MyGUI::IntCoord(0, 0, size.width, size.height),
                 MyGUI::Align::Stretch,
                 "KJM_Background");
+            g_background->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
             TagThemeBackground(g_background);
             // Keep the manager fully opaque. The game world showing through
             // reduced contrast for portraits, station art, and small labels.
@@ -649,7 +645,7 @@
                 MyGUI::IntCoord(PAD, PAD + TOP_HEIGHT, g_memberWidth, HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_MemberHeader");
-            memberHeader->setFontHeight(S(16));
+            SetFontPx(memberHeader, S(16));
             memberHeader->setCaption(Localize(
                 "ui.squad.member_stats_header",
                 "SQUAD MEMBER  |  TOP STATS"));
@@ -778,7 +774,7 @@
             // button itself is intentionally compact: "Add" followed by the
             // existing Medic and Robotics artwork.
             g_addHealingJobsButton->setCaption("");
-            g_addHealingJobsButton->setFontHeight(S(14));
+            SetFontPx(g_addHealingJobsButton, S(14));
             g_addHealingJobsButton->setTextAlign(
                 MyGUI::Align::Left | MyGUI::Align::VCenter);
             g_addHealingJobsButton->setEnabled(false);
@@ -871,12 +867,13 @@
                  MyGUI::Align::HStretch) :
                 (MyGUI::Align::Bottom | MyGUI::Align::HStretch);
             g_statusFrame = client->createWidget<MyGUI::Widget>(
-                "WhiteSkin",
+                "Kenshi_GenericTextBoxFlatSkin",
                 MyGUI::IntCoord(
                     statusWidgetLeft, statusTop,
                     statusWidgetWidth, statusHeight),
                 statusAlign,
                 "KJM_StatusFrame");
+            g_statusFrame->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
             TagThemeStatusFrame(g_statusFrame);
             g_statusFrame->setNeedMouseFocus(true);
             g_statusFrame->eventMouseButtonClick +=
@@ -891,7 +888,7 @@
                 statusAlign,
                 "KJM_Status");
             g_statusText->setCaption("");
-            g_statusText->setFontHeight(narrowActionBar ? S(11) : S(13));
+            SetFontPx(g_statusText, narrowActionBar ? S(11) : S(13));
             g_statusText->setTextAlign(
                 MyGUI::Align::Left | MyGUI::Align::Top);
             g_statusText->setNeedMouseFocus(true);
@@ -1016,7 +1013,14 @@
                         "KJM_AddHealingLabel");
                 addLabel->setCaption(Localize(
                     "ui.action.add_short", "Add"));
-                addLabel->setFontHeight(S(15));
+                SetFontPx(addLabel, S(15));
+                // LEOPARD: the same font as the neighbouring action buttons
+                // (the label is a TextBox, it would get the plain text font).
+                if (g_removeButton != NULL)
+                {
+                    addLabel->setFontName(g_removeButton->getFontName());
+                    addLabel->setFontHeight(g_removeButton->getFontHeight());
+                }
                 addLabel->setTextAlign(MyGUI::Align::Center);
                 addLabel->setNeedMouseFocus(false);
                 TagThemeButtonCaptionText(addLabel);
@@ -1040,7 +1044,7 @@
                         MyGUI::Align::Left | MyGUI::Align::VCenter,
                         "KJM_AddHealingSeparator");
                 separator->setCaption("/");
-                separator->setFontHeight(S(16));
+                SetFontPx(separator, S(16));
                 separator->setTextAlign(MyGUI::Align::Center);
                 separator->setNeedMouseFocus(false);
                 TagThemeButtonCaptionText(separator);
