@@ -1,0 +1,1236 @@
+# Kenshi Job Management (LEOPARD fork) - ru_RU
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# batch.cleanup_stage.initial_capture
+msgid "initial malformed-row capture"
+msgstr "Сбор ошибочных строк"
+
+# batch.cleanup_stage.plan
+msgid "cleanup plan"
+msgstr "План очистки"
+
+# batch.cleanup_stage.queue_changed
+msgid "exact queue precheck"
+msgstr "Предварительная проверка точной очереди"
+
+# batch.cleanup_stage.raw_remove
+msgid "native exact-slot removal"
+msgstr "Удаление точного слота"
+
+# batch.cleanup_stage.rethink
+msgid "AI rethink"
+msgstr "Повторная оценка ИИ"
+
+# batch.cleanup_stage.unknown
+msgid "unspecified cleanup stage"
+msgstr "Неуказанный этап очистки"
+
+# batch.cleanup_stage.verify_erase
+msgid "immediate erase verification"
+msgstr "Немедленная проверка удаления"
+
+# batch.cleanup_stage.verify_rethink
+msgid "post-rethink queue verification"
+msgstr "Проверка очереди после повторной оценки ИИ"
+
+# batch.result.action_completed
+msgid "Job action completed."
+msgstr "Действие с задачами завершено."
+
+# batch.result.added_healing
+msgid "Added healing jobs: {count}."
+msgstr "Добавлены задачи лечения: {count}."
+
+# batch.result.appended
+msgid "Appended job bundles: {count}."
+msgstr "Добавлены пакеты задач: {count}."
+
+# batch.result.capture_failed
+msgid "A selected job queue could not be read safely. No further jobs were changed."
+msgstr "Не удалось безопасно прочитать выбранную очередь задач. Другие задачи не изменены."
+
+# batch.result.clipboard_empty
+msgid "Copy one or more jobs before pasting."
+msgstr "Скопируйте одну или несколько задач перед вставкой."
+
+# batch.result.completed_recipients
+msgid "Completed recipients before stopping: {count}."
+msgstr "Обработано получателей до остановки: {count}."
+
+# batch.result.destination_full
+msgid "A destination job queue is at the safety limit."
+msgstr "Очередь задач назначения достигла безопасного лимита."
+
+# batch.result.disabled
+msgid "This job action is disabled in the current build."
+msgstr "Это действие с задачами отключено в текущей сборке."
+
+# batch.result.duplicate
+msgid "The destination already has one of the selected jobs. No jobs were moved."
+msgstr "В назначении уже есть одна из выбранных задач. Задачи не перемещены."
+
+# batch.result.duplicate_remains
+msgid "The move stopped after destination copies were added. Review the affected job queues before another change."
+msgstr "Перемещение остановлено после добавления копий в назначение. Проверьте затронутые очереди задач перед следующим изменением."
+
+# batch.result.failed_bundle
+msgid "Failed bundle: {bundle}."
+msgstr "Сбой пакета: {bundle}."
+
+# batch.result.failed_member
+msgid "Member: {member}."
+msgstr "Участник: {member}."
+
+# batch.result.failure_stage
+msgid "Stage: {stage}."
+msgstr "Этап: {stage}."
+
+# batch.result.healing_rejected
+msgid "Kenshi rejected a permanent job. No further jobs were changed."
+msgstr "Kenshi отклонила постоянную задачу. Другие задачи не изменены."
+
+# batch.result.healing_rejected_role
+msgid "Kenshi rejected the {role} permanent job. No further jobs were changed."
+msgstr "Kenshi отклонила постоянную задачу \"{role}\". Другие задачи не изменены."
+
+# batch.result.invalid_cleanup_rethink_unverified
+msgid "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change."
+msgstr "Очистка недействительных задач сохранила точно подтверждённое удаление, но пересчёт ИИ или полученную очередь подтвердить не удалось. Проверьте затронутую очередь перед следующим изменением."
+
+# batch.result.invalid_cleanup_unverified
+msgid "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change."
+msgstr "Очистка недействительных задач остановлена после неподтверждённого удаления. Проверьте затронутую очередь перед следующим изменением."
+
+# batch.result.invalid_request
+msgid "The selected job action is no longer valid."
+msgstr "Выбранное действие с задачами больше недействительно."
+
+# batch.result.no_changes
+msgid "No jobs needed changes."
+msgstr "Изменения задач не требуются."
+
+# batch.result.no_rollback
+msgid "Verified earlier changes remain; no rollback was attempted."
+msgstr "Ранее подтверждённые изменения сохранены; откат не выполнялся."
+
+# batch.result.queue_changed
+msgid "A selected member or job queue changed before the action completed. Review the affected members and try again."
+msgstr "Выбранный участник или очередь задач изменились до завершения действия. Проверьте затронутых участников и повторите попытку."
+
+# batch.result.removed_invalid_rows
+msgid "Removed invalid job rows: {count}."
+msgstr "Удалены строки недействительных задач: {count}."
+
+# batch.result.removed_source_rows
+msgid "Removed source rows: {count}."
+msgstr "Удалены строки источника: {count}."
+
+# batch.result.reordered
+msgid "Reordered jobs: {count}."
+msgstr "Задачи переупорядочены: {count}."
+
+# batch.result.skipped_duplicates
+msgid "Skipped duplicate bundles: {count}."
+msgstr "Пропущены дубликаты пакетов: {count}."
+
+# batch.result.unverified
+msgid "The job action stopped after an unverified result. Review the affected job queues before another change."
+msgstr "Действие с задачами остановлено после неподтверждённого результата. Проверьте затронутые очереди задач перед следующим изменением."
+
+# condition.carried
+msgid "Carried"
+msgstr "Перенесён"
+
+# condition.dead
+msgid "Dead"
+msgstr "Мёртв"
+
+# condition.dying
+msgid "Dying"
+msgstr "Умирает"
+
+# condition.imprisoned
+msgid "Imprisoned"
+msgstr "В тюрьме"
+
+# condition.kidnapped
+msgid "Kidnapped"
+msgstr "Похищен"
+
+# condition.playing_dead
+msgid "Playing dead"
+msgstr "Притворяется мёртвым"
+
+# condition.unconscious
+msgid "Unconscious"
+msgstr "Без сознания"
+
+# fallback.member.unavailable
+msgid "Unavailable member"
+msgstr "Недоступный участник"
+
+# fallback.squad.unavailable
+msgid "Unavailable squad"
+msgstr "Недоступный отряд"
+
+# job.label.operating
+msgid "Operating..."
+msgstr "Работа с машиной..."
+
+# job.label.unknown_permanent
+msgid "Unknown permanent job"
+msgstr "Неизвестная постоянная задача"
+
+# job.role.engineering
+msgid "Engineering"
+msgstr "Инженерия"
+
+# job.role.medic
+msgid "Medic"
+msgstr "Медик"
+
+# job.role.other
+msgid "other jobs"
+msgstr "прочие задачи"
+
+# job.role.put_in_bed
+msgid "Find and Put in Bed"
+msgstr "Найти и уложить в постель"
+
+# job.role.rescue
+msgid "Find and Rescue"
+msgstr "Найти и спасти"
+
+# job.role.robotics
+msgid "Robotics"
+msgstr "Роботехника"
+
+# job.role.splinting
+msgid "Splinting"
+msgstr "Наложение шин"
+
+# member.condition.cached_unavailable
+msgid "Cached / unavailable"
+msgstr "Кэшировано / недоступно"
+
+# member.condition.cached_unloaded
+msgid "Cached / unloaded"
+msgstr "Кэшировано / не загружено"
+
+# member.condition.queue_limit
+msgid "Queue exceeds safety limit (read-only)"
+msgstr "Очередь превышает безопасный лимит (только чтение)"
+
+# member.label.unavailable_condition
+msgid "Unavailable"
+msgstr "Недоступен"
+
+# member.label.unnamed
+msgid "Unnamed squad member"
+msgstr "Безымянный член отряда"
+
+# member.queue.empty
+msgid "[No permanent jobs]"
+msgstr "[Нет постоянных задач]"
+
+# member.queue.unavailable_readonly
+msgid "Queue unavailable (read-only)"
+msgstr "Очередь недоступна (только чтение)"
+
+# member.stats.none_above_one
+msgid "No stats above 1"
+msgstr "Нет навыков выше 1"
+
+# member.stats.unavailable
+msgid "Stats unavailable"
+msgstr "Навыки недоступны"
+
+# modal.clear.prompt
+msgid "Are you sure you wish to remove all jobs?\n\nRemove all {count} permanent jobs from {member}?"
+msgstr "Вы уверены, что хотите удалить все задачи?\n\nУдалить постоянные задачи ({count}) у {member}?"
+
+# modal.clear.title
+msgid "Confirm Clear Queue"
+msgstr "Подтвердить очистку очереди"
+
+# modal.message_log.help
+msgid "The 10 most recent non-empty timestamped messages from this game session (oldest to newest)."
+msgstr "10 последних непустых сообщений с отметкой времени за эту игровую сессию (от старых к новым)."
+
+# modal.message_log.title
+msgid "Recent Job Manager Messages"
+msgstr "Последние сообщения управления задачами"
+
+# modal.options.help
+msgid "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately."
+msgstr "Оформление применяется ко всему управлению. Фильтры категорий станций действуют только на вкладке \"Станции\".\nИзменения сохраняются глобально и применяются сразу."
+
+# modal.options.title
+msgid "Job Manager Options"
+msgstr "Настройки управления задачами"
+
+# options.appearance.dark_ui
+msgid "Dark UI friendly font colors"
+msgstr "Цвета текста для тёмного интерфейса"
+
+# options.appearance.dark_ui.help
+msgid "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text."
+msgstr "Выкл.: тёплый ванильный фон, тёмный текст.\nВкл.: тёмный фон интерфейса, текущий светлый текст."
+
+# options.appearance.header
+msgid "APPEARANCE"
+msgstr "ОФОРМЛЕНИЕ"
+
+# options.stations.header
+msgid "STATION CATEGORY FILTERS"
+msgstr "ФИЛЬТРЫ КАТЕГОРИЙ СТАНЦИЙ"
+
+# skill.armour_smith
+msgid "Armour smith"
+msgstr "Ковка доспехов"
+
+# skill.assassination
+msgid "Assassination"
+msgstr "Убийство"
+
+# skill.athletics
+msgid "Athletics"
+msgstr "Атлетика"
+
+# skill.blunt
+msgid "Blunt"
+msgstr "Дробящее"
+
+# skill.cooking
+msgid "Cooking"
+msgstr "Готовка"
+
+# skill.crossbow_smith
+msgid "Crossbow smith"
+msgstr "Ковка арбалетов"
+
+# skill.crossbows
+msgid "Crossbows"
+msgstr "Арбалеты"
+
+# skill.dexterity
+msgid "Dexterity"
+msgstr "Ловкость"
+
+# skill.dodge
+msgid "Dodge"
+msgstr "Уворот"
+
+# skill.engineer
+msgid "Engineer"
+msgstr "Инженер"
+
+# skill.farming
+msgid "Farming"
+msgstr "Фермерство"
+
+# skill.field_medic
+msgid "Field medic"
+msgstr "Полевой медик"
+
+# skill.hackers
+msgid "Hackers"
+msgstr "Рубачи"
+
+# skill.heavy_weapons
+msgid "Heavy weapons"
+msgstr "Тяжёлое оружие"
+
+# skill.hive_medic
+msgid "Hive medic"
+msgstr "Медик улья"
+
+# skill.katanas
+msgid "Katanas"
+msgstr "Катаны"
+
+# skill.labouring
+msgid "Labouring"
+msgstr "Работа"
+
+# skill.lockpicking
+msgid "Lockpicking"
+msgstr "Взлом"
+
+# skill.martial_arts
+msgid "Martial arts"
+msgstr "Боевые искусства"
+
+# skill.mass_combat
+msgid "Mass combat"
+msgstr "Массовый бой"
+
+# skill.melee_attack
+msgid "Melee attack"
+msgstr "Атака"
+
+# skill.melee_defence
+msgid "Melee defence"
+msgstr "Защита"
+
+# skill.perception
+msgid "Perception"
+msgstr "Восприятие"
+
+# skill.polearms
+msgid "Polearms"
+msgstr "Древковое"
+
+# skill.precision_shooting
+msgid "Precision shooting"
+msgstr "Точная стрельба"
+
+# skill.sabres
+msgid "Sabres"
+msgstr "Сабли"
+
+# skill.science
+msgid "Science"
+msgstr "Наука"
+
+# skill.stealth
+msgid "Stealth"
+msgstr "Скрытность"
+
+# skill.strength
+msgid "Strength"
+msgstr "Сила"
+
+# skill.survival
+msgid "Survival"
+msgstr "Выживание"
+
+# skill.swimming
+msgid "Swimming"
+msgstr "Плавание"
+
+# skill.thievery
+msgid "Thievery"
+msgstr "Воровство"
+
+# skill.toughness
+msgid "Toughness"
+msgstr "Крепость"
+
+# skill.turrets
+msgid "Turrets"
+msgstr "Турели"
+
+# skill.veterinary
+msgid "Veterinary"
+msgstr "Ветеринария"
+
+# skill.weapon_smith
+msgid "Weapon smith"
+msgstr "Ковка оружия"
+
+# skill.weapons
+msgid "Weapons"
+msgstr "Оружие"
+
+# squad.placeholder.unnamed_selector
+msgid "Unnamed squad"
+msgstr "Безымянный отряд"
+
+# station.area.wilderness
+msgid "Wilderness"
+msgstr "Дикая местность"
+
+# station.banner.count
+msgid "{count} PLAYER STATIONS"
+msgstr "СТАНЦИИ ИГРОКА: {count}"
+
+# station.banner.fault
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE"
+msgstr "ЧАСТИЧНЫЙ СКАН - НЕКОТОРЫЕ ДАННЫЕ О СТАНЦИЯХ ИЛИ ОТРЯДАХ НЕДОСТУПНЫ"
+
+# station.banner.fault_failed
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE  |  {failed} target(s) failed"
+msgstr "ЧАСТИЧНЫЙ СКАН - НЕКОТОРЫЕ ДАННЫЕ О СТАНЦИЯХ ИЛИ ОТРЯДАХ НЕДОСТУПНЫ | НЕУДАЧНЫЕ ЦЕЛИ: {failed}"
+
+# station.banner.partial
+msgid "PARTIAL SCAN - RESULTS INCOMPLETE  |  {completed} of {candidate} candidates read  |  {failed} target(s) failed"
+msgstr "ЧАСТИЧНЫЙ СКАН - РЕЗУЛЬТАТЫ НЕПОЛНЫ | ПРОЧИТАНО КАНДИДАТОВ: {completed}/{candidate} | НЕУДАЧНЫЕ ЦЕЛИ: {failed}"
+
+# station.banner.truncated
+msgid "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE  |  {failed} target(s) failed"
+msgstr "СПИСОК СТАНЦИЙ ИГРОКА ОБРЕЗАН НА 2,048 - РЕЗУЛЬТАТЫ НЕПОЛНЫ | НЕУДАЧНЫЕ ЦЕЛИ: {failed}"
+
+# station.category.crafting
+msgid "Crafting"
+msgstr "Ремесло"
+
+# station.category.defense
+msgid "Defense"
+msgstr "Оборона"
+
+# station.category.mining
+msgid "Mining"
+msgstr "Шахтёрство"
+
+# station.category.other
+msgid "Other / Unclassified"
+msgstr "Прочее / Не классифицировано"
+
+# station.category.refining
+msgid "Refining"
+msgstr "Переработка"
+
+# station.category.research
+msgid "Research"
+msgstr "Изучение"
+
+# station.category.storage_hauling
+msgid "Storage / Hauling"
+msgstr "Хранение / Переноска"
+
+# station.category.training
+msgid "Training"
+msgstr "Тренировка"
+
+# station.detail.assigned_header
+msgid "ASSIGNED WORKERS ({count})"
+msgstr "НАЗНАЧЕННЫЕ РАБОТНИКИ ({count})"
+
+# station.detail.assignment_unsupported
+msgid "This station does not expose a verified permanent-job mapping."
+msgstr "Эта станция не предоставляет подтверждённого сопоставления постоянной задачи."
+
+# station.detail.available_header
+msgid "AVAILABLE WORKERS ({count})"
+msgstr "ДОСТУПНЫЕ РАБОТНИКИ ({count})"
+
+# station.detail.no_candidates
+msgid "No loaded readable unassigned characters."
+msgstr "Нет загруженных доступных неназначенных персонажей."
+
+# station.detail.summary
+msgid "{category}  |  Relevant skill: {skill}"
+msgstr "{category}  |  Подходящий навык: {skill}"
+
+# station.detail.unassigned
+msgid "UNASSIGNED"
+msgstr "НЕ НАЗНАЧЕНЫ"
+
+# station.empty.filtered
+msgid "No stations match the current category filters."
+msgstr "Нет станций, соответствующих текущим фильтрам категорий."
+
+# station.empty.partial
+msgid "Partial scan in progress. No matching stations are available yet."
+msgstr "Выполняется частичный скан. Подходящие станции пока недоступны."
+
+# station.group.header.many
+msgid "{category}  |  {count} stations  |  {unassigned} unassigned"
+msgstr "{category}  |  Станции: {count}  |  Не назначены: {unassigned}"
+
+# station.group.header.one
+msgid "{category}  |  {count} station  |  {unassigned} unassigned"
+msgstr "{category}  |  Станция: {count}  |  Не назначена: {unassigned}"
+
+# station.name.unnamed_assigned_target
+msgid "Unnamed assigned target"
+msgstr "Безымянная назначенная цель"
+
+# station.name.unnamed_player_station
+msgid "Unnamed player station"
+msgstr "Безымянная станция игрока"
+
+# station.person.assigned_tooltip
+msgid "{caption}\n\nRight-click to request removal from this station."
+msgstr "{caption}\n\nЩёлкните правой кнопкой, чтобы запросить снятие с этой станции."
+
+# station.person.available_tooltip
+msgid "{caption}\n\nClick or press Enter to request assignment. Scrolling never assigns."
+msgstr "{caption}\n\nЩёлкните или нажмите Enter, чтобы запросить назначение. Прокрутка не назначает."
+
+# station.person.caption.many
+msgid "{name}  |  {skill}  |  {jobs} total jobs"
+msgstr "{name}  |  {skill}  |  Всего задач: {jobs}"
+
+# station.person.caption.one
+msgid "{name}  |  {skill}  |  {jobs} total job"
+msgstr "{name}  |  {skill}  |  Всего задач: {jobs}"
+
+# station.person.unknown
+msgid "Unknown person"
+msgstr "Неизвестный человек"
+
+# station.skill.none
+msgid "None"
+msgstr "Нет"
+
+# station.skill.unknown
+msgid "Unknown"
+msgstr "Неизвестно"
+
+# station.status.broken
+msgid "BROKEN"
+msgstr "СЛОМАНА"
+
+# station.status.cannot_work
+msgid "CANNOT WORK"
+msgstr "НЕ МОЖЕТ РАБОТАТЬ"
+
+# station.status.category_save_failed
+msgid "The category was changed, but settings.ini could not be saved."
+msgstr "Категория изменена, но settings.ini сохранить не удалось."
+
+# station.status.destroyed
+msgid "Destroyed"
+msgstr "УНИЧТОЖЕНА"
+
+# station.status.disabled
+msgid "DISABLED"
+msgstr "ОТКЛЮЧЕНА"
+
+# station.status.dismantling
+msgid "DISMANTLING"
+msgstr "РАЗБИРАЕТСЯ"
+
+# station.status.incomplete
+msgid "INCOMPLETE"
+msgstr "НЕПОЛНАЯ"
+
+# station.status.no_power
+msgid "NO POWER"
+msgstr "НЕТ ПИТАНИЯ"
+
+# station.status.power_off
+msgid "POWER OFF"
+msgstr "ПИТАНИЕ ОТКЛЮЧЕНО"
+
+# station.tooltip.area
+msgid "Area: {value}"
+msgstr "Область: {value}"
+
+# station.tooltip.assignment_unsupported
+msgid "Assignment: Not supported for this station"
+msgstr "Назначение: Для этой станции не поддерживается"
+
+# station.tooltip.cannot_work
+msgid "Cannot work: {value}"
+msgstr "Не может работать: {value}"
+
+# station.tooltip.category
+msgid "Category: {value}"
+msgstr "Категория: {value}"
+
+# station.tooltip.relevant_skill
+msgid "Relevant skill: {value}"
+msgstr "Подходящий навык: {value}"
+
+# station.tooltip.work_status_unavailable
+msgid "Work status: Unavailable"
+msgstr "Статус работы: Недоступен"
+
+# status.batch.adding_healing_jobs
+msgid "Adding and prioritizing healing jobs..."
+msgstr "Добавление и расстановка задач лечения..."
+
+# status.batch.applying_healing_priorities
+msgid "Applying healing priorities..."
+msgstr "Применение приоритетов лечения..."
+
+# status.batch.healing_jobs_updated
+msgid "Healing jobs updated."
+msgstr "Задачи лечения обновлены."
+
+# status.batch.healing_priorities_updated
+msgid "Healing priorities updated."
+msgstr "Приоритеты лечения обновлены."
+
+# status.batch.invalid_cleanup_completed
+msgid "Invalid-job cleanup completed."
+msgstr "Очистка недействительных задач завершена."
+
+# status.batch.jobs_moved
+msgid "Jobs moved."
+msgstr "Задачи перемещены."
+
+# status.batch.jobs_pasted
+msgid "Jobs pasted."
+msgstr "Задачи вставлены."
+
+# status.batch.no_removable_invalid
+msgid "No removable invalid jobs were found."
+msgstr "Удаляемых недействительных задач не найдено."
+
+# status.batch.removing_invalid_jobs
+msgid "Removing invalid fixed-target jobs..."
+msgstr "Удаление недействительных задач с фиксированной целью..."
+
+# status.clear.queue_changed
+msgid "The queue changed after confirmation. Clear Queue was cancelled."
+msgstr "Очередь изменилась после подтверждения. Очистка очереди отменена."
+
+# status.clear.rejected
+msgid "Kenshi rejected Clear Queue. No jobs were changed."
+msgstr "Kenshi отклонила очистку очереди. Задачи не изменены."
+
+# status.clear.success
+msgid "All permanent jobs were removed from {member}."
+msgstr "Все постоянные задачи у {member} удалены."
+
+# status.clipboard.cleared_suffix
+msgid " Clipboard cleared."
+msgstr " Буфер обмена очищен."
+
+# status.clipboard.copy_success
+msgid "Copied jobs: {count}. Select recipients, then press Ctrl+V."
+msgstr "Скопировано задач: {count}. Выберите получателей и нажмите Ctrl+V."
+
+# status.clipboard.jobs_copied
+msgid "Jobs copied."
+msgstr "Задачи скопированы."
+
+# status.clipboard.select_jobs
+msgid "Select one or more jobs before copying."
+msgstr "Выберите одну или несколько задач для копирования."
+
+# status.clipboard.select_recipient
+msgid "Select at least one recipient before pasting."
+msgstr "Выберите хотя бы одного получателя для вставки."
+
+# status.drag.queue_changed
+msgid "The queue changed during the drag. Review it and try again."
+msgstr "Очередь изменилась во время перетаскивания. Проверьте её и повторите попытку."
+
+# status.drag.squad_or_queue_changed
+msgid "A squad or queue changed during the drag. Review it and try again."
+msgstr "Отряд или очередь изменились во время перетаскивания. Проверьте их и повторите попытку."
+
+# status.jobs.disabled
+msgid "Jobs disabled for this member."
+msgstr "Задачи для этого участника отключены."
+
+# status.jobs.enabled
+msgid "Jobs enabled for this member."
+msgstr "Задачи для этого участника включены."
+
+# status.jobs.priority_updated
+msgid "Permanent-job priority updated."
+msgstr "Приоритет постоянной задачи обновлён."
+
+# status.jobs.reorder_rejected
+msgid "Kenshi rejected the queue reorder. No other jobs were changed."
+msgstr "Kenshi отклонила изменение порядка очереди. Другие задачи не изменены."
+
+# status.jobs.toggle_rejected
+msgid "Kenshi rejected the Jobs toggle. No jobs were changed."
+msgstr "Kenshi отклонила переключение задач. Задачи не изменены."
+
+# status.member.queue_unavailable
+msgid "The member queue is unavailable. No jobs were changed."
+msgstr "Очередь участника недоступна. Задачи не изменены."
+
+# status.message_log.empty
+msgid "No recent messages in this session."
+msgstr "В этой сессии нет новых сообщений."
+
+# status.move.invalid_destination
+msgid "Move cancelled: choose a member that does not own any selected source job."
+msgstr "Перемещение отменено: выберите участника, которому не принадлежит ни одна выбранная исходная задача."
+
+# status.priority.applied
+msgid "Priority order applied to {count} squad members."
+msgstr "Порядок приоритетов применён к участникам отряда: {count}."
+
+# status.priority.interrupted
+msgid "Priority update interrupted."
+msgstr "Обновление приоритетов прервано."
+
+# status.priority.move_rejected
+msgid "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed."
+msgstr "Kenshi отклонила или прервала изменение приоритета постоянной задачи; другие участники не изменены."
+
+# status.priority.move_unverified
+msgid "A priority move could not be verified; no further members were changed."
+msgstr "Изменение приоритета не удалось подтвердить; другие участники не изменены."
+
+# status.priority.no_changes
+msgid "No rescue, medical, robotics, splinting, or engineering jobs needed reordering."
+msgstr "Задачи спасения, лечения, робототехники, наложения шин или инженерии не требовали изменения порядка."
+
+# status.priority.queue_changed
+msgid "The permanent-job queue changed while priorities were being applied."
+msgstr "Очередь постоянных задач изменилась во время применения приоритетов."
+
+# status.priority.queue_prepare_failed
+msgid "A permanent-job queue could not be prepared for priority changes."
+msgstr "Не удалось подготовить очередь постоянных задач для изменения приоритетов."
+
+# status.priority.roster_limit
+msgid "The selected squad roster exceeds the safe batch limit. No priorities were changed."
+msgstr "Отряд превышает безопасный лимит. Приоритеты не изменены."
+
+# status.priority.skipped
+msgid "Skipped unavailable or unreadable members: {count}."
+msgstr "Пропущено недоступных или нечитаемых участников: {count}."
+
+# status.priority.snapshot_failed
+msgid "Priority update stopped because its snapshot could not be allocated."
+msgstr "Обновление приоритетов остановлено: не удалось создать снимок."
+
+# status.priority.squad_changed
+msgid "Squad membership changed while priorities were being applied."
+msgstr "Состав отряда изменился во время применения приоритетов."
+
+# status.priority.squad_changed_verification
+msgid "The squad changed while verifying a priority move."
+msgstr "Отряд изменился во время проверки изменения приоритета."
+
+# status.priority.squad_or_queue_changed
+msgid "The squad or permanent-job queue changed before a priority move."
+msgstr "Отряд или очередь постоянных задач изменились перед изменением приоритета."
+
+# status.priority.squad_unavailable
+msgid "The selected squad is no longer current or available."
+msgstr "Выбранный отряд больше не является текущим или недоступен."
+
+# status.queue.readonly
+msgid "The source or destination queue is read-only. No jobs were changed."
+msgstr "Исходная или целевая очередь доступна только для чтения. Задачи не изменены."
+
+# status.remove_selected.candidate
+msgid "{member} / {job}"
+msgstr "{member} / {job}"
+
+# status.remove_selected.candidate_with_priority
+msgid "{member} / {job} / Priority {priority}"
+msgstr "{member} / {job} / Приоритет {priority}"
+
+# status.remove_selected.interrupted
+msgid "Deletion queue interrupted. Completed removals: {completed}. Failed: {failed}. Remaining selected jobs: {remaining}. Review and try again."
+msgstr "Удаление прервано. Завершено удалений: {completed}. Сбой: {failed}. Осталось выбранных задач: {remaining}. Проверьте их и повторите попытку."
+
+# status.remove_selected.success
+msgid "Removed permanent jobs: {count}."
+msgstr "Удалено постоянных задач: {count}."
+
+# status.selection.no_recipient
+msgid "Select at least one recipient first."
+msgstr "Сначала выберите хотя бы одного получателя."
+
+# status.selector.selected_jobs_unavailable
+msgid "Kenshi selected the squad, but its jobs are temporarily unavailable."
+msgstr "Kenshi выбрала отряд, но его задачи временно недоступны."
+
+# status.selector.selection_cancelled_busy
+msgid "Squad selection was cancelled because another manager action is active."
+msgstr "Выбор отряда отменён: выполняется другое действие управления."
+
+# status.selector.squad_gone
+msgid "That squad is no longer available. The current squad was not changed."
+msgstr "Этот отряд больше недоступен. Текущий отряд не изменён."
+
+# status.selector.squad_jobs_unavailable
+msgid "That squad has unavailable job data and cannot be selected yet."
+msgstr "Данные задач этого отряда недоступны, поэтому выбрать его пока нельзя."
+
+# status.selector.squad_not_in_roster
+msgid "That squad is not available in the current roster."
+msgstr "Этого отряда нет в текущем составе."
+
+# status.settings.appearance_save_failed
+msgid "Appearance changed for this session, but settings.ini could not be saved."
+msgstr "Оформление изменено на эту сессию, но сохранить settings.ini не удалось."
+
+# status.settings.station_save_failed
+msgid "Station-category options were applied, but settings.ini could not be saved."
+msgstr "Категории станций применены, но сохранить settings.ini не удалось."
+
+# status.squad.current_unavailable
+msgid "Kenshi did not expose a current squad. No jobs were changed."
+msgstr "Kenshi не предоставила текущий отряд. Задачи не изменены."
+
+# status.squad.dead_hidden
+msgid "No active squad is available. Kenshi's __DEAD__ holding squad is hidden."
+msgstr "Активный отряд недоступен. Отряд __DEAD__ Kenshi скрыт."
+
+# status.squad.refresh_failed_cached
+msgid "The squad roster refresh failed. Cached rows are read-only until the next refresh."
+msgstr "Не удалось обновить состав отряда. Кэшированные строки доступны только для чтения до следующего обновления."
+
+# status.station.assign_error_verified
+msgid "Kenshi reported an error after changing the queue. The exact station job change was verified."
+msgstr "Kenshi сообщила об ошибке после изменения очереди. Точное изменение задачи станции подтверждено."
+
+# status.station.assign_stopped_projection
+msgid "Station assignment stopped. Verified job changes: 0. The station projection became unavailable."
+msgstr "Назначение на станцию остановлено. Подтверждено изменений задач: 0. Данные станции недоступны."
+
+# status.station.assign_stopped_queue
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed or became unavailable."
+msgstr "Назначение на станцию остановлено. Подтверждено изменений задач: 0. Очередь участника изменилась или стала недоступна."
+
+# status.station.assign_stopped_race
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed immediately before assignment."
+msgstr "Назначение на станцию остановлено. Подтверждено изменений задач: 0. Очередь участника изменилась непосредственно перед назначением."
+
+# status.station.assign_success
+msgid "Assigned {member} to this station. Permanent jobs added: {count}."
+msgstr "Выполнено назначение {member} на эту станцию. Добавлено постоянных задач: {count}."
+
+# status.station.assign_unexpected_queue
+msgid "Kenshi changed the queue in an unexpected way. Verified station job changes: 0. Review the member queue before another change."
+msgstr "Kenshi неожиданно изменила очередь. Подтверждено изменений задач станции: 0. Проверьте очередь участника перед следующим изменением."
+
+# status.station.assign_unverified_queue
+msgid "The station job was sent, but verified job changes: 0. The queue became unavailable. Review the member queue."
+msgstr "Задача станции отправлена, но подтверждено изменений задач: 0. Очередь стала недоступна. Проверьте очередь участника."
+
+# status.station.invalid_target_or_member
+msgid "The member or exact station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "Участник или точная станция недоступны либо больше не управляются игроком. Задачи не изменены."
+
+# status.station.job_rejected
+msgid "Kenshi rejected the station job. No jobs were changed."
+msgstr "Kenshi отклонила задачу станции. Задачи не изменены."
+
+# status.station.queue_full
+msgid "The member queue is too full for this station job. No jobs were changed."
+msgstr "Очередь участника переполнена для этой задачи станции. Задачи не изменены."
+
+# status.station.remove_none
+msgid "{member} has no permanent jobs for this station."
+msgstr "У {member} нет постоянных задач для этой станции."
+
+# status.station.remove_stopped_error
+msgid "Station removal stopped. Verified job removals: {count}. Kenshi reported an error after the removal. Review it before another change."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: {count}. Kenshi сообщила об ошибке после удаления. Проверьте очередь перед следующим изменением."
+
+# status.station.remove_stopped_queue
+msgid "Station removal stopped. Verified job removals: 0. The member queue changed or became unavailable."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: 0. Очередь участника изменилась или стала недоступна."
+
+# status.station.remove_stopped_queue_changed
+msgid "Station removal stopped. Verified job removals: {count}. The exact full queue changed or became unavailable."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: {count}. Точная полная очередь изменилась или стала недоступна."
+
+# status.station.remove_stopped_target
+msgid "Station removal stopped. Verified job removals: {count}. The exact station is no longer player-managed."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: {count}. Точная станция больше не управляется игроком."
+
+# status.station.remove_stopped_unavailable
+msgid "Station removal stopped. Verified job removals: {count}. The changed queue became unavailable. Review it before another change."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: {count}. Изменённая очередь стала недоступна. Проверьте её перед следующим изменением."
+
+# status.station.remove_stopped_unexpected
+msgid "Station removal stopped. Verified job removals: {count}. The queue changed in an unexpected way. Review it before another change."
+msgstr "Удаление со станции остановлено. Подтверждено удалений задач: {count}. Очередь изменилась неожиданно. Проверьте её перед следующим изменением."
+
+# status.station.remove_success
+msgid "Removed permanent station jobs: {count}. Member: {member}."
+msgstr "Удалено постоянных задач станции: {count}. Участник: {member}."
+
+# status.station.remove_unavailable
+msgid "The station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "Станция недоступна или больше не управляется игроком. Задачи не изменены."
+
+# status.station.transfer_destination_changed
+msgid "The destination queue changed or became unavailable. No jobs were changed."
+msgstr "Целевая очередь изменилась или стала недоступна. Задачи не изменены."
+
+# status.station.transfer_destination_full
+msgid "The destination queue is at the 64-job safety limit. No jobs were changed."
+msgstr "Целевая очередь достигла безопасного лимита в 64 задачи. Задачи не изменены."
+
+# status.station.transfer_destination_rejected
+msgid "Kenshi rejected the destination job. No jobs were changed."
+msgstr "Kenshi отклонила целевую задачу. Задачи не изменены."
+
+# status.station.transfer_destination_unverified
+msgid "The destination could not be verified after adding the job. The source was not changed; review both queues."
+msgstr "Не удалось подтвердить назначение после добавления задачи. Источник не изменён; проверьте обе очереди."
+
+# status.station.transfer_duplicate
+msgid "That member already has the same job for this station. No jobs were changed."
+msgstr "У этого участника уже есть такая задача для этой станции. Задачи не изменены."
+
+# status.station.transfer_same_member
+msgid "Choose a different member. No jobs were changed."
+msgstr "Выберите другого участника. Задачи не изменены."
+
+# status.station.transfer_source_changed
+msgid "The source queue changed or became unavailable. No jobs were changed."
+msgstr "Исходная очередь изменилась или стала недоступна. Задачи не изменены."
+
+# status.station.transfer_source_changed_after_add
+msgid "The destination job was added, but the source queue changed. The source was not removed; a duplicate may remain."
+msgstr "Целевая задача добавлена, но исходная очередь изменилась. Источник не удалён; может остаться дубликат."
+
+# status.station.transfer_source_missing
+msgid "The exact source job is no longer available. No jobs were changed."
+msgstr "Точная исходная задача больше недоступна. Задачи не изменены."
+
+# status.station.transfer_source_remove_rejected
+msgid "The destination job was added, but Kenshi rejected the source removal. A duplicate remains; review both queues."
+msgstr "Целевая задача добавлена, но Kenshi отклонила удаление источника. Дубликат остался; проверьте обе очереди."
+
+# status.station.transfer_source_remove_unverified
+msgid "The destination job was added, but the source removal could not be verified. Review both queues before making another change."
+msgstr "Целевая задача добавлена, но удаление источника не удалось подтвердить. Проверьте обе очереди перед следующим изменением."
+
+# status.station.transfer_success
+msgid "Moved {job} from {source} to {destination}."
+msgstr "Задача \"{job}\" перемещена из {source} в {destination}."
+
+# status.station.transfer_target_unavailable
+msgid "The station target is unavailable. No jobs were changed."
+msgstr "Цель станции недоступна. Задачи не изменены."
+
+# status.station.unsupported_job
+msgid "This station does not expose a supported permanent job. No jobs were changed."
+msgstr "Эта станция не предоставляет поддерживаемую постоянную задачу. Задачи не изменены."
+
+# status.station_action.pending
+msgid "Another job change is pending. Try again after it finishes."
+msgstr "Ожидается другое изменение задачи. Повторите попытку после его завершения."
+
+# status.station_action.queue_or_station_changed
+msgid "The member queue or station changed. No jobs were changed."
+msgstr "Очередь участника или станция изменились. Задачи не изменены."
+
+# status.station_action.validating_assignment
+msgid "Validating the station assignment..."
+msgstr "Проверка назначения на станцию..."
+
+# status.station_action.validating_removal
+msgid "Validating all jobs for this station..."
+msgstr "Проверка всех задач для этой станции..."
+
+# status.station_scan.interrupted
+msgid "The synchronous player-station scan was interrupted safely."
+msgstr "Синхронный скан станций игрока безопасно прерван."
+
+# status.station_scan.job_data_unavailable
+msgid "Some loaded squad job data is unavailable."
+msgstr "Некоторые загруженные данные задач отрядов недоступны."
+
+# status.station_scan.ownership_limit
+msgid "Player station ownership records reached the 8,192-record safety limit."
+msgstr "Записи владения станциями игрока достигли безопасного лимита в 8 192 записи."
+
+# status.station_scan.ownership_read_failed
+msgid "Player station ownership records could not be read safely."
+msgstr "Не удалось безопасно прочитать записи владения станциями игрока."
+
+# status.station_scan.ownership_validation_failed
+msgid "Some player station ownership records failed validation."
+msgstr "Не удалось подтвердить некоторые записи владения станциями игрока."
+
+# status.station_scan.refresh_failed
+msgid "Station assignments could not be refreshed."
+msgstr "Не удалось обновить назначения станций."
+
+# status.station_scan.roster_incomplete
+msgid "Player squad roster could not be read completely."
+msgstr "Не удалось полностью прочитать состав отрядов игрока."
+
+# status.station_scan.stopped_before_candidates
+msgid "The player-station scan stopped before every candidate was read."
+msgstr "Скан станций игрока остановлен до чтения всех кандидатов."
+
+# status.station_scan.target_limit
+msgid "Assigned station target list reached its safety limit."
+msgstr "Список назначенных целей станций достиг безопасного лимита."
+
+# status.station_scan.target_read_failed
+msgid "An assigned station target could not be read safely."
+msgstr "Не удалось безопасно прочитать назначенную цель станции."
+
+# status.transfer.destination_full
+msgid "The destination queue is at the safety limit. No jobs were changed."
+msgstr "Целевая очередь достигла безопасного лимита. Задачи не изменены."
+
+# status.transfer.disabled
+msgid "General job transfer is disabled in this test build."
+msgstr "Перемещение обычных задач отключено в текущей тестовой сборке."
+
+# status.transfer.duplicate
+msgid "The destination already has the same job. No jobs were changed."
+msgstr "В назначении уже есть такая задача. Задачи не изменены."
+
+# status.transfer.interrupted
+msgid "The transfer was interrupted. Review both queues before another change."
+msgstr "Перемещение прервано. Проверьте обе очереди перед следующим изменением."
+
+# status.transfer.queue_changed
+msgid "A queue changed before the transfer. Review both members and try again."
+msgstr "Очередь изменилась до перемещения. Проверьте обоих участников и повторите попытку."
+
+# status.transfer.queue_changed_after_drop
+msgid "A source or destination queue changed after the drop. No jobs were changed."
+msgstr "Исходная или целевая очередь изменилась после отпускания. Задачи не изменены."
+
+# status.transfer.queue_unverified
+msgid "A live queue could not be verified for the transfer. No jobs were changed."
+msgstr "Не удалось подтвердить рабочую очередь для перемещения. Задачи не изменены."
+
+# status.transfer.rejected
+msgid "Kenshi rejected the job transfer. No further jobs were changed."
+msgstr "Kenshi отклонила перемещение задачи. Другие задачи не изменены."
+
+# status.transfer.roster_member_left
+msgid "The source or destination left the active player roster. No jobs were changed."
+msgstr "Исходный или целевой участник покинул активный состав игрока. Задачи не изменены."
+
+# status.transfer.success
+msgid "Permanent job moved to the destination member."
+msgstr "Постоянная задача перемещена целевому участнику."
+
+# target.label.unavailable
+msgid "Target unavailable"
+msgstr "Цель недоступна"
+
+# target.label.unnamed
+msgid "Unnamed target"
+msgstr "Безымянная цель"
+
+# tooltip.job
+msgid "{member} | Priority {priority}\n{job}{target_line}"
+msgstr "{member} | Приоритет {priority}\n{job}{target_line}"
+
+# tooltip.job.target
+msgid "\nTarget: {target}"
+msgstr "\nЦель: {target}"
+
+# ui.action.add_healing
+msgid "Add Healing"
+msgstr "Добавить лечение"
+
+# ui.action.add_short
+msgid "Add"
+msgstr "Добавить"
+
+# ui.action.clear_queue
+msgid "Clear Queue"
+msgstr "Очистить очередь"
+
+# ui.action.close
+msgid "Close"
+msgstr "Закрыть"
+
+# ui.action.drop_to_remove
+msgid "DROP TO REMOVE"
+msgstr "БРОСИТЬ ДЛЯ УДАЛЕНИЯ"
+
+# ui.action.options
+msgid "Options"
+msgstr "Настройки"
+
+# ui.action.prioritize_healing
+msgid "Prioritize Healing"
+msgstr "Повысить приоритет лечения"
+
+# ui.action.remove_invalid_jobs
+msgid "Remove Invalid Jobs"
+msgstr "Удалить недейств."
+
+# ui.action.remove_jobs
+msgid "Remove Job(s)"
+msgstr "Удалить задачи"
+
+# ui.action.reset_default
+msgid "Reset Default"
+msgstr "Сбросить"
+
+# ui.dialog.no
+msgid "No"
+msgstr "Нет"
+
+# ui.dialog.yes
+msgid "Yes"
+msgstr "Да"
+
+# ui.hud.open_manager_tooltip
+msgid "Open Job Manager (Ctrl+J)"
+msgstr "Открыть управление задачами (Ctrl+J)"
+
+# ui.jobs.toggle_off
+msgid "Jobs: OFF"
+msgstr "Задачи: ВЫКЛ."
+
+# ui.jobs.toggle_on
+msgid "Jobs: ON"
+msgstr "Задачи: ВКЛ."
+
+# ui.priority.label
+msgid "Priority {number}"
+msgstr "Приоритет {number}"
+
+# ui.squad.current
+msgid "Current squad"
+msgstr "Текущий отряд"
+
+# ui.squad.current_marker
+msgid "CURRENT SQUAD"
+msgstr "ТЕКУЩИЙ ОТРЯД"
+
+# ui.squad.empty.no_manageable_members
+msgid "There are no active squads with job-manageable members."
+msgstr "Нет активных отрядов с участниками, чьи задачи можно изменять."
+
+# ui.squad.empty.unavailable
+msgid "The active squads are unavailable and have no session snapshot."
+msgstr "Активные отряды недоступны и не имеют снимка сессии."
+
+# ui.squad.generic
+msgid "Squad"
+msgstr "Отряд"
+
+# ui.squad.group_header
+msgid "{toggle}  {squad}  |  Members: {members}"
+msgstr "{toggle}  {squad}  |  Участники: {members}"
+
+# ui.squad.heading
+msgid "{squad}  |  Members: {members}{snapshot}{squad_count}{roster_state}  |  Recipients: {recipients}"
+msgstr "{squad}  |  Участники: {members}{snapshot}{squad_count}{roster_state}  |  Получатели: {recipients}"
+
+# ui.squad.member_stats_header
+msgid "SQUAD MEMBER  |  TOP STATS"
+msgstr "ЧЛЕН ОТРЯДА  |  ЛУЧШИЕ НАВЫКИ"
+
+# ui.squad.readonly_marker
+msgid "  |  Read-only snapshot"
+msgstr "  |  Снимок (только чтение)"
+
+# ui.squad.roster_incomplete
+msgid "  |  Roster incomplete"
+msgstr "  |  Состав неполный"
+
+# ui.squad.squad_count
+msgid "  |  Squads: {count}"
+msgstr "  |  Отряды: {count}"
+
+# ui.squad_selector.incomplete
+msgid "SQUADS *"
+msgstr "ОТРЯДЫ *"
+
+# ui.squad_selector.label
+msgid "SQUADS"
+msgstr "ОТРЯДЫ"
+
+# ui.squad_selector.unavailable
+msgid "SQUADS ?"
+msgstr "ОТРЯДЫ ?"
+
+# ui.tab.squad_jobs
+msgid "Squad Jobs"
+msgstr "Задачи отряда"
+
+# ui.tab.stations
+msgid "Stations"
+msgstr "Станции"
+
+# ui.window.title
+msgid "Kenshi Job Management {version}"
+msgstr "Управление задачами Kenshi {version}"

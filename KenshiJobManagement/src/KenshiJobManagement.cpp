@@ -9,40 +9,16 @@
 #endif
 #include <Windows.h>
 
+// LEOPARD: translations through the shared .po loader (en/ru/zh).
+#define KLOC_DOMAIN "kenshi_job_management"
+#include <Localization.h>
+
 #include <Debug.h>
 #include <core/Functions.h>
 #include <kenshi/AI/AITaskSystem.h>
-// KenshiLib 0.4.0 declares BuildingDesignation independently in Building.h
-// and Platoon.h. Rename the Building.h copy locally so the generated headers
-// can coexist in this single translation unit. This plug-in does not use that
-// designation type.
-#define BuildingDesignation KJM_BuildingHeaderDesignation
-#define BD_NONE KJM_BUILDING_BD_NONE
-#define BD_SHOP KJM_BUILDING_BD_SHOP
-#define BD_BARRACKS KJM_BUILDING_BD_BARRACKS
-#define BD_BAR KJM_BUILDING_BD_BAR
-#define BD_HOSPITAL KJM_BUILDING_BD_HOSPITAL
-#define BD_ARMOURY KJM_BUILDING_BD_ARMOURY
-#define BD_TREASURE KJM_BUILDING_BD_TREASURE
-#define BD_PRISON KJM_BUILDING_BD_PRISON
-#define BD_HQ KJM_BUILDING_BD_HQ
-#define BD_RESIDENTIAL KJM_BUILDING_BD_RESIDENTIAL
-#define BD_SLAVE_STORAGE KJM_BUILDING_BD_SLAVE_STORAGE
-#define BD_RESIDENTIAL_SMALL KJM_BUILDING_BD_RESIDENTIAL_SMALL
+// LEOPARD: the KenshiLib headers we build against declare BuildingDesignation
+// once (Enums.h), so the original rename workaround for KenshiLib 0.4.0 is gone.
 #include <kenshi/Building/Building.h>
-#undef BuildingDesignation
-#undef BD_NONE
-#undef BD_SHOP
-#undef BD_BARRACKS
-#undef BD_BAR
-#undef BD_HOSPITAL
-#undef BD_ARMOURY
-#undef BD_TREASURE
-#undef BD_PRISON
-#undef BD_HQ
-#undef BD_RESIDENTIAL
-#undef BD_SLAVE_STORAGE
-#undef BD_RESIDENTIAL_SMALL
 #include <kenshi/CharStats.h>
 #include <kenshi/Character.h>
 #include <kenshi/Faction.h>

@@ -1,0 +1,1236 @@
+# Kenshi Job Management (LEOPARD fork) - en_GB
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# batch.cleanup_stage.initial_capture
+msgid "initial malformed-row capture"
+msgstr "initial malformed-row capture"
+
+# batch.cleanup_stage.plan
+msgid "cleanup plan"
+msgstr "cleanup plan"
+
+# batch.cleanup_stage.queue_changed
+msgid "exact queue precheck"
+msgstr "exact queue precheck"
+
+# batch.cleanup_stage.raw_remove
+msgid "native exact-slot removal"
+msgstr "native exact-slot removal"
+
+# batch.cleanup_stage.rethink
+msgid "AI rethink"
+msgstr "AI rethink"
+
+# batch.cleanup_stage.unknown
+msgid "unspecified cleanup stage"
+msgstr "unspecified cleanup stage"
+
+# batch.cleanup_stage.verify_erase
+msgid "immediate erase verification"
+msgstr "immediate erase verification"
+
+# batch.cleanup_stage.verify_rethink
+msgid "post-rethink queue verification"
+msgstr "post-rethink queue verification"
+
+# batch.result.action_completed
+msgid "Job action completed."
+msgstr "Job action completed."
+
+# batch.result.added_healing
+msgid "Added healing jobs: {count}."
+msgstr "Added healing jobs: {count}."
+
+# batch.result.appended
+msgid "Appended job bundles: {count}."
+msgstr "Appended job bundles: {count}."
+
+# batch.result.capture_failed
+msgid "A selected job queue could not be read safely. No further jobs were changed."
+msgstr "A selected job queue could not be read safely. No further jobs were changed."
+
+# batch.result.clipboard_empty
+msgid "Copy one or more jobs before pasting."
+msgstr "Copy one or more jobs before pasting."
+
+# batch.result.completed_recipients
+msgid "Completed recipients before stopping: {count}."
+msgstr "Completed recipients before stopping: {count}."
+
+# batch.result.destination_full
+msgid "A destination job queue is at the safety limit."
+msgstr "A destination job queue is at the safety limit."
+
+# batch.result.disabled
+msgid "This job action is disabled in the current build."
+msgstr "This job action is disabled in the current build."
+
+# batch.result.duplicate
+msgid "The destination already has one of the selected jobs. No jobs were moved."
+msgstr "The destination already has one of the selected jobs. No jobs were moved."
+
+# batch.result.duplicate_remains
+msgid "The move stopped after destination copies were added. Review the affected job queues before another change."
+msgstr "The move stopped after destination copies were added. Review the affected job queues before another change."
+
+# batch.result.failed_bundle
+msgid "Failed bundle: {bundle}."
+msgstr "Failed bundle: {bundle}."
+
+# batch.result.failed_member
+msgid "Member: {member}."
+msgstr "Member: {member}."
+
+# batch.result.failure_stage
+msgid "Stage: {stage}."
+msgstr "Stage: {stage}."
+
+# batch.result.healing_rejected
+msgid "Kenshi rejected a permanent job. No further jobs were changed."
+msgstr "Kenshi rejected a permanent job. No further jobs were changed."
+
+# batch.result.healing_rejected_role
+msgid "Kenshi rejected the {role} permanent job. No further jobs were changed."
+msgstr "Kenshi rejected the {role} permanent job. No further jobs were changed."
+
+# batch.result.invalid_cleanup_rethink_unverified
+msgid "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change."
+msgstr "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change."
+
+# batch.result.invalid_cleanup_unverified
+msgid "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change."
+msgstr "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change."
+
+# batch.result.invalid_request
+msgid "The selected job action is no longer valid."
+msgstr "The selected job action is no longer valid."
+
+# batch.result.no_changes
+msgid "No jobs needed changes."
+msgstr "No jobs needed changes."
+
+# batch.result.no_rollback
+msgid "Verified earlier changes remain; no rollback was attempted."
+msgstr "Verified earlier changes remain; no rollback was attempted."
+
+# batch.result.queue_changed
+msgid "A selected member or job queue changed before the action completed. Review the affected members and try again."
+msgstr "A selected member or job queue changed before the action completed. Review the affected members and try again."
+
+# batch.result.removed_invalid_rows
+msgid "Removed invalid job rows: {count}."
+msgstr "Removed invalid job rows: {count}."
+
+# batch.result.removed_source_rows
+msgid "Removed source rows: {count}."
+msgstr "Removed source rows: {count}."
+
+# batch.result.reordered
+msgid "Reordered jobs: {count}."
+msgstr "Reordered jobs: {count}."
+
+# batch.result.skipped_duplicates
+msgid "Skipped duplicate bundles: {count}."
+msgstr "Skipped duplicate bundles: {count}."
+
+# batch.result.unverified
+msgid "The job action stopped after an unverified result. Review the affected job queues before another change."
+msgstr "The job action stopped after an unverified result. Review the affected job queues before another change."
+
+# condition.carried
+msgid "Carried"
+msgstr "Carried"
+
+# condition.dead
+msgid "Dead"
+msgstr "Dead"
+
+# condition.dying
+msgid "Dying"
+msgstr "Dying"
+
+# condition.imprisoned
+msgid "Imprisoned"
+msgstr "Imprisoned"
+
+# condition.kidnapped
+msgid "Kidnapped"
+msgstr "Kidnapped"
+
+# condition.playing_dead
+msgid "Playing dead"
+msgstr "Playing dead"
+
+# condition.unconscious
+msgid "Unconscious"
+msgstr "Unconscious"
+
+# fallback.member.unavailable
+msgid "Unavailable member"
+msgstr "Unavailable member"
+
+# fallback.squad.unavailable
+msgid "Unavailable squad"
+msgstr "Unavailable squad"
+
+# job.label.operating
+msgid "Operating..."
+msgstr "Operating..."
+
+# job.label.unknown_permanent
+msgid "Unknown permanent job"
+msgstr "Unknown permanent job"
+
+# job.role.engineering
+msgid "Engineering"
+msgstr "Engineering"
+
+# job.role.medic
+msgid "Medic"
+msgstr "Medic"
+
+# job.role.other
+msgid "other jobs"
+msgstr "other jobs"
+
+# job.role.put_in_bed
+msgid "Find and Put in Bed"
+msgstr "Find and Put in Bed"
+
+# job.role.rescue
+msgid "Find and Rescue"
+msgstr "Find and Rescue"
+
+# job.role.robotics
+msgid "Robotics"
+msgstr "Robotics"
+
+# job.role.splinting
+msgid "Splinting"
+msgstr "Splinting"
+
+# member.condition.cached_unavailable
+msgid "Cached / unavailable"
+msgstr "Cached / unavailable"
+
+# member.condition.cached_unloaded
+msgid "Cached / unloaded"
+msgstr "Cached / unloaded"
+
+# member.condition.queue_limit
+msgid "Queue exceeds safety limit (read-only)"
+msgstr "Queue exceeds safety limit (read-only)"
+
+# member.label.unavailable_condition
+msgid "Unavailable"
+msgstr "Unavailable"
+
+# member.label.unnamed
+msgid "Unnamed squad member"
+msgstr "Unnamed squad member"
+
+# member.queue.empty
+msgid "[No permanent jobs]"
+msgstr "[No permanent jobs]"
+
+# member.queue.unavailable_readonly
+msgid "Queue unavailable (read-only)"
+msgstr "Queue unavailable (read-only)"
+
+# member.stats.none_above_one
+msgid "No stats above 1"
+msgstr "No stats above 1"
+
+# member.stats.unavailable
+msgid "Stats unavailable"
+msgstr "Stats unavailable"
+
+# modal.clear.prompt
+msgid "Are you sure you wish to remove all jobs?\n\nRemove all {count} permanent jobs from {member}?"
+msgstr "Are you sure you wish to remove all jobs?\n\nRemove all {count} permanent jobs from {member}?"
+
+# modal.clear.title
+msgid "Confirm Clear Queue"
+msgstr "Confirm Clear Queue"
+
+# modal.message_log.help
+msgid "The 10 most recent non-empty timestamped messages from this game session (oldest to newest)."
+msgstr "The 10 most recent non-empty timestamped messages from this game session (oldest to newest)."
+
+# modal.message_log.title
+msgid "Recent Job Manager Messages"
+msgstr "Recent Job Manager Messages"
+
+# modal.options.help
+msgid "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately."
+msgstr "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately."
+
+# modal.options.title
+msgid "Job Manager Options"
+msgstr "Job Manager Options"
+
+# options.appearance.dark_ui
+msgid "Dark UI friendly font colors"
+msgstr "Dark UI friendly font colors"
+
+# options.appearance.dark_ui.help
+msgid "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text."
+msgstr "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text."
+
+# options.appearance.header
+msgid "APPEARANCE"
+msgstr "APPEARANCE"
+
+# options.stations.header
+msgid "STATION CATEGORY FILTERS"
+msgstr "STATION CATEGORY FILTERS"
+
+# skill.armour_smith
+msgid "Armour smith"
+msgstr "Armour smith"
+
+# skill.assassination
+msgid "Assassination"
+msgstr "Assassination"
+
+# skill.athletics
+msgid "Athletics"
+msgstr "Athletics"
+
+# skill.blunt
+msgid "Blunt"
+msgstr "Blunt"
+
+# skill.cooking
+msgid "Cooking"
+msgstr "Cooking"
+
+# skill.crossbow_smith
+msgid "Crossbow smith"
+msgstr "Crossbow smith"
+
+# skill.crossbows
+msgid "Crossbows"
+msgstr "Crossbows"
+
+# skill.dexterity
+msgid "Dexterity"
+msgstr "Dexterity"
+
+# skill.dodge
+msgid "Dodge"
+msgstr "Dodge"
+
+# skill.engineer
+msgid "Engineer"
+msgstr "Engineer"
+
+# skill.farming
+msgid "Farming"
+msgstr "Farming"
+
+# skill.field_medic
+msgid "Field medic"
+msgstr "Field medic"
+
+# skill.hackers
+msgid "Hackers"
+msgstr "Hackers"
+
+# skill.heavy_weapons
+msgid "Heavy weapons"
+msgstr "Heavy weapons"
+
+# skill.hive_medic
+msgid "Hive medic"
+msgstr "Hive medic"
+
+# skill.katanas
+msgid "Katanas"
+msgstr "Katanas"
+
+# skill.labouring
+msgid "Labouring"
+msgstr "Labouring"
+
+# skill.lockpicking
+msgid "Lockpicking"
+msgstr "Lockpicking"
+
+# skill.martial_arts
+msgid "Martial arts"
+msgstr "Martial arts"
+
+# skill.mass_combat
+msgid "Mass combat"
+msgstr "Mass combat"
+
+# skill.melee_attack
+msgid "Melee attack"
+msgstr "Melee attack"
+
+# skill.melee_defence
+msgid "Melee defence"
+msgstr "Melee defence"
+
+# skill.perception
+msgid "Perception"
+msgstr "Perception"
+
+# skill.polearms
+msgid "Polearms"
+msgstr "Polearms"
+
+# skill.precision_shooting
+msgid "Precision shooting"
+msgstr "Precision shooting"
+
+# skill.sabres
+msgid "Sabres"
+msgstr "Sabres"
+
+# skill.science
+msgid "Science"
+msgstr "Science"
+
+# skill.stealth
+msgid "Stealth"
+msgstr "Stealth"
+
+# skill.strength
+msgid "Strength"
+msgstr "Strength"
+
+# skill.survival
+msgid "Survival"
+msgstr "Survival"
+
+# skill.swimming
+msgid "Swimming"
+msgstr "Swimming"
+
+# skill.thievery
+msgid "Thievery"
+msgstr "Thievery"
+
+# skill.toughness
+msgid "Toughness"
+msgstr "Toughness"
+
+# skill.turrets
+msgid "Turrets"
+msgstr "Turrets"
+
+# skill.veterinary
+msgid "Veterinary"
+msgstr "Veterinary"
+
+# skill.weapon_smith
+msgid "Weapon smith"
+msgstr "Weapon smith"
+
+# skill.weapons
+msgid "Weapons"
+msgstr "Weapons"
+
+# squad.placeholder.unnamed_selector
+msgid "Unnamed squad"
+msgstr "Unnamed squad"
+
+# station.area.wilderness
+msgid "Wilderness"
+msgstr "Wilderness"
+
+# station.banner.count
+msgid "{count} PLAYER STATIONS"
+msgstr "{count} PLAYER STATIONS"
+
+# station.banner.fault
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE"
+msgstr "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE"
+
+# station.banner.fault_failed
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE  |  {failed} target(s) failed"
+msgstr "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE  |  {failed} target(s) failed"
+
+# station.banner.partial
+msgid "PARTIAL SCAN - RESULTS INCOMPLETE  |  {completed} of {candidate} candidates read  |  {failed} target(s) failed"
+msgstr "PARTIAL SCAN - RESULTS INCOMPLETE  |  {completed} of {candidate} candidates read  |  {failed} target(s) failed"
+
+# station.banner.truncated
+msgid "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE  |  {failed} target(s) failed"
+msgstr "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE  |  {failed} target(s) failed"
+
+# station.category.crafting
+msgid "Crafting"
+msgstr "Crafting"
+
+# station.category.defense
+msgid "Defense"
+msgstr "Defense"
+
+# station.category.mining
+msgid "Mining"
+msgstr "Mining"
+
+# station.category.other
+msgid "Other / Unclassified"
+msgstr "Other / Unclassified"
+
+# station.category.refining
+msgid "Refining"
+msgstr "Refining"
+
+# station.category.research
+msgid "Research"
+msgstr "Research"
+
+# station.category.storage_hauling
+msgid "Storage / Hauling"
+msgstr "Storage / Hauling"
+
+# station.category.training
+msgid "Training"
+msgstr "Training"
+
+# station.detail.assigned_header
+msgid "ASSIGNED WORKERS ({count})"
+msgstr "ASSIGNED WORKERS ({count})"
+
+# station.detail.assignment_unsupported
+msgid "This station does not expose a verified permanent-job mapping."
+msgstr "This station does not expose a verified permanent-job mapping."
+
+# station.detail.available_header
+msgid "AVAILABLE WORKERS ({count})"
+msgstr "AVAILABLE WORKERS ({count})"
+
+# station.detail.no_candidates
+msgid "No loaded readable unassigned characters."
+msgstr "No loaded readable unassigned characters."
+
+# station.detail.summary
+msgid "{category}  |  Relevant skill: {skill}"
+msgstr "{category}  |  Relevant skill: {skill}"
+
+# station.detail.unassigned
+msgid "UNASSIGNED"
+msgstr "UNASSIGNED"
+
+# station.empty.filtered
+msgid "No stations match the current category filters."
+msgstr "No stations match the current category filters."
+
+# station.empty.partial
+msgid "Partial scan in progress. No matching stations are available yet."
+msgstr "Partial scan in progress. No matching stations are available yet."
+
+# station.group.header.many
+msgid "{category}  |  {count} stations  |  {unassigned} unassigned"
+msgstr "{category}  |  {count} stations  |  {unassigned} unassigned"
+
+# station.group.header.one
+msgid "{category}  |  {count} station  |  {unassigned} unassigned"
+msgstr "{category}  |  {count} station  |  {unassigned} unassigned"
+
+# station.name.unnamed_assigned_target
+msgid "Unnamed assigned target"
+msgstr "Unnamed assigned target"
+
+# station.name.unnamed_player_station
+msgid "Unnamed player station"
+msgstr "Unnamed player station"
+
+# station.person.assigned_tooltip
+msgid "{caption}\n\nRight-click to request removal from this station."
+msgstr "{caption}\n\nRight-click to request removal from this station."
+
+# station.person.available_tooltip
+msgid "{caption}\n\nClick or press Enter to request assignment. Scrolling never assigns."
+msgstr "{caption}\n\nClick or press Enter to request assignment. Scrolling never assigns."
+
+# station.person.caption.many
+msgid "{name}  |  {skill}  |  {jobs} total jobs"
+msgstr "{name}  |  {skill}  |  {jobs} total jobs"
+
+# station.person.caption.one
+msgid "{name}  |  {skill}  |  {jobs} total job"
+msgstr "{name}  |  {skill}  |  {jobs} total job"
+
+# station.person.unknown
+msgid "Unknown person"
+msgstr "Unknown person"
+
+# station.skill.none
+msgid "None"
+msgstr "None"
+
+# station.skill.unknown
+msgid "Unknown"
+msgstr "Unknown"
+
+# station.status.broken
+msgid "BROKEN"
+msgstr "BROKEN"
+
+# station.status.cannot_work
+msgid "CANNOT WORK"
+msgstr "CANNOT WORK"
+
+# station.status.category_save_failed
+msgid "The category was changed, but settings.ini could not be saved."
+msgstr "The category was changed, but settings.ini could not be saved."
+
+# station.status.destroyed
+msgid "Destroyed"
+msgstr "Destroyed"
+
+# station.status.disabled
+msgid "DISABLED"
+msgstr "DISABLED"
+
+# station.status.dismantling
+msgid "DISMANTLING"
+msgstr "DISMANTLING"
+
+# station.status.incomplete
+msgid "INCOMPLETE"
+msgstr "INCOMPLETE"
+
+# station.status.no_power
+msgid "NO POWER"
+msgstr "NO POWER"
+
+# station.status.power_off
+msgid "POWER OFF"
+msgstr "POWER OFF"
+
+# station.tooltip.area
+msgid "Area: {value}"
+msgstr "Area: {value}"
+
+# station.tooltip.assignment_unsupported
+msgid "Assignment: Not supported for this station"
+msgstr "Assignment: Not supported for this station"
+
+# station.tooltip.cannot_work
+msgid "Cannot work: {value}"
+msgstr "Cannot work: {value}"
+
+# station.tooltip.category
+msgid "Category: {value}"
+msgstr "Category: {value}"
+
+# station.tooltip.relevant_skill
+msgid "Relevant skill: {value}"
+msgstr "Relevant skill: {value}"
+
+# station.tooltip.work_status_unavailable
+msgid "Work status: Unavailable"
+msgstr "Work status: Unavailable"
+
+# status.batch.adding_healing_jobs
+msgid "Adding and prioritizing healing jobs..."
+msgstr "Adding and prioritizing healing jobs..."
+
+# status.batch.applying_healing_priorities
+msgid "Applying healing priorities..."
+msgstr "Applying healing priorities..."
+
+# status.batch.healing_jobs_updated
+msgid "Healing jobs updated."
+msgstr "Healing jobs updated."
+
+# status.batch.healing_priorities_updated
+msgid "Healing priorities updated."
+msgstr "Healing priorities updated."
+
+# status.batch.invalid_cleanup_completed
+msgid "Invalid-job cleanup completed."
+msgstr "Invalid-job cleanup completed."
+
+# status.batch.jobs_moved
+msgid "Jobs moved."
+msgstr "Jobs moved."
+
+# status.batch.jobs_pasted
+msgid "Jobs pasted."
+msgstr "Jobs pasted."
+
+# status.batch.no_removable_invalid
+msgid "No removable invalid jobs were found."
+msgstr "No removable invalid jobs were found."
+
+# status.batch.removing_invalid_jobs
+msgid "Removing invalid fixed-target jobs..."
+msgstr "Removing invalid fixed-target jobs..."
+
+# status.clear.queue_changed
+msgid "The queue changed after confirmation. Clear Queue was cancelled."
+msgstr "The queue changed after confirmation. Clear Queue was cancelled."
+
+# status.clear.rejected
+msgid "Kenshi rejected Clear Queue. No jobs were changed."
+msgstr "Kenshi rejected Clear Queue. No jobs were changed."
+
+# status.clear.success
+msgid "All permanent jobs were removed from {member}."
+msgstr "All permanent jobs were removed from {member}."
+
+# status.clipboard.cleared_suffix
+msgid " Clipboard cleared."
+msgstr " Clipboard cleared."
+
+# status.clipboard.copy_success
+msgid "Copied jobs: {count}. Select recipients, then press Ctrl+V."
+msgstr "Copied jobs: {count}. Select recipients, then press Ctrl+V."
+
+# status.clipboard.jobs_copied
+msgid "Jobs copied."
+msgstr "Jobs copied."
+
+# status.clipboard.select_jobs
+msgid "Select one or more jobs before copying."
+msgstr "Select one or more jobs before copying."
+
+# status.clipboard.select_recipient
+msgid "Select at least one recipient before pasting."
+msgstr "Select at least one recipient before pasting."
+
+# status.drag.queue_changed
+msgid "The queue changed during the drag. Review it and try again."
+msgstr "The queue changed during the drag. Review it and try again."
+
+# status.drag.squad_or_queue_changed
+msgid "A squad or queue changed during the drag. Review it and try again."
+msgstr "A squad or queue changed during the drag. Review it and try again."
+
+# status.jobs.disabled
+msgid "Jobs disabled for this member."
+msgstr "Jobs disabled for this member."
+
+# status.jobs.enabled
+msgid "Jobs enabled for this member."
+msgstr "Jobs enabled for this member."
+
+# status.jobs.priority_updated
+msgid "Permanent-job priority updated."
+msgstr "Permanent-job priority updated."
+
+# status.jobs.reorder_rejected
+msgid "Kenshi rejected the queue reorder. No other jobs were changed."
+msgstr "Kenshi rejected the queue reorder. No other jobs were changed."
+
+# status.jobs.toggle_rejected
+msgid "Kenshi rejected the Jobs toggle. No jobs were changed."
+msgstr "Kenshi rejected the Jobs toggle. No jobs were changed."
+
+# status.member.queue_unavailable
+msgid "The member queue is unavailable. No jobs were changed."
+msgstr "The member queue is unavailable. No jobs were changed."
+
+# status.message_log.empty
+msgid "No recent messages in this session."
+msgstr "No recent messages in this session."
+
+# status.move.invalid_destination
+msgid "Move cancelled: choose a member that does not own any selected source job."
+msgstr "Move cancelled: choose a member that does not own any selected source job."
+
+# status.priority.applied
+msgid "Priority order applied to {count} squad members."
+msgstr "Priority order applied to {count} squad members."
+
+# status.priority.interrupted
+msgid "Priority update interrupted."
+msgstr "Priority update interrupted."
+
+# status.priority.move_rejected
+msgid "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed."
+msgstr "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed."
+
+# status.priority.move_unverified
+msgid "A priority move could not be verified; no further members were changed."
+msgstr "A priority move could not be verified; no further members were changed."
+
+# status.priority.no_changes
+msgid "No rescue, medical, robotics, splinting, or engineering jobs needed reordering."
+msgstr "No rescue, medical, robotics, splinting, or engineering jobs needed reordering."
+
+# status.priority.queue_changed
+msgid "The permanent-job queue changed while priorities were being applied."
+msgstr "The permanent-job queue changed while priorities were being applied."
+
+# status.priority.queue_prepare_failed
+msgid "A permanent-job queue could not be prepared for priority changes."
+msgstr "A permanent-job queue could not be prepared for priority changes."
+
+# status.priority.roster_limit
+msgid "The selected squad roster exceeds the safe batch limit. No priorities were changed."
+msgstr "The selected squad roster exceeds the safe batch limit. No priorities were changed."
+
+# status.priority.skipped
+msgid "Skipped unavailable or unreadable members: {count}."
+msgstr "Skipped unavailable or unreadable members: {count}."
+
+# status.priority.snapshot_failed
+msgid "Priority update stopped because its snapshot could not be allocated."
+msgstr "Priority update stopped because its snapshot could not be allocated."
+
+# status.priority.squad_changed
+msgid "Squad membership changed while priorities were being applied."
+msgstr "Squad membership changed while priorities were being applied."
+
+# status.priority.squad_changed_verification
+msgid "The squad changed while verifying a priority move."
+msgstr "The squad changed while verifying a priority move."
+
+# status.priority.squad_or_queue_changed
+msgid "The squad or permanent-job queue changed before a priority move."
+msgstr "The squad or permanent-job queue changed before a priority move."
+
+# status.priority.squad_unavailable
+msgid "The selected squad is no longer current or available."
+msgstr "The selected squad is no longer current or available."
+
+# status.queue.readonly
+msgid "The source or destination queue is read-only. No jobs were changed."
+msgstr "The source or destination queue is read-only. No jobs were changed."
+
+# status.remove_selected.candidate
+msgid "{member} / {job}"
+msgstr "{member} / {job}"
+
+# status.remove_selected.candidate_with_priority
+msgid "{member} / {job} / Priority {priority}"
+msgstr "{member} / {job} / Priority {priority}"
+
+# status.remove_selected.interrupted
+msgid "Deletion queue interrupted. Completed removals: {completed}. Failed: {failed}. Remaining selected jobs: {remaining}. Review and try again."
+msgstr "Deletion queue interrupted. Completed removals: {completed}. Failed: {failed}. Remaining selected jobs: {remaining}. Review and try again."
+
+# status.remove_selected.success
+msgid "Removed permanent jobs: {count}."
+msgstr "Removed permanent jobs: {count}."
+
+# status.selection.no_recipient
+msgid "Select at least one recipient first."
+msgstr "Select at least one recipient first."
+
+# status.selector.selected_jobs_unavailable
+msgid "Kenshi selected the squad, but its jobs are temporarily unavailable."
+msgstr "Kenshi selected the squad, but its jobs are temporarily unavailable."
+
+# status.selector.selection_cancelled_busy
+msgid "Squad selection was cancelled because another manager action is active."
+msgstr "Squad selection was cancelled because another manager action is active."
+
+# status.selector.squad_gone
+msgid "That squad is no longer available. The current squad was not changed."
+msgstr "That squad is no longer available. The current squad was not changed."
+
+# status.selector.squad_jobs_unavailable
+msgid "That squad has unavailable job data and cannot be selected yet."
+msgstr "That squad has unavailable job data and cannot be selected yet."
+
+# status.selector.squad_not_in_roster
+msgid "That squad is not available in the current roster."
+msgstr "That squad is not available in the current roster."
+
+# status.settings.appearance_save_failed
+msgid "Appearance changed for this session, but settings.ini could not be saved."
+msgstr "Appearance changed for this session, but settings.ini could not be saved."
+
+# status.settings.station_save_failed
+msgid "Station-category options were applied, but settings.ini could not be saved."
+msgstr "Station-category options were applied, but settings.ini could not be saved."
+
+# status.squad.current_unavailable
+msgid "Kenshi did not expose a current squad. No jobs were changed."
+msgstr "Kenshi did not expose a current squad. No jobs were changed."
+
+# status.squad.dead_hidden
+msgid "No active squad is available. Kenshi's __DEAD__ holding squad is hidden."
+msgstr "No active squad is available. Kenshi's __DEAD__ holding squad is hidden."
+
+# status.squad.refresh_failed_cached
+msgid "The squad roster refresh failed. Cached rows are read-only until the next refresh."
+msgstr "The squad roster refresh failed. Cached rows are read-only until the next refresh."
+
+# status.station.assign_error_verified
+msgid "Kenshi reported an error after changing the queue. The exact station job change was verified."
+msgstr "Kenshi reported an error after changing the queue. The exact station job change was verified."
+
+# status.station.assign_stopped_projection
+msgid "Station assignment stopped. Verified job changes: 0. The station projection became unavailable."
+msgstr "Station assignment stopped. Verified job changes: 0. The station projection became unavailable."
+
+# status.station.assign_stopped_queue
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed or became unavailable."
+msgstr "Station assignment stopped. Verified job changes: 0. The member queue changed or became unavailable."
+
+# status.station.assign_stopped_race
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed immediately before assignment."
+msgstr "Station assignment stopped. Verified job changes: 0. The member queue changed immediately before assignment."
+
+# status.station.assign_success
+msgid "Assigned {member} to this station. Permanent jobs added: {count}."
+msgstr "Assigned {member} to this station. Permanent jobs added: {count}."
+
+# status.station.assign_unexpected_queue
+msgid "Kenshi changed the queue in an unexpected way. Verified station job changes: 0. Review the member queue before another change."
+msgstr "Kenshi changed the queue in an unexpected way. Verified station job changes: 0. Review the member queue before another change."
+
+# status.station.assign_unverified_queue
+msgid "The station job was sent, but verified job changes: 0. The queue became unavailable. Review the member queue."
+msgstr "The station job was sent, but verified job changes: 0. The queue became unavailable. Review the member queue."
+
+# status.station.invalid_target_or_member
+msgid "The member or exact station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "The member or exact station is unavailable or is no longer player-managed. No jobs were changed."
+
+# status.station.job_rejected
+msgid "Kenshi rejected the station job. No jobs were changed."
+msgstr "Kenshi rejected the station job. No jobs were changed."
+
+# status.station.queue_full
+msgid "The member queue is too full for this station job. No jobs were changed."
+msgstr "The member queue is too full for this station job. No jobs were changed."
+
+# status.station.remove_none
+msgid "{member} has no permanent jobs for this station."
+msgstr "{member} has no permanent jobs for this station."
+
+# status.station.remove_stopped_error
+msgid "Station removal stopped. Verified job removals: {count}. Kenshi reported an error after the removal. Review it before another change."
+msgstr "Station removal stopped. Verified job removals: {count}. Kenshi reported an error after the removal. Review it before another change."
+
+# status.station.remove_stopped_queue
+msgid "Station removal stopped. Verified job removals: 0. The member queue changed or became unavailable."
+msgstr "Station removal stopped. Verified job removals: 0. The member queue changed or became unavailable."
+
+# status.station.remove_stopped_queue_changed
+msgid "Station removal stopped. Verified job removals: {count}. The exact full queue changed or became unavailable."
+msgstr "Station removal stopped. Verified job removals: {count}. The exact full queue changed or became unavailable."
+
+# status.station.remove_stopped_target
+msgid "Station removal stopped. Verified job removals: {count}. The exact station is no longer player-managed."
+msgstr "Station removal stopped. Verified job removals: {count}. The exact station is no longer player-managed."
+
+# status.station.remove_stopped_unavailable
+msgid "Station removal stopped. Verified job removals: {count}. The changed queue became unavailable. Review it before another change."
+msgstr "Station removal stopped. Verified job removals: {count}. The changed queue became unavailable. Review it before another change."
+
+# status.station.remove_stopped_unexpected
+msgid "Station removal stopped. Verified job removals: {count}. The queue changed in an unexpected way. Review it before another change."
+msgstr "Station removal stopped. Verified job removals: {count}. The queue changed in an unexpected way. Review it before another change."
+
+# status.station.remove_success
+msgid "Removed permanent station jobs: {count}. Member: {member}."
+msgstr "Removed permanent station jobs: {count}. Member: {member}."
+
+# status.station.remove_unavailable
+msgid "The station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "The station is unavailable or is no longer player-managed. No jobs were changed."
+
+# status.station.transfer_destination_changed
+msgid "The destination queue changed or became unavailable. No jobs were changed."
+msgstr "The destination queue changed or became unavailable. No jobs were changed."
+
+# status.station.transfer_destination_full
+msgid "The destination queue is at the 64-job safety limit. No jobs were changed."
+msgstr "The destination queue is at the 64-job safety limit. No jobs were changed."
+
+# status.station.transfer_destination_rejected
+msgid "Kenshi rejected the destination job. No jobs were changed."
+msgstr "Kenshi rejected the destination job. No jobs were changed."
+
+# status.station.transfer_destination_unverified
+msgid "The destination could not be verified after adding the job. The source was not changed; review both queues."
+msgstr "The destination could not be verified after adding the job. The source was not changed; review both queues."
+
+# status.station.transfer_duplicate
+msgid "That member already has the same job for this station. No jobs were changed."
+msgstr "That member already has the same job for this station. No jobs were changed."
+
+# status.station.transfer_same_member
+msgid "Choose a different member. No jobs were changed."
+msgstr "Choose a different member. No jobs were changed."
+
+# status.station.transfer_source_changed
+msgid "The source queue changed or became unavailable. No jobs were changed."
+msgstr "The source queue changed or became unavailable. No jobs were changed."
+
+# status.station.transfer_source_changed_after_add
+msgid "The destination job was added, but the source queue changed. The source was not removed; a duplicate may remain."
+msgstr "The destination job was added, but the source queue changed. The source was not removed; a duplicate may remain."
+
+# status.station.transfer_source_missing
+msgid "The exact source job is no longer available. No jobs were changed."
+msgstr "The exact source job is no longer available. No jobs were changed."
+
+# status.station.transfer_source_remove_rejected
+msgid "The destination job was added, but Kenshi rejected the source removal. A duplicate remains; review both queues."
+msgstr "The destination job was added, but Kenshi rejected the source removal. A duplicate remains; review both queues."
+
+# status.station.transfer_source_remove_unverified
+msgid "The destination job was added, but the source removal could not be verified. Review both queues before making another change."
+msgstr "The destination job was added, but the source removal could not be verified. Review both queues before making another change."
+
+# status.station.transfer_success
+msgid "Moved {job} from {source} to {destination}."
+msgstr "Moved {job} from {source} to {destination}."
+
+# status.station.transfer_target_unavailable
+msgid "The station target is unavailable. No jobs were changed."
+msgstr "The station target is unavailable. No jobs were changed."
+
+# status.station.unsupported_job
+msgid "This station does not expose a supported permanent job. No jobs were changed."
+msgstr "This station does not expose a supported permanent job. No jobs were changed."
+
+# status.station_action.pending
+msgid "Another job change is pending. Try again after it finishes."
+msgstr "Another job change is pending. Try again after it finishes."
+
+# status.station_action.queue_or_station_changed
+msgid "The member queue or station changed. No jobs were changed."
+msgstr "The member queue or station changed. No jobs were changed."
+
+# status.station_action.validating_assignment
+msgid "Validating the station assignment..."
+msgstr "Validating the station assignment..."
+
+# status.station_action.validating_removal
+msgid "Validating all jobs for this station..."
+msgstr "Validating all jobs for this station..."
+
+# status.station_scan.interrupted
+msgid "The synchronous player-station scan was interrupted safely."
+msgstr "The synchronous player-station scan was interrupted safely."
+
+# status.station_scan.job_data_unavailable
+msgid "Some loaded squad job data is unavailable."
+msgstr "Some loaded squad job data is unavailable."
+
+# status.station_scan.ownership_limit
+msgid "Player station ownership records reached the 8,192-record safety limit."
+msgstr "Player station ownership records reached the 8,192-record safety limit."
+
+# status.station_scan.ownership_read_failed
+msgid "Player station ownership records could not be read safely."
+msgstr "Player station ownership records could not be read safely."
+
+# status.station_scan.ownership_validation_failed
+msgid "Some player station ownership records failed validation."
+msgstr "Some player station ownership records failed validation."
+
+# status.station_scan.refresh_failed
+msgid "Station assignments could not be refreshed."
+msgstr "Station assignments could not be refreshed."
+
+# status.station_scan.roster_incomplete
+msgid "Player squad roster could not be read completely."
+msgstr "Player squad roster could not be read completely."
+
+# status.station_scan.stopped_before_candidates
+msgid "The player-station scan stopped before every candidate was read."
+msgstr "The player-station scan stopped before every candidate was read."
+
+# status.station_scan.target_limit
+msgid "Assigned station target list reached its safety limit."
+msgstr "Assigned station target list reached its safety limit."
+
+# status.station_scan.target_read_failed
+msgid "An assigned station target could not be read safely."
+msgstr "An assigned station target could not be read safely."
+
+# status.transfer.destination_full
+msgid "The destination queue is at the safety limit. No jobs were changed."
+msgstr "The destination queue is at the safety limit. No jobs were changed."
+
+# status.transfer.disabled
+msgid "General job transfer is disabled in this test build."
+msgstr "General job transfer is disabled in this test build."
+
+# status.transfer.duplicate
+msgid "The destination already has the same job. No jobs were changed."
+msgstr "The destination already has the same job. No jobs were changed."
+
+# status.transfer.interrupted
+msgid "The transfer was interrupted. Review both queues before another change."
+msgstr "The transfer was interrupted. Review both queues before another change."
+
+# status.transfer.queue_changed
+msgid "A queue changed before the transfer. Review both members and try again."
+msgstr "A queue changed before the transfer. Review both members and try again."
+
+# status.transfer.queue_changed_after_drop
+msgid "A source or destination queue changed after the drop. No jobs were changed."
+msgstr "A source or destination queue changed after the drop. No jobs were changed."
+
+# status.transfer.queue_unverified
+msgid "A live queue could not be verified for the transfer. No jobs were changed."
+msgstr "A live queue could not be verified for the transfer. No jobs were changed."
+
+# status.transfer.rejected
+msgid "Kenshi rejected the job transfer. No further jobs were changed."
+msgstr "Kenshi rejected the job transfer. No further jobs were changed."
+
+# status.transfer.roster_member_left
+msgid "The source or destination left the active player roster. No jobs were changed."
+msgstr "The source or destination left the active player roster. No jobs were changed."
+
+# status.transfer.success
+msgid "Permanent job moved to the destination member."
+msgstr "Permanent job moved to the destination member."
+
+# target.label.unavailable
+msgid "Target unavailable"
+msgstr "Target unavailable"
+
+# target.label.unnamed
+msgid "Unnamed target"
+msgstr "Unnamed target"
+
+# tooltip.job
+msgid "{member} | Priority {priority}\n{job}{target_line}"
+msgstr "{member} | Priority {priority}\n{job}{target_line}"
+
+# tooltip.job.target
+msgid "\nTarget: {target}"
+msgstr "\nTarget: {target}"
+
+# ui.action.add_healing
+msgid "Add Healing"
+msgstr "Add Healing"
+
+# ui.action.add_short
+msgid "Add"
+msgstr "Add"
+
+# ui.action.clear_queue
+msgid "Clear Queue"
+msgstr "Clear Queue"
+
+# ui.action.close
+msgid "Close"
+msgstr "Close"
+
+# ui.action.drop_to_remove
+msgid "DROP TO REMOVE"
+msgstr "DROP TO REMOVE"
+
+# ui.action.options
+msgid "Options"
+msgstr "Options"
+
+# ui.action.prioritize_healing
+msgid "Prioritize Healing"
+msgstr "Prioritize Healing"
+
+# ui.action.remove_invalid_jobs
+msgid "Remove Invalid Jobs"
+msgstr "Remove Invalid Jobs"
+
+# ui.action.remove_jobs
+msgid "Remove Job(s)"
+msgstr "Remove Job(s)"
+
+# ui.action.reset_default
+msgid "Reset Default"
+msgstr "Reset Default"
+
+# ui.dialog.no
+msgid "No"
+msgstr "No"
+
+# ui.dialog.yes
+msgid "Yes"
+msgstr "Yes"
+
+# ui.hud.open_manager_tooltip
+msgid "Open Job Manager (Ctrl+J)"
+msgstr "Open Job Manager (Ctrl+J)"
+
+# ui.jobs.toggle_off
+msgid "Jobs: OFF"
+msgstr "Jobs: OFF"
+
+# ui.jobs.toggle_on
+msgid "Jobs: ON"
+msgstr "Jobs: ON"
+
+# ui.priority.label
+msgid "Priority {number}"
+msgstr "Priority {number}"
+
+# ui.squad.current
+msgid "Current squad"
+msgstr "Current squad"
+
+# ui.squad.current_marker
+msgid "CURRENT SQUAD"
+msgstr "CURRENT SQUAD"
+
+# ui.squad.empty.no_manageable_members
+msgid "There are no active squads with job-manageable members."
+msgstr "There are no active squads with job-manageable members."
+
+# ui.squad.empty.unavailable
+msgid "The active squads are unavailable and have no session snapshot."
+msgstr "The active squads are unavailable and have no session snapshot."
+
+# ui.squad.generic
+msgid "Squad"
+msgstr "Squad"
+
+# ui.squad.group_header
+msgid "{toggle}  {squad}  |  Members: {members}"
+msgstr "{toggle}  {squad}  |  Members: {members}"
+
+# ui.squad.heading
+msgid "{squad}  |  Members: {members}{snapshot}{squad_count}{roster_state}  |  Recipients: {recipients}"
+msgstr "{squad}  |  Members: {members}{snapshot}{squad_count}{roster_state}  |  Recipients: {recipients}"
+
+# ui.squad.member_stats_header
+msgid "SQUAD MEMBER  |  TOP STATS"
+msgstr "SQUAD MEMBER  |  TOP STATS"
+
+# ui.squad.readonly_marker
+msgid "  |  Read-only snapshot"
+msgstr "  |  Read-only snapshot"
+
+# ui.squad.roster_incomplete
+msgid "  |  Roster incomplete"
+msgstr "  |  Roster incomplete"
+
+# ui.squad.squad_count
+msgid "  |  Squads: {count}"
+msgstr "  |  Squads: {count}"
+
+# ui.squad_selector.incomplete
+msgid "SQUADS *"
+msgstr "SQUADS *"
+
+# ui.squad_selector.label
+msgid "SQUADS"
+msgstr "SQUADS"
+
+# ui.squad_selector.unavailable
+msgid "SQUADS ?"
+msgstr "SQUADS ?"
+
+# ui.tab.squad_jobs
+msgid "Squad Jobs"
+msgstr "Squad Jobs"
+
+# ui.tab.stations
+msgid "Stations"
+msgstr "Stations"
+
+# ui.window.title
+msgid "Kenshi Job Management {version}"
+msgstr "Kenshi Job Management {version}"

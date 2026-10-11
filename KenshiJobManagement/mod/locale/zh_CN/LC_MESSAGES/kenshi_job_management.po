@@ -1,0 +1,1236 @@
+# Kenshi Job Management (LEOPARD fork) - zh_CN
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# batch.cleanup_stage.initial_capture
+msgid "initial malformed-row capture"
+msgstr "初始错误行捕获"
+
+# batch.cleanup_stage.plan
+msgid "cleanup plan"
+msgstr "清理计划"
+
+# batch.cleanup_stage.queue_changed
+msgid "exact queue precheck"
+msgstr "完整队列预检查"
+
+# batch.cleanup_stage.raw_remove
+msgid "native exact-slot removal"
+msgstr "原生精确槽位移除"
+
+# batch.cleanup_stage.rethink
+msgid "AI rethink"
+msgstr "AI重新评估"
+
+# batch.cleanup_stage.unknown
+msgid "unspecified cleanup stage"
+msgstr "未指定的清理阶段"
+
+# batch.cleanup_stage.verify_erase
+msgid "immediate erase verification"
+msgstr "立即验证删除"
+
+# batch.cleanup_stage.verify_rethink
+msgid "post-rethink queue verification"
+msgstr "重新评估后的队列验证"
+
+# batch.result.action_completed
+msgid "Job action completed."
+msgstr "工作操作完成。"
+
+# batch.result.added_healing
+msgid "Added healing jobs: {count}."
+msgstr "已添加治疗工作：{count}项。"
+
+# batch.result.appended
+msgid "Appended job bundles: {count}."
+msgstr "已追加工作组：{count}项。"
+
+# batch.result.capture_failed
+msgid "A selected job queue could not be read safely. No further jobs were changed."
+msgstr "无法安全读取所选工作队列。未再更改任何工作。"
+
+# batch.result.clipboard_empty
+msgid "Copy one or more jobs before pasting."
+msgstr "粘贴前请先复制一个或多个工作。"
+
+# batch.result.completed_recipients
+msgid "Completed recipients before stopping: {count}."
+msgstr "停止前已处理接收者：{count}个。"
+
+# batch.result.destination_full
+msgid "A destination job queue is at the safety limit."
+msgstr "目标工作队列已达到安全上限。"
+
+# batch.result.disabled
+msgid "This job action is disabled in the current build."
+msgstr "此工作操作在当前版本中已禁用。"
+
+# batch.result.duplicate
+msgid "The destination already has one of the selected jobs. No jobs were moved."
+msgstr "目标已有所选工作中的一项。未移动任何工作。"
+
+# batch.result.duplicate_remains
+msgid "The move stopped after destination copies were added. Review the affected job queues before another change."
+msgstr "目标副本添加后移动已停止。再次更改前请检查受影响的工作队列。"
+
+# batch.result.failed_bundle
+msgid "Failed bundle: {bundle}."
+msgstr "失败的工作组：{bundle}。"
+
+# batch.result.failed_member
+msgid "Member: {member}."
+msgstr "成员：{member}。"
+
+# batch.result.failure_stage
+msgid "Stage: {stage}."
+msgstr "阶段：{stage}。"
+
+# batch.result.healing_rejected
+msgid "Kenshi rejected a permanent job. No further jobs were changed."
+msgstr "Kenshi拒绝了永久工作。未再更改任何工作。"
+
+# batch.result.healing_rejected_role
+msgid "Kenshi rejected the {role} permanent job. No further jobs were changed."
+msgstr "Kenshi拒绝了{role}永久工作。未再更改任何工作。"
+
+# batch.result.invalid_cleanup_rethink_unverified
+msgid "Invalid-job cleanup retained an exactly verified removal, but AI rethink or its resulting queue could not be verified. Review the affected queue before another change."
+msgstr "无效工作清理保留了一项已精确验证的移除，但无法验证AI重新检查或其结果队列。再次更改前请检查受影响的队列。"
+
+# batch.result.invalid_cleanup_unverified
+msgid "Invalid-job cleanup stopped after an unverified removal. Review the affected queue before another change."
+msgstr "无效工作清理在一次未验证的移除后停止。再次更改前请检查受影响的队列。"
+
+# batch.result.invalid_request
+msgid "The selected job action is no longer valid."
+msgstr "所选工作操作已不再有效。"
+
+# batch.result.no_changes
+msgid "No jobs needed changes."
+msgstr "没有需要更改的工作。"
+
+# batch.result.no_rollback
+msgid "Verified earlier changes remain; no rollback was attempted."
+msgstr "之前已验证的更改仍然保留；未尝试回滚。"
+
+# batch.result.queue_changed
+msgid "A selected member or job queue changed before the action completed. Review the affected members and try again."
+msgstr "所选成员或工作队列在操作完成前发生了更改。请检查受影响的成员后重试。"
+
+# batch.result.removed_invalid_rows
+msgid "Removed invalid job rows: {count}."
+msgstr "已移除无效工作行：{count}项。"
+
+# batch.result.removed_source_rows
+msgid "Removed source rows: {count}."
+msgstr "已移除源行：{count}项。"
+
+# batch.result.reordered
+msgid "Reordered jobs: {count}."
+msgstr "已重新排列工作：{count}项。"
+
+# batch.result.skipped_duplicates
+msgid "Skipped duplicate bundles: {count}."
+msgstr "已跳过重复工作组：{count}项。"
+
+# batch.result.unverified
+msgid "The job action stopped after an unverified result. Review the affected job queues before another change."
+msgstr "工作操作在结果未验证后停止。再次更改前请检查受影响的工作队列。"
+
+# condition.carried
+msgid "Carried"
+msgstr "被携带"
+
+# condition.dead
+msgid "Dead"
+msgstr "死亡"
+
+# condition.dying
+msgid "Dying"
+msgstr "垂死"
+
+# condition.imprisoned
+msgid "Imprisoned"
+msgstr "被囚禁"
+
+# condition.kidnapped
+msgid "Kidnapped"
+msgstr "被绑架"
+
+# condition.playing_dead
+msgid "Playing dead"
+msgstr "装死"
+
+# condition.unconscious
+msgid "Unconscious"
+msgstr "失去意识"
+
+# fallback.member.unavailable
+msgid "Unavailable member"
+msgstr "不可用的成员"
+
+# fallback.squad.unavailable
+msgid "Unavailable squad"
+msgstr "不可用的小队"
+
+# job.label.operating
+msgid "Operating..."
+msgstr "工作中..."
+
+# job.label.unknown_permanent
+msgid "Unknown permanent job"
+msgstr "未知永久工作"
+
+# job.role.engineering
+msgid "Engineering"
+msgstr "工程"
+
+# job.role.medic
+msgid "Medic"
+msgstr "医生"
+
+# job.role.other
+msgid "other jobs"
+msgstr "其他工作"
+
+# job.role.put_in_bed
+msgid "Find and Put in Bed"
+msgstr "寻找并放到床上"
+
+# job.role.rescue
+msgid "Find and Rescue"
+msgstr "寻找并救援"
+
+# job.role.robotics
+msgid "Robotics"
+msgstr "机器人学"
+
+# job.role.splinting
+msgid "Splinting"
+msgstr "夹板治疗中"
+
+# member.condition.cached_unavailable
+msgid "Cached / unavailable"
+msgstr "已缓存／不可用"
+
+# member.condition.cached_unloaded
+msgid "Cached / unloaded"
+msgstr "已缓存／未加载"
+
+# member.condition.queue_limit
+msgid "Queue exceeds safety limit (read-only)"
+msgstr "队列超过安全上限（只读）"
+
+# member.label.unavailable_condition
+msgid "Unavailable"
+msgstr "不可用"
+
+# member.label.unnamed
+msgid "Unnamed squad member"
+msgstr "未命名的小队成员"
+
+# member.queue.empty
+msgid "[No permanent jobs]"
+msgstr "[无永久工作]"
+
+# member.queue.unavailable_readonly
+msgid "Queue unavailable (read-only)"
+msgstr "队列不可用（只读）"
+
+# member.stats.none_above_one
+msgid "No stats above 1"
+msgstr "没有高于1的属性"
+
+# member.stats.unavailable
+msgid "Stats unavailable"
+msgstr "属性不可用"
+
+# modal.clear.prompt
+msgid "Are you sure you wish to remove all jobs?\n\nRemove all {count} permanent jobs from {member}?"
+msgstr "确定要删除所有工作吗？\n\n要从{member}移除全部{count}项永久工作吗？"
+
+# modal.clear.title
+msgid "Confirm Clear Queue"
+msgstr "确认清空队列"
+
+# modal.message_log.help
+msgid "The 10 most recent non-empty timestamped messages from this game session (oldest to newest)."
+msgstr "此游戏会话中最近的10条非空带时间戳消息（从旧到新）。"
+
+# modal.message_log.title
+msgid "Recent Job Manager Messages"
+msgstr "最近的工作管理器消息"
+
+# modal.options.help
+msgid "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately."
+msgstr "外观设置应用于整个管理器。站点类别筛选仅应用于\"站点\"页面。\n更改会全局保存并立即应用。"
+
+# modal.options.title
+msgid "Job Manager Options"
+msgstr "工作管理器选项"
+
+# options.appearance.dark_ui
+msgid "Dark UI friendly font colors"
+msgstr "适合深色UI的字体颜色"
+
+# options.appearance.dark_ui.help
+msgid "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text."
+msgstr "关闭：原版暖色背景配深色文字。\n开启：深色UI背景配当前浅色文字。"
+
+# options.appearance.header
+msgid "APPEARANCE"
+msgstr "外观"
+
+# options.stations.header
+msgid "STATION CATEGORY FILTERS"
+msgstr "站点类别筛选"
+
+# skill.armour_smith
+msgid "Armour smith"
+msgstr "护甲工匠"
+
+# skill.assassination
+msgid "Assassination"
+msgstr "暗杀"
+
+# skill.athletics
+msgid "Athletics"
+msgstr "奔跑"
+
+# skill.blunt
+msgid "Blunt"
+msgstr "钝器"
+
+# skill.cooking
+msgid "Cooking"
+msgstr "烹饪"
+
+# skill.crossbow_smith
+msgid "Crossbow smith"
+msgstr "十字弩工匠"
+
+# skill.crossbows
+msgid "Crossbows"
+msgstr "十字弩"
+
+# skill.dexterity
+msgid "Dexterity"
+msgstr "灵巧性"
+
+# skill.dodge
+msgid "Dodge"
+msgstr "躲闪"
+
+# skill.engineer
+msgid "Engineer"
+msgstr "工程师"
+
+# skill.farming
+msgid "Farming"
+msgstr "耕作"
+
+# skill.field_medic
+msgid "Field medic"
+msgstr "战地医生"
+
+# skill.hackers
+msgid "Hackers"
+msgstr "砍刀"
+
+# skill.heavy_weapons
+msgid "Heavy weapons"
+msgstr "重型武器"
+
+# skill.hive_medic
+msgid "Hive medic"
+msgstr "蜂巢医师"
+
+# skill.katanas
+msgid "Katanas"
+msgstr "武士刀"
+
+# skill.labouring
+msgid "Labouring"
+msgstr "劳动"
+
+# skill.lockpicking
+msgid "Lockpicking"
+msgstr "撬锁"
+
+# skill.martial_arts
+msgid "Martial arts"
+msgstr "武术"
+
+# skill.mass_combat
+msgid "Mass combat"
+msgstr "群体战斗"
+
+# skill.melee_attack
+msgid "Melee attack"
+msgstr "近战攻击"
+
+# skill.melee_defence
+msgid "Melee defence"
+msgstr "近战防御"
+
+# skill.perception
+msgid "Perception"
+msgstr "知觉"
+
+# skill.polearms
+msgid "Polearms"
+msgstr "长柄刀"
+
+# skill.precision_shooting
+msgid "Precision shooting"
+msgstr "精准射击"
+
+# skill.sabres
+msgid "Sabres"
+msgstr "军刀"
+
+# skill.science
+msgid "Science"
+msgstr "科学"
+
+# skill.stealth
+msgid "Stealth"
+msgstr "潜行"
+
+# skill.strength
+msgid "Strength"
+msgstr "力量"
+
+# skill.survival
+msgid "Survival"
+msgstr "生存"
+
+# skill.swimming
+msgid "Swimming"
+msgstr "游泳"
+
+# skill.thievery
+msgid "Thievery"
+msgstr "偷窃"
+
+# skill.toughness
+msgid "Toughness"
+msgstr "韧性"
+
+# skill.turrets
+msgid "Turrets"
+msgstr "炮塔"
+
+# skill.veterinary
+msgid "Veterinary"
+msgstr "兽医"
+
+# skill.weapon_smith
+msgid "Weapon smith"
+msgstr "武器工匠"
+
+# skill.weapons
+msgid "Weapons"
+msgstr "武器"
+
+# squad.placeholder.unnamed_selector
+msgid "Unnamed squad"
+msgstr "未命名的小队"
+
+# station.area.wilderness
+msgid "Wilderness"
+msgstr "荒野"
+
+# station.banner.count
+msgid "{count} PLAYER STATIONS"
+msgstr "玩家站点 {count}个"
+
+# station.banner.fault
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE"
+msgstr "部分扫描 - 部分站点或小队数据不可用"
+
+# station.banner.fault_failed
+msgid "PARTIAL SCAN - SOME STATION OR ROSTER DATA IS UNAVAILABLE  |  {failed} target(s) failed"
+msgstr "部分扫描 - 部分站点或小队数据不可用  |  失败目标：{failed}个"
+
+# station.banner.partial
+msgid "PARTIAL SCAN - RESULTS INCOMPLETE  |  {completed} of {candidate} candidates read  |  {failed} target(s) failed"
+msgstr "部分扫描 - 结果不完整  |  已读取{completed}/{candidate}个候选项  |  失败目标：{failed}个"
+
+# station.banner.truncated
+msgid "PLAYER STATION RESULT LIST TRUNCATED AT 2,048 - RESULTS INCOMPLETE  |  {failed} target(s) failed"
+msgstr "玩家站点结果列表已截断（上限2,048）- 结果不完整  |  失败目标：{failed}个"
+
+# station.category.crafting
+msgid "Crafting"
+msgstr "制作"
+
+# station.category.defense
+msgid "Defense"
+msgstr "防御"
+
+# station.category.mining
+msgid "Mining"
+msgstr "采矿"
+
+# station.category.other
+msgid "Other / Unclassified"
+msgstr "其他／未分类"
+
+# station.category.refining
+msgid "Refining"
+msgstr "精炼"
+
+# station.category.research
+msgid "Research"
+msgstr "研究"
+
+# station.category.storage_hauling
+msgid "Storage / Hauling"
+msgstr "储存／搬运"
+
+# station.category.training
+msgid "Training"
+msgstr "训练"
+
+# station.detail.assigned_header
+msgid "ASSIGNED WORKERS ({count})"
+msgstr "已分配工人（{count}）"
+
+# station.detail.assignment_unsupported
+msgid "This station does not expose a verified permanent-job mapping."
+msgstr "此站点未提供经过验证的永久工作映射。"
+
+# station.detail.available_header
+msgid "AVAILABLE WORKERS ({count})"
+msgstr "可用工人（{count}）"
+
+# station.detail.no_candidates
+msgid "No loaded readable unassigned characters."
+msgstr "没有已加载且可读取的未分配角色。"
+
+# station.detail.summary
+msgid "{category}  |  Relevant skill: {skill}"
+msgstr "{category}  |  相关技能：{skill}"
+
+# station.detail.unassigned
+msgid "UNASSIGNED"
+msgstr "未分配"
+
+# station.empty.filtered
+msgid "No stations match the current category filters."
+msgstr "没有站点符合当前类别筛选条件。"
+
+# station.empty.partial
+msgid "Partial scan in progress. No matching stations are available yet."
+msgstr "部分扫描进行中。暂时没有可用的匹配站点。"
+
+# station.group.header.many
+msgid "{category}  |  {count} stations  |  {unassigned} unassigned"
+msgstr "{category}  |  站点：{count}个  |  未分配：{unassigned}个"
+
+# station.group.header.one
+msgid "{category}  |  {count} station  |  {unassigned} unassigned"
+msgstr "{category}  |  站点：{count}个  |  未分配：{unassigned}个"
+
+# station.name.unnamed_assigned_target
+msgid "Unnamed assigned target"
+msgstr "未命名的已分配目标"
+
+# station.name.unnamed_player_station
+msgid "Unnamed player station"
+msgstr "未命名的玩家站点"
+
+# station.person.assigned_tooltip
+msgid "{caption}\n\nRight-click to request removal from this station."
+msgstr "{caption}\n\n右键请求从此站点移除。"
+
+# station.person.available_tooltip
+msgid "{caption}\n\nClick or press Enter to request assignment. Scrolling never assigns."
+msgstr "{caption}\n\n点击或按 Enter 请求分配。滚动不会分配。"
+
+# station.person.caption.many
+msgid "{name}  |  {skill}  |  {jobs} total jobs"
+msgstr "{name}  |  {skill}  |  永久工作：{jobs}项"
+
+# station.person.caption.one
+msgid "{name}  |  {skill}  |  {jobs} total job"
+msgstr "{name}  |  {skill}  |  永久工作：{jobs}项"
+
+# station.person.unknown
+msgid "Unknown person"
+msgstr "未知人物"
+
+# station.skill.none
+msgid "None"
+msgstr "无"
+
+# station.skill.unknown
+msgid "Unknown"
+msgstr "未知"
+
+# station.status.broken
+msgid "BROKEN"
+msgstr "损坏"
+
+# station.status.cannot_work
+msgid "CANNOT WORK"
+msgstr "无法工作"
+
+# station.status.category_save_failed
+msgid "The category was changed, but settings.ini could not be saved."
+msgstr "类别已更改，但无法保存settings.ini。"
+
+# station.status.destroyed
+msgid "Destroyed"
+msgstr "已摧毁"
+
+# station.status.disabled
+msgid "DISABLED"
+msgstr "已禁用"
+
+# station.status.dismantling
+msgid "DISMANTLING"
+msgstr "拆除中"
+
+# station.status.incomplete
+msgid "INCOMPLETE"
+msgstr "不完整"
+
+# station.status.no_power
+msgid "NO POWER"
+msgstr "无电力"
+
+# station.status.power_off
+msgid "POWER OFF"
+msgstr "电源关闭"
+
+# station.tooltip.area
+msgid "Area: {value}"
+msgstr "区域：{value}"
+
+# station.tooltip.assignment_unsupported
+msgid "Assignment: Not supported for this station"
+msgstr "分配：此站点不支持"
+
+# station.tooltip.cannot_work
+msgid "Cannot work: {value}"
+msgstr "无法工作：{value}"
+
+# station.tooltip.category
+msgid "Category: {value}"
+msgstr "类别：{value}"
+
+# station.tooltip.relevant_skill
+msgid "Relevant skill: {value}"
+msgstr "相关技能：{value}"
+
+# station.tooltip.work_status_unavailable
+msgid "Work status: Unavailable"
+msgstr "工作状态：不可用"
+
+# status.batch.adding_healing_jobs
+msgid "Adding and prioritizing healing jobs..."
+msgstr "正在添加并提升治疗工作优先级..."
+
+# status.batch.applying_healing_priorities
+msgid "Applying healing priorities..."
+msgstr "正在应用治疗优先级..."
+
+# status.batch.healing_jobs_updated
+msgid "Healing jobs updated."
+msgstr "治疗工作已更新。"
+
+# status.batch.healing_priorities_updated
+msgid "Healing priorities updated."
+msgstr "治疗优先级已更新。"
+
+# status.batch.invalid_cleanup_completed
+msgid "Invalid-job cleanup completed."
+msgstr "无效工作清理完成。"
+
+# status.batch.jobs_moved
+msgid "Jobs moved."
+msgstr "工作已移动。"
+
+# status.batch.jobs_pasted
+msgid "Jobs pasted."
+msgstr "工作已粘贴。"
+
+# status.batch.no_removable_invalid
+msgid "No removable invalid jobs were found."
+msgstr "未找到可移除的无效工作。"
+
+# status.batch.removing_invalid_jobs
+msgid "Removing invalid fixed-target jobs..."
+msgstr "正在移除无效的固定目标工作..."
+
+# status.clear.queue_changed
+msgid "The queue changed after confirmation. Clear Queue was cancelled."
+msgstr "确认后队列发生了更改。已取消清空队列。"
+
+# status.clear.rejected
+msgid "Kenshi rejected Clear Queue. No jobs were changed."
+msgstr "Kenshi拒绝清空队列。未更改任何工作。"
+
+# status.clear.success
+msgid "All permanent jobs were removed from {member}."
+msgstr "已从{member}移除所有永久工作。"
+
+# status.clipboard.cleared_suffix
+msgid " Clipboard cleared."
+msgstr " 剪贴板已清空。"
+
+# status.clipboard.copy_success
+msgid "Copied jobs: {count}. Select recipients, then press Ctrl+V."
+msgstr "已复制工作：{count}项。选择接收者后按Ctrl+V。"
+
+# status.clipboard.jobs_copied
+msgid "Jobs copied."
+msgstr "工作已复制。"
+
+# status.clipboard.select_jobs
+msgid "Select one or more jobs before copying."
+msgstr "复制前请先选择一个或多个工作。"
+
+# status.clipboard.select_recipient
+msgid "Select at least one recipient before pasting."
+msgstr "粘贴前请先选择至少一个接收者。"
+
+# status.drag.queue_changed
+msgid "The queue changed during the drag. Review it and try again."
+msgstr "拖动期间队列发生了更改。请检查后重试。"
+
+# status.drag.squad_or_queue_changed
+msgid "A squad or queue changed during the drag. Review it and try again."
+msgstr "拖动期间小队或队列发生了更改。请检查后重试。"
+
+# status.jobs.disabled
+msgid "Jobs disabled for this member."
+msgstr "已禁用此成员的工作。"
+
+# status.jobs.enabled
+msgid "Jobs enabled for this member."
+msgstr "已启用此成员的工作。"
+
+# status.jobs.priority_updated
+msgid "Permanent-job priority updated."
+msgstr "永久工作优先级已更新。"
+
+# status.jobs.reorder_rejected
+msgid "Kenshi rejected the queue reorder. No other jobs were changed."
+msgstr "Kenshi拒绝重新排列队列。其他工作未更改。"
+
+# status.jobs.toggle_rejected
+msgid "Kenshi rejected the Jobs toggle. No jobs were changed."
+msgstr "Kenshi拒绝切换工作。未更改任何工作。"
+
+# status.member.queue_unavailable
+msgid "The member queue is unavailable. No jobs were changed."
+msgstr "成员队列不可用。未更改任何工作。"
+
+# status.message_log.empty
+msgid "No recent messages in this session."
+msgstr "此会话中没有最近消息。"
+
+# status.move.invalid_destination
+msgid "Move cancelled: choose a member that does not own any selected source job."
+msgstr "移动已取消：请选择不拥有任何所选源工作的成员。"
+
+# status.priority.applied
+msgid "Priority order applied to {count} squad members."
+msgstr "已为{count}名小队成员应用优先级顺序。"
+
+# status.priority.interrupted
+msgid "Priority update interrupted."
+msgstr "优先级更新已中断。"
+
+# status.priority.move_rejected
+msgid "Kenshi rejected or interrupted a permanent-job priority move; no further members were changed."
+msgstr "Kenshi拒绝或中断了永久工作优先级移动；未再更改其他成员。"
+
+# status.priority.move_unverified
+msgid "A priority move could not be verified; no further members were changed."
+msgstr "无法验证优先级移动；未再更改其他成员。"
+
+# status.priority.no_changes
+msgid "No rescue, medical, robotics, splinting, or engineering jobs needed reordering."
+msgstr "无需重新排列救援、医疗、机器人学、夹板治疗或工程工作。"
+
+# status.priority.queue_changed
+msgid "The permanent-job queue changed while priorities were being applied."
+msgstr "应用优先级期间永久工作队列发生了更改。"
+
+# status.priority.queue_prepare_failed
+msgid "A permanent-job queue could not be prepared for priority changes."
+msgstr "无法准备更改优先级所需的永久工作队列。"
+
+# status.priority.roster_limit
+msgid "The selected squad roster exceeds the safe batch limit. No priorities were changed."
+msgstr "所选小队名单超过安全批处理上限。未更改任何优先级。"
+
+# status.priority.skipped
+msgid "Skipped unavailable or unreadable members: {count}."
+msgstr "已跳过{count}名不可用或无法读取的成员。"
+
+# status.priority.snapshot_failed
+msgid "Priority update stopped because its snapshot could not be allocated."
+msgstr "无法创建快照，优先级更新已停止。"
+
+# status.priority.squad_changed
+msgid "Squad membership changed while priorities were being applied."
+msgstr "应用优先级期间小队成员发生了更改。"
+
+# status.priority.squad_changed_verification
+msgid "The squad changed while verifying a priority move."
+msgstr "验证优先级移动期间小队发生了更改。"
+
+# status.priority.squad_or_queue_changed
+msgid "The squad or permanent-job queue changed before a priority move."
+msgstr "优先级移动前小队或永久工作队列发生了更改。"
+
+# status.priority.squad_unavailable
+msgid "The selected squad is no longer current or available."
+msgstr "所选小队已不是当前小队，或已不可用。"
+
+# status.queue.readonly
+msgid "The source or destination queue is read-only. No jobs were changed."
+msgstr "源队列或目标队列为只读。未更改任何工作。"
+
+# status.remove_selected.candidate
+msgid "{member} / {job}"
+msgstr "{member} / {job}"
+
+# status.remove_selected.candidate_with_priority
+msgid "{member} / {job} / Priority {priority}"
+msgstr "{member} / {job} / 优先级 {priority}"
+
+# status.remove_selected.interrupted
+msgid "Deletion queue interrupted. Completed removals: {completed}. Failed: {failed}. Remaining selected jobs: {remaining}. Review and try again."
+msgstr "删除队列已中断。已完成删除：{completed}项。失败：{failed}项。仍选中的工作：{remaining}项。请检查后重试。"
+
+# status.remove_selected.success
+msgid "Removed permanent jobs: {count}."
+msgstr "已移除永久工作：{count}项。"
+
+# status.selection.no_recipient
+msgid "Select at least one recipient first."
+msgstr "请先选择至少一个接收者。"
+
+# status.selector.selected_jobs_unavailable
+msgid "Kenshi selected the squad, but its jobs are temporarily unavailable."
+msgstr "Kenshi已选择小队，但其工作暂时不可用。"
+
+# status.selector.selection_cancelled_busy
+msgid "Squad selection was cancelled because another manager action is active."
+msgstr "另一个管理器操作正在进行，小队选择已取消。"
+
+# status.selector.squad_gone
+msgid "That squad is no longer available. The current squad was not changed."
+msgstr "该小队已不可用。当前小队未更改。"
+
+# status.selector.squad_jobs_unavailable
+msgid "That squad has unavailable job data and cannot be selected yet."
+msgstr "该小队的工作数据不可用，暂时无法选择。"
+
+# status.selector.squad_not_in_roster
+msgid "That squad is not available in the current roster."
+msgstr "该小队不在当前名单中。"
+
+# status.settings.appearance_save_failed
+msgid "Appearance changed for this session, but settings.ini could not be saved."
+msgstr "外观已在本会话中更改，但无法保存settings.ini。"
+
+# status.settings.station_save_failed
+msgid "Station-category options were applied, but settings.ini could not be saved."
+msgstr "站点类别选项已应用，但无法保存settings.ini。"
+
+# status.squad.current_unavailable
+msgid "Kenshi did not expose a current squad. No jobs were changed."
+msgstr "Kenshi未提供当前小队。未更改任何工作。"
+
+# status.squad.dead_hidden
+msgid "No active squad is available. Kenshi's __DEAD__ holding squad is hidden."
+msgstr "没有可用的活动小队。Kenshi的__DEAD__收容小队已隐藏。"
+
+# status.squad.refresh_failed_cached
+msgid "The squad roster refresh failed. Cached rows are read-only until the next refresh."
+msgstr "小队名单刷新失败。在下次刷新前，缓存行仅可读取。"
+
+# status.station.assign_error_verified
+msgid "Kenshi reported an error after changing the queue. The exact station job change was verified."
+msgstr "更改队列后Kenshi报告了错误。站点工作的精确更改已验证。"
+
+# status.station.assign_stopped_projection
+msgid "Station assignment stopped. Verified job changes: 0. The station projection became unavailable."
+msgstr "站点分配已停止。已验证的工作更改：0项。站点视图不可用。"
+
+# status.station.assign_stopped_queue
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed or became unavailable."
+msgstr "站点分配已停止。已验证的工作更改：0项。成员队列已更改或不可用。"
+
+# status.station.assign_stopped_race
+msgid "Station assignment stopped. Verified job changes: 0. The member queue changed immediately before assignment."
+msgstr "站点分配已停止。已验证的工作更改：0项。分配前成员队列刚刚发生了更改。"
+
+# status.station.assign_success
+msgid "Assigned {member} to this station. Permanent jobs added: {count}."
+msgstr "已将{member}分配到此站点。添加的永久工作：{count}项。"
+
+# status.station.assign_unexpected_queue
+msgid "Kenshi changed the queue in an unexpected way. Verified station job changes: 0. Review the member queue before another change."
+msgstr "Kenshi以意外方式更改了队列。已验证的站点工作更改：0项。再次更改前请检查成员队列。"
+
+# status.station.assign_unverified_queue
+msgid "The station job was sent, but verified job changes: 0. The queue became unavailable. Review the member queue."
+msgstr "已发送站点工作，但已验证的工作更改：0项。队列已不可用。请检查成员队列。"
+
+# status.station.invalid_target_or_member
+msgid "The member or exact station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "成员或精确站点不可用，或已不再由玩家管理。未更改任何工作。"
+
+# status.station.job_rejected
+msgid "Kenshi rejected the station job. No jobs were changed."
+msgstr "Kenshi拒绝了站点工作。未更改任何工作。"
+
+# status.station.queue_full
+msgid "The member queue is too full for this station job. No jobs were changed."
+msgstr "成员队列过满，无法添加此站点工作。未更改任何工作。"
+
+# status.station.remove_none
+msgid "{member} has no permanent jobs for this station."
+msgstr "{member}没有属于此站点的永久工作。"
+
+# status.station.remove_stopped_error
+msgid "Station removal stopped. Verified job removals: {count}. Kenshi reported an error after the removal. Review it before another change."
+msgstr "站点移除已停止。已验证的工作移除：{count}项。Kenshi在移除后报告了错误。请检查后再继续。"
+
+# status.station.remove_stopped_queue
+msgid "Station removal stopped. Verified job removals: 0. The member queue changed or became unavailable."
+msgstr "站点移除已停止。已验证的工作移除：0项。成员队列已更改或不可用。"
+
+# status.station.remove_stopped_queue_changed
+msgid "Station removal stopped. Verified job removals: {count}. The exact full queue changed or became unavailable."
+msgstr "站点移除已停止。已验证的工作移除：{count}项。完整精确队列已更改或不可用。"
+
+# status.station.remove_stopped_target
+msgid "Station removal stopped. Verified job removals: {count}. The exact station is no longer player-managed."
+msgstr "站点移除已停止。已验证的工作移除：{count}项。精确站点已不再由玩家管理。"
+
+# status.station.remove_stopped_unavailable
+msgid "Station removal stopped. Verified job removals: {count}. The changed queue became unavailable. Review it before another change."
+msgstr "站点移除已停止。已验证的工作移除：{count}项。更改后的队列不可用。请检查后再继续。"
+
+# status.station.remove_stopped_unexpected
+msgid "Station removal stopped. Verified job removals: {count}. The queue changed in an unexpected way. Review it before another change."
+msgstr "站点移除已停止。已验证的工作移除：{count}项。队列发生了意外更改。请检查后再继续。"
+
+# status.station.remove_success
+msgid "Removed permanent station jobs: {count}. Member: {member}."
+msgstr "已移除永久站点工作：{count}项。成员：{member}。"
+
+# status.station.remove_unavailable
+msgid "The station is unavailable or is no longer player-managed. No jobs were changed."
+msgstr "站点不可用，或已不再由玩家管理。未更改任何工作。"
+
+# status.station.transfer_destination_changed
+msgid "The destination queue changed or became unavailable. No jobs were changed."
+msgstr "目标队列已更改或不可用。未更改任何工作。"
+
+# status.station.transfer_destination_full
+msgid "The destination queue is at the 64-job safety limit. No jobs were changed."
+msgstr "目标队列已达到64项工作的安全上限。未更改任何工作。"
+
+# status.station.transfer_destination_rejected
+msgid "Kenshi rejected the destination job. No jobs were changed."
+msgstr "Kenshi拒绝了目标工作。未更改任何工作。"
+
+# status.station.transfer_destination_unverified
+msgid "The destination could not be verified after adding the job. The source was not changed; review both queues."
+msgstr "添加工作后无法验证目标。源队列未更改；请检查两个队列。"
+
+# status.station.transfer_duplicate
+msgid "That member already has the same job for this station. No jobs were changed."
+msgstr "该成员在此站点已有相同工作。未更改任何工作。"
+
+# status.station.transfer_same_member
+msgid "Choose a different member. No jobs were changed."
+msgstr "请选择其他成员。未更改任何工作。"
+
+# status.station.transfer_source_changed
+msgid "The source queue changed or became unavailable. No jobs were changed."
+msgstr "源队列已更改或不可用。未更改任何工作。"
+
+# status.station.transfer_source_changed_after_add
+msgid "The destination job was added, but the source queue changed. The source was not removed; a duplicate may remain."
+msgstr "目标工作已添加，但源队列发生了更改。源工作未移除；可能仍有重复项。"
+
+# status.station.transfer_source_missing
+msgid "The exact source job is no longer available. No jobs were changed."
+msgstr "精确的源工作已不可用。未更改任何工作。"
+
+# status.station.transfer_source_remove_rejected
+msgid "The destination job was added, but Kenshi rejected the source removal. A duplicate remains; review both queues."
+msgstr "目标工作已添加，但Kenshi拒绝移除源工作。重复项仍然存在；请检查两个队列。"
+
+# status.station.transfer_source_remove_unverified
+msgid "The destination job was added, but the source removal could not be verified. Review both queues before making another change."
+msgstr "目标工作已添加，但无法验证源工作移除。再次更改前请检查两个队列。"
+
+# status.station.transfer_success
+msgid "Moved {job} from {source} to {destination}."
+msgstr "已将{job}从{source}移动到{destination}。"
+
+# status.station.transfer_target_unavailable
+msgid "The station target is unavailable. No jobs were changed."
+msgstr "站点目标不可用。未更改任何工作。"
+
+# status.station.unsupported_job
+msgid "This station does not expose a supported permanent job. No jobs were changed."
+msgstr "此站点未提供受支持的永久工作。未更改任何工作。"
+
+# status.station_action.pending
+msgid "Another job change is pending. Try again after it finishes."
+msgstr "另一个工作更改正在等待处理。完成后请重试。"
+
+# status.station_action.queue_or_station_changed
+msgid "The member queue or station changed. No jobs were changed."
+msgstr "成员队列或站点发生了更改。未更改任何工作。"
+
+# status.station_action.validating_assignment
+msgid "Validating the station assignment..."
+msgstr "正在验证站点分配..."
+
+# status.station_action.validating_removal
+msgid "Validating all jobs for this station..."
+msgstr "正在验证此站点的所有工作..."
+
+# status.station_scan.interrupted
+msgid "The synchronous player-station scan was interrupted safely."
+msgstr "玩家站点同步扫描已安全中断。"
+
+# status.station_scan.job_data_unavailable
+msgid "Some loaded squad job data is unavailable."
+msgstr "部分已加载的小队工作数据不可用。"
+
+# status.station_scan.ownership_limit
+msgid "Player station ownership records reached the 8,192-record safety limit."
+msgstr "玩家站点所有权记录已达到8,192条安全上限。"
+
+# status.station_scan.ownership_read_failed
+msgid "Player station ownership records could not be read safely."
+msgstr "无法安全读取玩家站点所有权记录。"
+
+# status.station_scan.ownership_validation_failed
+msgid "Some player station ownership records failed validation."
+msgstr "部分玩家站点所有权记录验证失败。"
+
+# status.station_scan.refresh_failed
+msgid "Station assignments could not be refreshed."
+msgstr "无法刷新站点分配。"
+
+# status.station_scan.roster_incomplete
+msgid "Player squad roster could not be read completely."
+msgstr "无法完整读取玩家小队名单。"
+
+# status.station_scan.stopped_before_candidates
+msgid "The player-station scan stopped before every candidate was read."
+msgstr "玩家站点扫描在读取所有候选项前停止。"
+
+# status.station_scan.target_limit
+msgid "Assigned station target list reached its safety limit."
+msgstr "已分配站点目标列表达到安全上限。"
+
+# status.station_scan.target_read_failed
+msgid "An assigned station target could not be read safely."
+msgstr "无法安全读取已分配的站点目标。"
+
+# status.transfer.destination_full
+msgid "The destination queue is at the safety limit. No jobs were changed."
+msgstr "目标队列已达到安全上限。未更改任何工作。"
+
+# status.transfer.disabled
+msgid "General job transfer is disabled in this test build."
+msgstr "此测试版本中已禁用通用工作移动。"
+
+# status.transfer.duplicate
+msgid "The destination already has the same job. No jobs were changed."
+msgstr "目标已有相同工作。未更改任何工作。"
+
+# status.transfer.interrupted
+msgid "The transfer was interrupted. Review both queues before another change."
+msgstr "移动已中断。请检查两个队列。"
+
+# status.transfer.queue_changed
+msgid "A queue changed before the transfer. Review both members and try again."
+msgstr "移动前队列发生了更改。请检查两个成员后重试。"
+
+# status.transfer.queue_changed_after_drop
+msgid "A source or destination queue changed after the drop. No jobs were changed."
+msgstr "放置后源队列或目标队列发生了更改。未更改任何工作。"
+
+# status.transfer.queue_unverified
+msgid "A live queue could not be verified for the transfer. No jobs were changed."
+msgstr "无法验证用于移动的实时队列。未更改任何工作。"
+
+# status.transfer.rejected
+msgid "Kenshi rejected the job transfer. No further jobs were changed."
+msgstr "Kenshi拒绝了工作移动。未再更改任何工作。"
+
+# status.transfer.roster_member_left
+msgid "The source or destination left the active player roster. No jobs were changed."
+msgstr "源或目标成员已离开活动玩家名单。未更改任何工作。"
+
+# status.transfer.success
+msgid "Permanent job moved to the destination member."
+msgstr "已将永久工作移动到目标成员。"
+
+# target.label.unavailable
+msgid "Target unavailable"
+msgstr "目标不可用"
+
+# target.label.unnamed
+msgid "Unnamed target"
+msgstr "未命名目标"
+
+# tooltip.job
+msgid "{member} | Priority {priority}\n{job}{target_line}"
+msgstr "{member} | 优先级 {priority}\n{job}{target_line}"
+
+# tooltip.job.target
+msgid "\nTarget: {target}"
+msgstr "\n目标：{target}"
+
+# ui.action.add_healing
+msgid "Add Healing"
+msgstr "添加治疗"
+
+# ui.action.add_short
+msgid "Add"
+msgstr "添加"
+
+# ui.action.clear_queue
+msgid "Clear Queue"
+msgstr "清空队列"
+
+# ui.action.close
+msgid "Close"
+msgstr "关闭"
+
+# ui.action.drop_to_remove
+msgid "DROP TO REMOVE"
+msgstr "拖放以移除"
+
+# ui.action.options
+msgid "Options"
+msgstr "选项"
+
+# ui.action.prioritize_healing
+msgid "Prioritize Healing"
+msgstr "优先治疗"
+
+# ui.action.remove_invalid_jobs
+msgid "Remove Invalid Jobs"
+msgstr "移除无效工作"
+
+# ui.action.remove_jobs
+msgid "Remove Job(s)"
+msgstr "移除工作"
+
+# ui.action.reset_default
+msgid "Reset Default"
+msgstr "恢复默认"
+
+# ui.dialog.no
+msgid "No"
+msgstr "否"
+
+# ui.dialog.yes
+msgid "Yes"
+msgstr "是"
+
+# ui.hud.open_manager_tooltip
+msgid "Open Job Manager (Ctrl+J)"
+msgstr "打开工作管理器 (Ctrl+J)"
+
+# ui.jobs.toggle_off
+msgid "Jobs: OFF"
+msgstr "工作：关闭"
+
+# ui.jobs.toggle_on
+msgid "Jobs: ON"
+msgstr "工作：开启"
+
+# ui.priority.label
+msgid "Priority {number}"
+msgstr "优先级 {number}"
+
+# ui.squad.current
+msgid "Current squad"
+msgstr "当前小队"
+
+# ui.squad.current_marker
+msgid "CURRENT SQUAD"
+msgstr "当前小队"
+
+# ui.squad.empty.no_manageable_members
+msgid "There are no active squads with job-manageable members."
+msgstr "没有可管理工作的活动小队。"
+
+# ui.squad.empty.unavailable
+msgid "The active squads are unavailable and have no session snapshot."
+msgstr "活动小队不可用，且没有会话快照。"
+
+# ui.squad.generic
+msgid "Squad"
+msgstr "小队"
+
+# ui.squad.group_header
+msgid "{toggle}  {squad}  |  Members: {members}"
+msgstr "{toggle}  {squad}  |  成员：{members}"
+
+# ui.squad.heading
+msgid "{squad}  |  Members: {members}{snapshot}{squad_count}{roster_state}  |  Recipients: {recipients}"
+msgstr "{squad}  |  成员：{members}{snapshot}{squad_count}{roster_state}  |  接收者：{recipients}"
+
+# ui.squad.member_stats_header
+msgid "SQUAD MEMBER  |  TOP STATS"
+msgstr "小队成员  |  主要属性"
+
+# ui.squad.readonly_marker
+msgid "  |  Read-only snapshot"
+msgstr "  |  只读快照"
+
+# ui.squad.roster_incomplete
+msgid "  |  Roster incomplete"
+msgstr "  |  名单不完整"
+
+# ui.squad.squad_count
+msgid "  |  Squads: {count}"
+msgstr "  |  小队数：{count}"
+
+# ui.squad_selector.incomplete
+msgid "SQUADS *"
+msgstr "小队 *"
+
+# ui.squad_selector.label
+msgid "SQUADS"
+msgstr "小队"
+
+# ui.squad_selector.unavailable
+msgid "SQUADS ?"
+msgstr "小队 ?"
+
+# ui.tab.squad_jobs
+msgid "Squad Jobs"
+msgstr "小队工作"
+
+# ui.tab.stations
+msgid "Stations"
+msgstr "站点"
+
+# ui.window.title
+msgid "Kenshi Job Management {version}"
+msgstr "Kenshi工作管理器 {version}"
