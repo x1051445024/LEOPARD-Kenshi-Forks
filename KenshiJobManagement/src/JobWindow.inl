@@ -863,8 +863,10 @@
             const int statusWidgetLeft = narrowActionBar ? PAD : statusLeft;
             const int statusWidgetWidth = narrowActionBar ?
                 std::max(1, size.width - 2 * PAD) : statusWidth;
-            const int statusTop = narrowActionBar ? actionTop + S(40) : actionTop;
             const int statusHeight = narrowActionBar ? S(48) : S(60);
+            // LEOPARD: centred on the row of buttons beside it
+            const int statusTop = narrowActionBar ? actionTop + S(40) :
+                actionTop - (statusHeight - S(40)) / 2;
             const MyGUI::Align statusAlign = narrowActionBar ?
                 (MyGUI::Align::Left | MyGUI::Align::Top |
                  MyGUI::Align::HStretch) :
@@ -884,10 +886,11 @@
             g_statusText = client->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
                 MyGUI::IntCoord(
-                    statusWidgetLeft + S(8),
-                    statusTop + S(3),
-                    std::max(1, statusWidgetWidth - S(16)),
-                    std::max(1, statusHeight - S(6))),
+                    // inside the frame's light line (10 px native)
+                    statusWidgetLeft + 12 + S(4),
+                    statusTop + 9 + S(2),
+                    std::max(1, statusWidgetWidth - 2 * (12 + S(4))),
+                    std::max(1, statusHeight - 2 * (9 + S(2)))),
                 statusAlign,
                 "KJM_Status");
             g_statusText->setCaption("");
