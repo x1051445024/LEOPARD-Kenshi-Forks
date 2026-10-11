@@ -1629,9 +1629,12 @@
         {
             return false;
         }
+        // LEOPARD: sizes at the base scale, like everything inside.
+        width = S(width);
+        height = S(height);
         const MyGUI::IntSize view = MyGUI::RenderManager::getInstance().getViewSize();
-        width = std::min(width, std::max(320, view.width - 40));
-        height = std::min(height, std::max(180, view.height - 40));
+        width = std::min(width, std::max(S(320), view.width - S(40)));
+        height = std::min(height, std::max(S(180), view.height - S(40)));
         g_modal.shade = gui->createWidget<MyGUI::Widget>(
             "WhiteSkin",
             MyGUI::IntCoord(0, 0, view.width, view.height),
@@ -2025,10 +2028,6 @@
         {
             g_settingsWriteFailed = true;
         }
-        if (!SetDarkUIFriendlyFontColors(false))
-        {
-            g_settingsWriteFailed = true;
-        }
         ApplyThemeToTaggedTree(g_window);
         ApplyThemeToTaggedTree(g_modal.window);
         ApplyThemeToTaggedTree(g_tooltip);
@@ -2050,7 +2049,7 @@
         // the normal supported resolutions.
         const std::string modalCaption = Localize(
             "modal.options.title", "Job Manager Options");
-        if (!BeginModal(MODAL_OPTIONS, 1000, 600, modalCaption.c_str()))
+        if (!BeginModal(MODAL_OPTIONS, 900, 440, modalCaption.c_str()))
         {
             return;
         }
@@ -2064,7 +2063,7 @@
         help->setFontHeight(S(15));
         const std::string helpCaption = Localize(
             "modal.options.help",
-            "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately.");
+            "Which station categories the Stations tab shows.\nChanges are saved and apply immediately.");
         help->setCaption(helpCaption.c_str());
         help->setTextAlign(MyGUI::Align::Center);
         help->setNeedMouseFocus(false);
@@ -2087,54 +2086,16 @@
         const int canvasWidth = std::max(S(240), clientSize.width - S(60));
         const int columnGap = S(16);
         const int columnWidth = std::max(
-            100, (canvasWidth - 16 - columnGap) / 2);
-        const int leftColumn = 8;
+            S(100), (canvasWidth - S(16) - columnGap) / 2);
+        const int leftColumn = S(8);
         const int rightColumn = leftColumn + columnWidth + columnGap;
 
-        MyGUI::TextBox* appearanceSection =
-            scroll->createWidget<MyGUI::TextBox>(
-                "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(leftColumn, S(8), canvasWidth, S(30)),
-                MyGUI::Align::Left | MyGUI::Align::Top,
-                "KJM_AppearanceSection");
-        const std::string appearanceSectionCaption = Localize(
-            "options.appearance.header", "APPEARANCE");
-        appearanceSection->setCaption(appearanceSectionCaption.c_str());
-        appearanceSection->setNeedMouseFocus(false);
-        TagThemeStandardText(appearanceSection);
-
-        g_darkUiOptionButton = scroll->createWidget<MyGUI::Button>(
-            "Kenshi_TickButton1",
-            MyGUI::IntCoord(leftColumn, S(44), columnWidth, S(34)),
-            MyGUI::Align::Left | MyGUI::Align::Top,
-            "KJM_DarkUiOption");
-        const std::string darkUiCaption = Localize(
-            "options.appearance.dark_ui", "Dark UI friendly font colors");
-        SetFittedButtonCaption(
-            g_darkUiOptionButton, darkUiCaption, 15, 10, 20);
-        g_darkUiOptionButton->eventMouseButtonClick +=
-            MyGUI::newDelegate(OnDarkUiOptionClicked);
-        g_darkUiOptionButton->eventMouseWheel +=
-            MyGUI::newDelegate(OnOptionsMouseWheel);
-        TagThemeButtonText(g_darkUiOptionButton);
-
-        MyGUI::TextBox* appearanceHelp =
-            scroll->createWidget<MyGUI::TextBox>(
-                "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(
-                    rightColumn, S(42), columnWidth, S(42)),
-                MyGUI::Align::Left | MyGUI::Align::Top,
-                "KJM_AppearanceHelp");
-        const std::string appearanceHelpCaption = Localize(
-            "options.appearance.dark_ui.help",
-            "Off: vanilla warm background with dark text.\nOn: Dark UI background with current light text.");
-        appearanceHelp->setCaption(appearanceHelpCaption.c_str());
-        appearanceHelp->setNeedMouseFocus(false);
-        TagThemeMutedText(appearanceHelp);
-
+        // LEOPARD: the "Appearance" section (Dark UI switch) is gone - the
+        // colours follow the game's interface theme.
+        g_darkUiOptionButton = NULL;
         MyGUI::TextBox* stationSection = scroll->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(leftColumn, S(104), canvasWidth, S(30)),
+            MyGUI::IntCoord(leftColumn, S(8), canvasWidth, S(30)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationFilterSection");
         const std::string stationSectionCaption = Localize(
@@ -2151,7 +2112,7 @@
             const size_t column = index / 5;
             const size_t row = index % 5;
             const int x = column == 0 ? leftColumn : rightColumn;
-            const int y = S(142) + static_cast<int>(row) * S(40);
+            const int y = S(46) + static_cast<int>(row) * S(40);
             MyGUI::Button* category = scroll->createWidget<MyGUI::Button>(
                 "Kenshi_TickButton1",
                 MyGUI::IntCoord(
@@ -2173,10 +2134,10 @@
             g_stationOptionButtons.push_back(binding);
         }
         scroll->setCanvasSize(
-            canvasWidth, S(142) + 5 * S(40) + S(8));
+            canvasWidth, S(46) + 5 * S(40) + S(8));
         MyGUI::Widget* optionsSurface = scroll->createWidget<MyGUI::Widget>(
             "WhiteSkin",
-            MyGUI::IntCoord(0, 0, canvasWidth, S(142) + 5 * S(40) + S(8)),
+            MyGUI::IntCoord(0, 0, canvasWidth, S(46) + 5 * S(40) + S(8)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_OptionsSurface");
         TagThemeSurface(optionsSurface);

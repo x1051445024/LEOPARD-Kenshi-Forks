@@ -16,6 +16,7 @@
 #include <ModConfigMenu.h>
 #include <HoldKey.h>
 #include <IniDefaults.h>
+#include <GameTheme.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 

@@ -1261,3 +1261,6 @@ msgstr "Interface size, %"
 
 msgid "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
 msgstr "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
+
+msgid "Which station categories the Stations tab shows.\nChanges are saved and apply immediately."
+msgstr "Which station categories the Stations tab shows.\nChanges are saved and apply immediately."

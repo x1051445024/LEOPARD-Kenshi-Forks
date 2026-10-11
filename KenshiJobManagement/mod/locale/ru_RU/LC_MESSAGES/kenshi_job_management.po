@@ -1261,3 +1261,6 @@ msgstr "Размер окна, %"
 
 msgid "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
 msgstr "Размер всего окна работ: текст, кнопки и карточки. 100 - по высоте экрана; действует при следующем открытии окна."
+
+msgid "Which station categories the Stations tab shows.\nChanges are saved and apply immediately."
+msgstr "Какие категории станций показывает вкладка \"Станции\".\nИзменения сохраняются и применяются сразу."
