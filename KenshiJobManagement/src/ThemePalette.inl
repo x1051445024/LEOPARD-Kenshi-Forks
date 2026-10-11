@@ -1,0 +1,908 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Runtime palette helpers for the optional Dark UI text mode.
+//
+// This file is included after RuntimeAccess.inl, while the translation unit
+// is still inside its anonymous namespace.  It intentionally owns no widget
+// pointers.  Callers can apply the palette to an open widget tree whenever
+// the setting changes or a view is rebuilt.
+
+#ifndef KENSHI_JOB_MANAGEMENT_THEME_PALETTE_INL
+#define KENSHI_JOB_MANAGEMENT_THEME_PALETTE_INL
+
+    // The current manager uses a dark brown canvas and warm, light labels.
+    // Vanilla Kenshi's standard panels are a light, warm parchment/tan.  Keep
+    // these values in one place so a live palette refresh cannot leave the
+    // background and text in mismatched modes.
+    const char* const THEME_SETTINGS_SECTION = "Appearance";
+    const char* const THEME_DARK_UI_KEY = "DarkUIFriendlyFontColors";
+    const char* const THEME_TAG_BACKGROUND = "KJM_ThemeBackground";
+    const char* const THEME_TAG_STATUS_FRAME = "KJM_ThemeStatusFrame";
+    const char* const THEME_TAG_STATUS_TEXT = "KJM_ThemeStatusText";
+    const char* const THEME_TAG_STATION_TINT = "KJM_ThemeStationTint";
+    const char* const THEME_TAG_SCROLLBAR = "KJM_ThemeScrollBar";
+    const char* const THEME_TAG_SCROLLBAR_SKIN =
+        "KJM_ThemeScrollBarSkin";
+    const char* const THEME_TAG_SCROLLBAR_PART =
+        "KJM_ThemeScrollBarPart";
+    const char* const THEME_SCROLLBAR_TRACK = "track";
+    const char* const THEME_SCROLLBAR_THUMB = "thumb";
+    const char* const THEME_SCROLLBAR_OUTLINE = "outline";
+    const char* const THEME_SCROLLBAR_VERTICAL_SMALL_SKIN =
+        "Kenshi_ScrollBarV";
+    const char* const THEME_SCROLLBAR_HORIZONTAL_SMALL_SKIN =
+        "Kenshi_ScrollBarH";
+    const char* const THEME_SCROLLBAR_VERTICAL_LARGE_SKIN =
+        "Kenshi_SliderVBig";
+    const char* const THEME_SCROLLBAR_HORIZONTAL_LARGE_SKIN =
+        "Kenshi_SliderHBig";
+    const char* const THEME_TINT_STATION_NORMAL = "normal";
+    const char* const THEME_TINT_STATION_BLOCKING = "blocking";
+    const char* const THEME_TAG_TEXT = "KJM_ThemeText";
+    const char* const THEME_TEXT_STANDARD = "standard";
+    const char* const THEME_TEXT_MUTED = "muted";
+    const char* const THEME_TEXT_BUTTON = "button";
+    const char* const THEME_TEXT_ACCENT = "accent";
+    const char* const THEME_TEXT_WARNING = "warning";
+    const char* const THEME_TEXT_SUCCESS = "success";
+
+    // Dark UI mode is opt-in.  A missing key therefore selects the vanilla
+    // light canvas and dark text, which is readable in an unmodified game.
+    bool g_darkUiFriendlyFontColors = false;
+    bool g_themePaletteLoaded = false;
+    unsigned int g_themePaletteRevision = 0;
+
+    struct ThemePalette
+    {
+        MyGUI::Colour background;
+        MyGUI::Colour statusFrame;
+        MyGUI::Colour statusText;
+        MyGUI::Colour standardText;
+        MyGUI::Colour mutedText;
+        MyGUI::Colour buttonText;
+        MyGUI::Colour accentText;
+        MyGUI::Colour warningText;
+        MyGUI::Colour successText;
+
+        ThemePalette() :
+            background(MyGUI::Colour::White),
+            statusFrame(MyGUI::Colour(0.22f, 0.20f, 0.16f)),
+            statusText(MyGUI::Colour(1.0f, 0.96f, 0.84f)),
+            standardText(MyGUI::Colour::Black),
+            mutedText(MyGUI::Colour::Black),
+            buttonText(MyGUI::Colour::Black),
+            accentText(MyGUI::Colour::Black),
+            warningText(MyGUI::Colour::Black),
+            successText(MyGUI::Colour::Black)
+        {
+        }
+    };
+
+    ThemePalette g_themePalette;
+
+    ThemePalette BuildThemePalette(bool darkUi)
+    {
+        ThemePalette palette;
+        if (darkUi)
+        {
+            // Existing KJM dark treatment.  These are the light colours used
+            // by the current job cards, headers, and action buttons.
+            palette.background = MyGUI::Colour(0.105f, 0.085f, 0.065f);
+            palette.statusFrame = MyGUI::Colour(0.045f, 0.035f, 0.028f);
+            palette.statusText = MyGUI::Colour(0.96f, 0.93f, 0.84f);
+            palette.standardText = MyGUI::Colour(1.0f, 1.0f, 1.0f);
+            palette.mutedText = MyGUI::Colour(0.92f, 0.92f, 0.88f);
+            palette.buttonText = MyGUI::Colour(1.0f, 0.96f, 0.84f);
+            palette.accentText = MyGUI::Colour(1.0f, 0.84f, 0.45f);
+            palette.warningText = MyGUI::Colour(1.0f, 0.38f, 0.27f);
+            palette.successText = MyGUI::Colour(0.68f, 1.0f, 0.70f);
+        }
+        else
+        {
+            // Warm Kenshi-style light panel.  The slight red/yellow bias keeps
+            // the panel close to vanilla's parchment UI instead of using a
+            // cold pure white surface.  Text stays well above WCAG's medium
+            // contrast threshold against this background.
+            // Vanilla's main warm panel is approximately #AFA68B, and its
+            // standard text is approximately #140806.
+            palette.background = MyGUI::Colour(
+                0.686275f, 0.650980f, 0.545098f);
+            // Status messages sit in a compact dark frame so they remain
+            // readable over the warm vanilla-light panel as well as over the
+            // optional dark canvas.
+            palette.statusFrame = MyGUI::Colour(0.30f, 0.27f, 0.21f);
+            palette.statusText = MyGUI::Colour(1.0f, 0.96f, 0.84f);
+            palette.standardText = MyGUI::Colour(
+                0.078431f, 0.031373f, 0.023529f);
+            palette.mutedText = MyGUI::Colour(0.24f, 0.20f, 0.16f);
+            // Native Kenshi button skins remain dark atlas textures. Keep
+            // their captions light in both modes; standard TextBox content
+            // uses the dark vanilla colour on the themed light surfaces.
+            palette.buttonText = MyGUI::Colour(1.0f, 0.96f, 0.84f);
+            palette.accentText = MyGUI::Colour(0.32f, 0.20f, 0.025f);
+            palette.warningText = MyGUI::Colour(0.55f, 0.075f, 0.04f);
+            palette.successText = MyGUI::Colour(0.08f, 0.34f, 0.12f);
+        }
+        return palette;
+    }
+
+    void RebuildThemePalette()
+    {
+        g_themePalette = BuildThemePalette(g_darkUiFriendlyFontColors);
+        ++g_themePaletteRevision;
+        if (g_themePaletteRevision == 0)
+        {
+            // Keep zero reserved for an unknown/unobserved revision if the
+            // process ever survives enough live refreshes to wrap.
+            g_themePaletteRevision = 1;
+        }
+    }
+
+    void LoadThemePaletteSettings()
+    {
+        if (g_themePaletteLoaded)
+        {
+            return;
+        }
+
+        // RuntimeAccess supplies EnsureSettingsPath and g_settingsPath.
+        // Treat a failed directory lookup as a normal first-run default; the
+        // in-memory setting still works for this manager session.
+        EnsureSettingsPath();
+        g_darkUiFriendlyFontColors =
+            GetPrivateProfileIntA(
+                THEME_SETTINGS_SECTION,
+                THEME_DARK_UI_KEY,
+                0,
+                g_settingsPath.c_str()) != 0;
+        g_themePaletteLoaded = true;
+        RebuildThemePalette();
+    }
+
+    bool SaveThemePaletteSettings()
+    {
+        if (!EnsureSettingsPath())
+        {
+            return false;
+        }
+        return WritePrivateProfileStringA(
+            THEME_SETTINGS_SECTION,
+            THEME_DARK_UI_KEY,
+            g_darkUiFriendlyFontColors ? "1" : "0",
+            g_settingsPath.c_str()) != FALSE;
+    }
+
+    const ThemePalette& GetThemePalette()
+    {
+        LoadThemePaletteSettings();
+        return g_themePalette;
+    }
+
+    unsigned int GetThemePaletteRevision()
+    {
+        LoadThemePaletteSettings();
+        return g_themePaletteRevision;
+    }
+
+    bool IsDarkUIFriendlyFontColorsEnabled()
+    {
+        LoadThemePaletteSettings();
+        return g_darkUiFriendlyFontColors;
+    }
+
+    // Returns true when the setting changed.  The palette is rebuilt before
+    // returning, so callers can immediately repaint an open manager without
+    // rebuilding its captured squad snapshot.
+    bool SetDarkUIFriendlyFontColors(bool enabled)
+    {
+        LoadThemePaletteSettings();
+        if (g_darkUiFriendlyFontColors == enabled)
+        {
+            return true;
+        }
+        g_darkUiFriendlyFontColors = enabled;
+        RebuildThemePalette();
+        return SaveThemePaletteSettings();
+    }
+
+    bool ToggleDarkUIFriendlyFontColors()
+    {
+        return SetDarkUIFriendlyFontColors(
+            !IsDarkUIFriendlyFontColorsEnabled());
+    }
+
+    MyGUI::Colour ThemeBackgroundColour()
+    {
+        return GetThemePalette().background;
+    }
+
+    MyGUI::Colour ThemeStandardTextColour()
+    {
+        return GetThemePalette().standardText;
+    }
+
+    MyGUI::Colour ThemeStatusFrameColour()
+    {
+        return GetThemePalette().statusFrame;
+    }
+
+    MyGUI::Colour ThemeStatusTextColour()
+    {
+        return GetThemePalette().statusText;
+    }
+
+    MyGUI::Colour ThemeMutedTextColour()
+    {
+        return GetThemePalette().mutedText;
+    }
+
+    MyGUI::Colour ThemeButtonTextColour()
+    {
+        return GetThemePalette().buttonText;
+    }
+
+    MyGUI::Colour ThemeButtonAccentTextColour()
+    {
+        // Selected/partial squad captions are rendered on native dark
+        // buttons, so use the existing light accent in either palette.
+        return MyGUI::Colour(1.0f, 0.84f, 0.45f);
+    }
+
+    MyGUI::Colour ThemeButtonSuccessTextColour()
+    {
+        // Fully selected squad captions need the same dark-surface contrast.
+        return MyGUI::Colour(0.68f, 1.0f, 0.70f);
+    }
+
+    MyGUI::Colour ThemeAccentTextColour()
+    {
+        return GetThemePalette().accentText;
+    }
+
+    MyGUI::Colour ThemeWarningTextColour()
+    {
+        return GetThemePalette().warningText;
+    }
+
+    MyGUI::Colour ThemeSuccessTextColour()
+    {
+        return GetThemePalette().successText;
+    }
+
+    void ApplyThemeScrollBarPart(MyGUI::Widget* widget)
+    {
+        if (widget == NULL ||
+            !widget->isUserString(THEME_TAG_SCROLLBAR_PART))
+        {
+            return;
+        }
+
+        const bool dark = IsDarkUIFriendlyFontColorsEnabled();
+        if (!dark)
+        {
+            widget->setVisible(false);
+            return;
+        }
+
+        const std::string& role =
+            widget->getUserString(THEME_TAG_SCROLLBAR_PART);
+        // Thumb visibility also depends on range and geometry. Its dedicated
+        // updater owns that state; theme application only owns its colour.
+        if (role != THEME_SCROLLBAR_THUMB)
+        {
+            widget->setVisible(true);
+        }
+        if (role == THEME_SCROLLBAR_THUMB)
+        {
+            // The native large-slider handle is translucent. This opaque,
+            // mouse-transparent face sits above it so the track cannot show
+            // through the draggable area.
+            widget->setColour(MyGUI::Colour(0.66f, 0.61f, 0.50f));
+            widget->setAlpha(1.0f);
+        }
+        else if (role == THEME_SCROLLBAR_OUTLINE)
+        {
+            widget->setColour(MyGUI::Colour(0.74f, 0.69f, 0.57f));
+            widget->setAlpha(0.96f);
+        }
+        else
+        {
+            widget->setColour(MyGUI::Colour(0.48f, 0.44f, 0.36f));
+            widget->setAlpha(0.62f);
+        }
+    }
+
+    void TagThemeScrollBarPart(
+        MyGUI::Widget* widget,
+        const char* role,
+        int depth)
+    {
+        if (widget == NULL || role == NULL)
+        {
+            return;
+        }
+        widget->setUserString(THEME_TAG_SCROLLBAR_PART, role);
+        widget->setDepth(depth);
+        widget->setNeedMouseFocus(false);
+        widget->setNeedKeyFocus(false);
+        ApplyThemeScrollBarPart(widget);
+    }
+
+    MyGUI::Widget* CreateThemeScrollBarPart(
+        MyGUI::Widget* parent,
+        const MyGUI::IntCoord& coord,
+        MyGUI::Align align,
+        const char* role,
+        int depth)
+    {
+        if (parent == NULL)
+        {
+            return NULL;
+        }
+        MyGUI::Widget* part = parent->createWidget<MyGUI::Widget>(
+            "WhiteSkin", coord, align);
+        TagThemeScrollBarPart(part, role, depth);
+        return part;
+    }
+
+    void CreateThemeScrollBarEdge(
+        MyGUI::Widget* parent,
+        const MyGUI::IntCoord& coord,
+        MyGUI::Align align)
+    {
+        CreateThemeScrollBarPart(
+            parent,
+            coord,
+            align,
+            THEME_SCROLLBAR_OUTLINE,
+            -1);
+    }
+
+    const char* GetThemeScrollBarSkin(bool vertical)
+    {
+        if (IsDarkUIFriendlyFontColorsEnabled())
+        {
+            return vertical ?
+                THEME_SCROLLBAR_VERTICAL_LARGE_SKIN :
+                THEME_SCROLLBAR_HORIZONTAL_LARGE_SKIN;
+        }
+        return vertical ?
+            THEME_SCROLLBAR_VERTICAL_SMALL_SKIN :
+            THEME_SCROLLBAR_HORIZONTAL_SMALL_SKIN;
+    }
+
+    MyGUI::Widget* FindThemeScrollBarPart(
+        MyGUI::ScrollBar* scrollBar,
+        const char* role)
+    {
+        if (scrollBar == NULL || role == NULL)
+        {
+            return NULL;
+        }
+        const size_t childCount = scrollBar->getChildCount();
+        for (size_t index = 0; index < childCount; ++index)
+        {
+            MyGUI::Widget* child = scrollBar->getChildAt(index);
+            if (child != NULL &&
+                child->isUserString(THEME_TAG_SCROLLBAR_PART) &&
+                child->getUserString(THEME_TAG_SCROLLBAR_PART) == role)
+            {
+                return child;
+            }
+        }
+        return NULL;
+    }
+
+    void UpdateThemeScrollBarThumb(MyGUI::ScrollBar* scrollBar)
+    {
+        MyGUI::Widget* thumb = FindThemeScrollBarPart(
+            scrollBar, THEME_SCROLLBAR_THUMB);
+        if (scrollBar == NULL || thumb == NULL)
+        {
+            return;
+        }
+
+        const size_t range = scrollBar->getScrollRange();
+        const int lineLength = scrollBar->getLineSize();
+        const int thumbLength = std::min(
+            lineLength, scrollBar->getTrackSize());
+        const bool show = IsDarkUIFriendlyFontColorsEnabled() &&
+            range > 1 && lineLength > thumbLength && thumbLength > 0;
+        thumb->setVisible(show);
+        if (!show)
+        {
+            return;
+        }
+
+        const int travel = lineLength - thumbLength;
+        // Match MyGUI ScrollBar::updateTrack exactly. It uses integer
+        // division, so rounding here would let the visual face lead the
+        // actual draggable handle by one pixel at some positions.
+        const int trackOffset = static_cast<int>(
+            (static_cast<size_t>(travel) *
+                scrollBar->getScrollPosition()) /
+            (range - 1));
+        // Both Kenshi large-slider skins start TrackPlace 25 pixels after
+        // the leading arrow. These insets leave the native handle border
+        // visible around the new solid face.
+        const int trackStart = 25;
+        if (scrollBar->getVerticalAlignment())
+        {
+            thumb->setCoord(
+                3,
+                trackStart + trackOffset,
+                25,
+                thumbLength);
+        }
+        else
+        {
+            thumb->setCoord(
+                trackStart + trackOffset,
+                5,
+                thumbLength,
+                22);
+        }
+    }
+
+    void OnThemeScrollBarPositionChanged(
+        MyGUI::ScrollBar* scrollBar,
+        size_t)
+    {
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void SetThemeScrollBarPosition(
+        MyGUI::ScrollBar* scrollBar,
+        size_t position)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        scrollBar->setScrollPosition(position);
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void ApplyThemeScrollBarSkin(MyGUI::ScrollBar* scrollBar)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        const bool vertical = scrollBar->getVerticalAlignment();
+        const char* desiredSkin = GetThemeScrollBarSkin(vertical);
+        const std::string currentSkin =
+            scrollBar->isUserString(THEME_TAG_SCROLLBAR_SKIN) ?
+                scrollBar->getUserString(THEME_TAG_SCROLLBAR_SKIN) : "";
+        if (currentSkin != desiredSkin)
+        {
+            const size_t scrollPage = scrollBar->getScrollPage();
+            const size_t scrollViewPage = scrollBar->getScrollViewPage();
+            const size_t scrollWheelPage = scrollBar->getScrollWheelPage();
+            // changeWidgetSkin is MyGUI's supported path for replacing the
+            // private skin-child tree. It preserves the ScrollBar object and
+            // its event delegates. MyGUI resets the three page-step values
+            // while it initialises the replacement skin, so restore them
+            // before this interaction continues.
+            scrollBar->changeWidgetSkin(desiredSkin);
+            scrollBar->setScrollPage(scrollPage);
+            scrollBar->setScrollViewPage(scrollViewPage);
+            scrollBar->setScrollWheelPage(scrollWheelPage);
+            scrollBar->setUserString(
+                THEME_TAG_SCROLLBAR_SKIN, desiredSkin);
+        }
+
+        // The small vanilla layouts permit a 10-pixel thumb. Keep a larger
+        // floor in both modes; the dark large-slider skins already exceed it.
+        const int minimumThumbLength = 36;
+        scrollBar->setMinTrackSize(minimumThumbLength);
+        scrollBar->setTrackSize(std::max(
+            minimumThumbLength, scrollBar->getTrackSize()));
+        UpdateThemeScrollBarThumb(scrollBar);
+    }
+
+    void TagThemeScrollBar(MyGUI::ScrollBar* scrollBar)
+    {
+        if (scrollBar == NULL)
+        {
+            return;
+        }
+        if (scrollBar->isUserString(THEME_TAG_SCROLLBAR))
+        {
+            return;
+        }
+        scrollBar->setUserString(THEME_TAG_SCROLLBAR, "1");
+        ApplyThemeScrollBarSkin(scrollBar);
+
+        const int width = scrollBar->getWidth();
+        const int height = scrollBar->getHeight();
+        const bool vertical = scrollBar->getVerticalAlignment();
+        const int trackThickness = std::min(
+            12, std::max(1, (vertical ? width : height) - 6));
+        CreateThemeScrollBarPart(
+            scrollBar,
+            vertical ?
+                MyGUI::IntCoord(
+                    (width - trackThickness) / 2,
+                    2,
+                    trackThickness,
+                    std::max(1, height - 4)) :
+                MyGUI::IntCoord(
+                    2,
+                    (height - trackThickness) / 2,
+                    std::max(1, width - 4),
+                    trackThickness),
+            vertical ?
+                (MyGUI::Align::Top | MyGUI::Align::VStretch) :
+                (MyGUI::Align::Left | MyGUI::Align::HStretch),
+            THEME_SCROLLBAR_TRACK,
+            100);
+
+        CreateThemeScrollBarPart(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, 1, 1),
+            MyGUI::Align::Top | MyGUI::Align::Left,
+            THEME_SCROLLBAR_THUMB,
+            -2);
+        scrollBar->eventScrollChangePosition +=
+            MyGUI::newDelegate(OnThemeScrollBarPositionChanged);
+        UpdateThemeScrollBarThumb(scrollBar);
+
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, width, 2),
+            MyGUI::Align::Top | MyGUI::Align::HStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, std::max(0, height - 2), width, 2),
+            MyGUI::Align::Bottom | MyGUI::Align::HStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(0, 0, 2, height),
+            MyGUI::Align::Left | MyGUI::Align::VStretch);
+        CreateThemeScrollBarEdge(
+            scrollBar,
+            MyGUI::IntCoord(std::max(0, width - 2), 0, 2, height),
+            MyGUI::Align::Right | MyGUI::Align::VStretch);
+    }
+
+    void ApplyThemeBackground(MyGUI::Widget* widget)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        widget->setColour(GetThemePalette().background);
+    }
+
+    void ApplyThemeStatusFrame(MyGUI::Widget* widget)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        widget->setColour(GetThemePalette().statusFrame);
+    }
+
+    void ApplyThemeStationCardTint(
+        MyGUI::Widget* widget,
+        bool blocking)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        if (IsDarkUIFriendlyFontColorsEnabled())
+        {
+            widget->setColour(blocking ?
+                MyGUI::Colour(0.38f, 0.07f, 0.05f) :
+                MyGUI::Colour(0.09f, 0.07f, 0.05f));
+            widget->setAlpha(0.55f);
+        }
+        else
+        {
+            // Keep the status tint visible without putting near-black paint
+            // behind the vanilla dark labels. The warning tint remains a
+            // warm red, but its low alpha preserves the light card surface.
+            widget->setColour(blocking ?
+                MyGUI::Colour(0.82f, 0.30f, 0.22f) :
+                MyGUI::Colour(0.76f, 0.65f, 0.46f));
+            widget->setAlpha(blocking ? 0.20f : 0.16f);
+        }
+    }
+
+    void ApplyThemeStandardText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setTextColour(GetThemePalette().standardText);
+    }
+
+    void ApplyThemeMutedText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setTextColour(GetThemePalette().mutedText);
+    }
+
+    void ApplyThemeStatusText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setTextColour(GetThemePalette().statusText);
+    }
+
+    void ApplyThemeButtonText(MyGUI::Button* button)
+    {
+        if (button == NULL)
+        {
+            return;
+        }
+        button->setTextColour(GetThemePalette().buttonText);
+    }
+
+    void ApplyThemeAccentText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setTextColour(GetThemePalette().accentText);
+        }
+    }
+
+    void ApplyThemeWarningText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setTextColour(GetThemePalette().warningText);
+        }
+    }
+
+    void ApplyThemeSuccessText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setTextColour(GetThemePalette().successText);
+        }
+    }
+
+    void TagThemeBackground(MyGUI::Widget* widget)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        widget->setUserString(THEME_TAG_BACKGROUND, "1");
+        ApplyThemeBackground(widget);
+    }
+
+    void TagThemeStatusFrame(MyGUI::Widget* widget)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        widget->setUserString(THEME_TAG_STATUS_FRAME, "1");
+        ApplyThemeStatusFrame(widget);
+        // It is created immediately before its sibling label. Keep the
+        // native default depth so it stays above the full-screen backdrop but
+        // below the label in MyGUI's creation order.
+        widget->setAlpha(1.0f);
+        widget->setNeedMouseFocus(false);
+    }
+
+    void TagThemeStationCardTint(
+        MyGUI::Widget* widget,
+        bool blocking)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        widget->setUserString(
+            THEME_TAG_STATION_TINT,
+            blocking ? THEME_TINT_STATION_BLOCKING :
+                THEME_TINT_STATION_NORMAL);
+        ApplyThemeStationCardTint(widget, blocking);
+    }
+
+    // A solid theme surface sits below normal-depth child labels. It never
+    // receives mouse focus, so it cannot hide captions or steal callbacks.
+    void TagThemeSurface(MyGUI::Widget* widget)
+    {
+        if (widget == NULL)
+        {
+            return;
+        }
+        TagThemeBackground(widget);
+        widget->setDepth(100);
+        widget->setAlpha(1.0f);
+        widget->setNeedMouseFocus(false);
+    }
+
+    void TagThemeStandardText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setUserString(THEME_TAG_TEXT, THEME_TEXT_STANDARD);
+        ApplyThemeStandardText(text);
+    }
+
+    void TagThemeMutedText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setUserString(THEME_TAG_TEXT, THEME_TEXT_MUTED);
+        ApplyThemeMutedText(text);
+    }
+
+    void TagThemeStatusText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setUserString(THEME_TAG_STATUS_TEXT, "1");
+        ApplyThemeStatusText(text);
+    }
+
+    void TagThemeButtonText(MyGUI::Button* button)
+    {
+        if (button == NULL)
+        {
+            return;
+        }
+        button->setUserString(THEME_TAG_TEXT, THEME_TEXT_BUTTON);
+        ApplyThemeButtonText(button);
+    }
+
+    // TextBox children used inside native dark Kenshi buttons need the same
+    // caption colour as the parent button. This is used for the compact
+    // healing-action label and separator around its existing job icons.
+    void TagThemeButtonCaptionText(MyGUI::TextBox* text)
+    {
+        if (text == NULL)
+        {
+            return;
+        }
+        text->setUserString(THEME_TAG_TEXT, THEME_TEXT_BUTTON);
+        text->setTextColour(GetThemePalette().buttonText);
+    }
+
+    void TagThemeAccentText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setUserString(THEME_TAG_TEXT, THEME_TEXT_ACCENT);
+            ApplyThemeAccentText(text);
+        }
+    }
+
+    void TagThemeWarningText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setUserString(THEME_TAG_TEXT, THEME_TEXT_WARNING);
+            ApplyThemeWarningText(text);
+        }
+    }
+
+    void TagThemeSuccessText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setUserString(THEME_TAG_TEXT, THEME_TEXT_SUCCESS);
+            ApplyThemeSuccessText(text);
+        }
+    }
+
+    // Apply only explicit theme tags.  Warning, success, selection, and
+    // station-status colours remain untouched unless a caller tags those
+    // widgets deliberately with one of the roles above.
+    void ApplyThemeToTaggedTree(MyGUI::Widget* root)
+    {
+        if (root == NULL)
+        {
+            return;
+        }
+
+        if (root->isUserString(THEME_TAG_BACKGROUND))
+        {
+            ApplyThemeBackground(root);
+        }
+
+        if (root->isUserString(THEME_TAG_STATUS_FRAME))
+        {
+            ApplyThemeStatusFrame(root);
+        }
+
+        if (root->isUserString(THEME_TAG_STATUS_TEXT) &&
+            root->isType<MyGUI::TextBox>())
+        {
+            ApplyThemeStatusText(root->castType<MyGUI::TextBox>(false));
+        }
+
+        if (root->isUserString(THEME_TAG_STATION_TINT))
+        {
+            ApplyThemeStationCardTint(
+                root,
+                root->getUserString(THEME_TAG_STATION_TINT) ==
+                    THEME_TINT_STATION_BLOCKING);
+        }
+
+        if (root->isUserString(THEME_TAG_SCROLLBAR_PART))
+        {
+            ApplyThemeScrollBarPart(root);
+        }
+
+        if (root->isUserString(THEME_TAG_SCROLLBAR) &&
+            root->isType<MyGUI::ScrollBar>())
+        {
+            ApplyThemeScrollBarSkin(
+                root->castType<MyGUI::ScrollBar>(false));
+        }
+
+        if (root->isUserString(THEME_TAG_TEXT))
+        {
+            const std::string& role = root->getUserString(THEME_TAG_TEXT);
+            if (role == THEME_TEXT_BUTTON && root->isType<MyGUI::Button>())
+            {
+                ApplyThemeButtonText(root->castType<MyGUI::Button>(false));
+            }
+            else if (role == THEME_TEXT_BUTTON &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                root->castType<MyGUI::TextBox>(false)->setTextColour(
+                    GetThemePalette().buttonText);
+            }
+            else if (role == THEME_TEXT_MUTED &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                ApplyThemeMutedText(root->castType<MyGUI::TextBox>(false));
+            }
+            else if (role == THEME_TEXT_STANDARD &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                ApplyThemeStandardText(root->castType<MyGUI::TextBox>(false));
+            }
+            else if (role == THEME_TEXT_ACCENT &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                ApplyThemeAccentText(root->castType<MyGUI::TextBox>(false));
+            }
+            else if (role == THEME_TEXT_WARNING &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                ApplyThemeWarningText(root->castType<MyGUI::TextBox>(false));
+            }
+            else if (role == THEME_TEXT_SUCCESS &&
+                     root->isType<MyGUI::TextBox>())
+            {
+                ApplyThemeSuccessText(root->castType<MyGUI::TextBox>(false));
+            }
+        }
+
+        const size_t childCount = root->getChildCount();
+        for (size_t index = 0; index < childCount; ++index)
+        {
+            ApplyThemeToTaggedTree(root->getChildAt(index));
+        }
+    }
+
+    // Convenience for the live-refresh path: callers can set a tag on each
+    // root once, then call this after changing the option or rebuilding a
+    // tab.  The revision is monotonic for cheap caller-side change checks.
+    bool ThemePaletteChangedSince(unsigned int revision)
+    {
+        return GetThemePaletteRevision() != revision;
+    }
+
+#endif

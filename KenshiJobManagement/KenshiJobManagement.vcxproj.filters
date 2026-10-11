@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{BDB54E92-25F2-4ADB-987E-D1FD3FA55190}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Mod Package">
+      <UniqueIdentifier>{47AA7A18-1700-44AA-B591-586A51FC681F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\KenshiJobManagement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Localization.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\RuntimeAccess.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\JobView.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\JobActions.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\JobWindow.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\Hooks.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\StationScanner.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\StationSettings.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\StationAssets.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\StationView.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\HudButton.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="mod\RE_Kenshi.json">
+      <Filter>Mod Package</Filter>
+    </None>
+    <None Include="mod\KenshiJobManagement.mod">
+      <Filter>Mod Package</Filter>
+    </None>
+    <None Include="mod\locale\de_DE.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\ja_JP.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\ru_RU.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\locale\zh_CN.lang"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-crafting.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-copper-alloy-plates.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-copper-ore.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-copper-plates.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-crossbow.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-defense.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-electronics.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-farming.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-iron-ore.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-iron-plates.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-mining.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-other.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-refining.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-research.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-skeleton-limbs.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-steel-bars.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-storage.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\station-training.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\job-engineering.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\job-escort-out.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\job-foraging-animals.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\job-medic.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\job-splint.png"><Filter>Mod Package</Filter></None>
+    <None Include="mod\gui\kjm-hud-icon.png"><Filter>Mod Package</Filter></None>
+    <None Include="src\SquadSelector.inl"><Filter>Source Files</Filter></None>
+    <None Include="src\SquadGroups.inl"><Filter>Source Files</Filter></None>
+    <None Include="src\SquadPriority.inl"><Filter>Source Files</Filter></None>
+    <None Include="src\GeneralJobTransfer.inl"><Filter>Source Files</Filter></None>
+    <None Include="src\JobBatchActions.inl"><Filter>Source Files</Filter></None>
+    <None Include="src\ThemePalette.inl"><Filter>Source Files</Filter></None>
+  </ItemGroup>
+</Project>
