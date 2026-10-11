@@ -2,7 +2,8 @@
 
 Kenshi Job Management adds an ingame UI for visualizing and editing job queues.
 
-**Version: 0.5.0-beta**
+**Version: 0.5.0-beta** (original). This repository holds the LEOPARD fork -
+see "Изменения форка" at the end.
 
 ## Disclaimer
 
@@ -62,3 +63,15 @@ Kenshi and its assets belong to Lo-Fi Games. RE_Kenshi and KenshiLib are
 separate projects with their own licenses and release notes.
 
 This project is licensed under **GPL-3.0-only**.
+
+## Изменения форка (LEOPARD, 12-13.10.2026)
+
+Оригинал - [SirixKC/KenshiJobManagement](https://github.com/SirixKC/KenshiJobManagement), 0.5.0-beta, GPL-3.0-only. Выкладка форка - «Kenshi Job Management (MCM fork) (QoL)», версия 1.
+
+- Сборка на нашей KenshiLib (`build.ps1 -FromVcxproj`), одна единица компиляции.
+- Настройки - во вкладке MCM окна «Настройки» (мод ModConfigMenu): вкл/выкл (после перезапуска), клавиша окна (Ctrl+J, можно NONE), кнопка JM на панели, размер окна 70-200 %. Файл `KenshiJobManagement.ini` рядом с DLL; в раздаче - `KenshiJobManagement.defaults.ini`, личный ini создаётся из него и при обновлении не затирается. Фильтры станций и свёрнутые группы - как в оригинале, `%LOCALAPPDATA%\KenshiJobManagement\settings.ini`.
+- Перевод - .po (`mod/locale/<язык>/LC_MESSAGES/kenshi_job_management.po`) через общий `Localization.h`: английский, русский, китайский; немецкий и японский убраны. В бинарнике только английский.
+- Интерфейс - родные скины игры (рамки `Kenshi_GenericTextBoxFlatSkin`, окна, кнопки, галочки `Kenshi_TickBoxSkin`, крупные полосы прокрутки `Kenshi_SliderVBig/HBig`) и родные шрифты в их размерах (без растягивания). Цвета - из темы интерфейса игры (ванила или мод на интерфейс); переключатель Dark UI убран.
+- Один масштаб на всё окно: высота экрана / 1080 × размер из MCM. Содержимое карточек и строк - внутри светлой линии рамки.
+- Заголовок окна без номера версии.
+- Ревью на утечки и нагрузку: при закрытом окне - только клавиша и проверка кнопки на панели раз в 400 мс; все виджеты, модальные окна и кэши удаляются при закрытии; иконки станций грузятся в Ogre один раз.

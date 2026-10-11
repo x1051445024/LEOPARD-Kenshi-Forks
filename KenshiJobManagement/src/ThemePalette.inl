@@ -496,70 +496,9 @@
 
     void TagThemeScrollBar(MyGUI::ScrollBar* scrollBar)
     {
-        // LEOPARD: scroll bars keep the game's own skin and colours.
+        // LEOPARD: scroll bars keep the game's own skin and colours (the
+        // original redrew them for its Dark UI switch, which is gone).
         (void)scrollBar;
-        return;
-        if (scrollBar == NULL)
-        {
-            return;
-        }
-        if (scrollBar->isUserString(THEME_TAG_SCROLLBAR))
-        {
-            return;
-        }
-        scrollBar->setUserString(THEME_TAG_SCROLLBAR, "1");
-        ApplyThemeScrollBarSkin(scrollBar);
-
-        const int width = scrollBar->getWidth();
-        const int height = scrollBar->getHeight();
-        const bool vertical = scrollBar->getVerticalAlignment();
-        const int trackThickness = std::min(
-            12, std::max(1, (vertical ? width : height) - 6));
-        CreateThemeScrollBarPart(
-            scrollBar,
-            vertical ?
-                MyGUI::IntCoord(
-                    (width - trackThickness) / 2,
-                    S(2),
-                    trackThickness,
-                    std::max(1, height - S(4))) :
-                MyGUI::IntCoord(
-                    S(2),
-                    (height - trackThickness) / 2,
-                    std::max(1, width - S(4)),
-                    trackThickness),
-            vertical ?
-                (MyGUI::Align::Top | MyGUI::Align::VStretch) :
-                (MyGUI::Align::Left | MyGUI::Align::HStretch),
-            THEME_SCROLLBAR_TRACK,
-            100);
-
-        CreateThemeScrollBarPart(
-            scrollBar,
-            MyGUI::IntCoord(0, 0, 1, 1),
-            MyGUI::Align::Top | MyGUI::Align::Left,
-            THEME_SCROLLBAR_THUMB,
-            -2);
-        scrollBar->eventScrollChangePosition +=
-            MyGUI::newDelegate(OnThemeScrollBarPositionChanged);
-        UpdateThemeScrollBarThumb(scrollBar);
-
-        CreateThemeScrollBarEdge(
-            scrollBar,
-            MyGUI::IntCoord(0, 0, width, S(2)),
-            MyGUI::Align::Top | MyGUI::Align::HStretch);
-        CreateThemeScrollBarEdge(
-            scrollBar,
-            MyGUI::IntCoord(0, std::max(0, height - S(2)), width, S(2)),
-            MyGUI::Align::Bottom | MyGUI::Align::HStretch);
-        CreateThemeScrollBarEdge(
-            scrollBar,
-            MyGUI::IntCoord(0, 0, S(2), height),
-            MyGUI::Align::Left | MyGUI::Align::VStretch);
-        CreateThemeScrollBarEdge(
-            scrollBar,
-            MyGUI::IntCoord(std::max(0, width - S(2)), 0, S(2), height),
-            MyGUI::Align::Right | MyGUI::Align::VStretch);
     }
 
     void ApplyThemeBackground(MyGUI::Widget* widget)

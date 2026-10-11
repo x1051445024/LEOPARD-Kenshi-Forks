@@ -1232,8 +1232,8 @@ msgid "Stations"
 msgstr "Станции"
 
 # ui.window.title
-msgid "Kenshi Job Management {version}"
-msgstr "Управление задачами Kenshi {version}"
+msgid "Kenshi Job Management"
+msgstr "Управление задачами Kenshi"
 
 msgid "A window for squad job queues and work stations: who does what, in which order, and who works where."
 msgstr "Окно очередей работы отрядов и рабочих мест: кто что делает, в каком порядке и кто где работает."

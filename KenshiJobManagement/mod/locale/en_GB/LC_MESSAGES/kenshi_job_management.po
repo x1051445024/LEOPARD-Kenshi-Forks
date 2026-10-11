@@ -1232,8 +1232,8 @@ msgid "Stations"
 msgstr "Stations"
 
 # ui.window.title
-msgid "Kenshi Job Management {version}"
-msgstr "Kenshi Job Management {version}"
+msgid "Kenshi Job Management"
+msgstr "Kenshi Job Management"
 
 msgid "A window for squad job queues and work stations: who does what, in which order, and who works where."
 msgstr "A window for squad job queues and work stations: who does what, in which order, and who works where."

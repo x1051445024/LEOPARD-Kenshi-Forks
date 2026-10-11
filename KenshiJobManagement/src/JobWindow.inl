@@ -584,9 +584,8 @@
                 "KJM_SquadWindow");
             g_window->setMovable(false);
             g_window->setAutoAlpha(false);
-            g_window->setCaption(LocalizeFormat(
-                "ui.window.title", "Kenshi Job Management {version}",
-                "{version}", PLUGIN_VERSION));
+            g_window->setCaption(Localize(
+                "ui.window.title", "Kenshi Job Management"));
             g_window->eventWindowButtonPressed +=
                 MyGUI::newDelegate(OnWindowButtonPressed);
 

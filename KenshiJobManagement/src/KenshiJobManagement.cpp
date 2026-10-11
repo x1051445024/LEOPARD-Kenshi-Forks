@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Kenshi Job Management, 0.5.0-beta squad queue editor.
+// Kenshi Job Management, squad queue editor (LEOPARD fork of 0.5.0-beta).
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -84,7 +84,7 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 namespace
 {
     const char* const PLUGIN_NAME = "Kenshi Job Management";
-    const char* const PLUGIN_VERSION = "0.5.0-beta";
+    const char* const PLUGIN_VERSION = "1";   // LEOPARD fork release
     // Keep failed station-assignment recovery bounded while the Stations tab
     // is active. The paused Squad Jobs board refreshes only at explicit UI or
     // mutation boundaries.
@@ -751,7 +751,7 @@ __declspec(dllexport) void startPlugin()
 extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
 {
     static const std::string ini = LeopardIniPath();
-    api->beginMod(api, "KenshiJobManagement", "Kenshi Job Management", ini.c_str(), &LoadLeopardSettings);
+    api->beginMod(api, "KenshiJobManagement", Tr("Kenshi Job Management"), ini.c_str(), &LoadLeopardSettings);
     if (api->version >= 2)
     {
         api->info(api, Tr("A window for squad job queues and work stations: who does what, in which order, and who works where."));
