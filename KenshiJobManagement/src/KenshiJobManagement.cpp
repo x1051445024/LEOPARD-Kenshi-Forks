@@ -751,7 +751,8 @@ __declspec(dllexport) void startPlugin()
 extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
 {
     static const std::string ini = LeopardIniPath();
-    api->beginMod(api, "KenshiJobManagement", Tr("Kenshi Job Management"), ini.c_str(), &LoadLeopardSettings);
+    // page titles in MCM stay English in every language (one name to look for)
+    api->beginMod(api, "KenshiJobManagement", "Kenshi Job Management", ini.c_str(), &LoadLeopardSettings);
     if (api->version >= 2)
     {
         api->info(api, Tr("A window for squad job queues and work stations: who does what, in which order, and who works where."));
