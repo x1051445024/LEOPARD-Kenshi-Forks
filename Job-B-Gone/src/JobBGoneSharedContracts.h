@@ -20,6 +20,8 @@ struct PluginConfig
     int jobBGonePanelPosX;
     int jobBGonePanelPosY;
     std::string panelVisibilityToggleHotkey;
+    // Panel hidden by the hotkey - remembered across loads (LEOPARD, 11.10.2026).
+    bool jobBGonePanelHidden;
 };
 
 struct JobRowModel
@@ -60,6 +62,8 @@ struct ConfigParseDiagnostics
     bool invalidHidePanelDuringCharacterInteraction;
     bool foundJobBGonePanelCollapsed;
     bool invalidJobBGonePanelCollapsed;
+    bool foundJobBGonePanelHidden;
+    bool invalidJobBGonePanelHidden;
     bool foundJobBGonePanelHasCustomPosition;
     bool invalidJobBGonePanelHasCustomPosition;
     bool foundJobBGonePanelPosX;

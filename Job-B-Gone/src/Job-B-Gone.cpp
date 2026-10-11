@@ -295,6 +295,8 @@ static void ResetConfigParseDiagnostics(ConfigParseDiagnostics* diagnostics)
     diagnostics->invalidHidePanelDuringCharacterInteraction = false;
     diagnostics->foundJobBGonePanelCollapsed = false;
     diagnostics->invalidJobBGonePanelCollapsed = false;
+    diagnostics->foundJobBGonePanelHidden = false;
+    diagnostics->invalidJobBGonePanelHidden = false;
     diagnostics->foundJobBGonePanelHasCustomPosition = false;
     diagnostics->invalidJobBGonePanelHasCustomPosition = false;
     diagnostics->foundJobBGonePanelPosX = false;
@@ -704,6 +706,8 @@ static bool IsPanelVisibilityToggleHotkeyDown()
     return (GetAsyncKeyState(g_panelVisibilityToggleVirtualKey) & 0x8000) != 0;
 }
 
+static bool SaveConfigState();
+
 static void TickPanelVisibilityToggleHotkey(bool allowToggle, const char* blockedReasonSummary)
 {
     const bool hotkeyDown = IsPanelVisibilityToggleHotkeyDown();
@@ -729,6 +733,14 @@ static void TickPanelVisibilityToggleHotkey(bool allowToggle, const char* blocke
         if (g_panelHiddenByToggle)
         {
             HideConfirmationOverlay();
+        }
+
+        // Players: after loading a game the panel was always visible again.
+        // Remember the choice in mod-config.json (LEOPARD, 11.10.2026).
+        g_config.jobBGonePanelHidden = g_panelHiddenByToggle;
+        if (!SaveConfigState())
+        {
+            ErrorLog("Job-B-Gone WARN: failed to persist Job-B-Gone panel hidden state");
         }
 
         if (g_config.debugLogTransitions)
@@ -761,6 +773,7 @@ static void LoadConfigState()
     g_config.jobBGonePanelPosX = 0;
     g_config.jobBGonePanelPosY = 0;
     g_config.panelVisibilityToggleHotkey = kPanelVisibilityToggleHotkeyDefault;
+    g_config.jobBGonePanelHidden = false;
     g_runtimePanelHasCustomPosition = false;
     g_runtimePanelPosX = 0;
     g_runtimePanelPosY = 0;
@@ -811,7 +824,8 @@ static void LoadConfigState()
          << (g_config.jobBGonePanelHasCustomPosition ? "true" : "false")
          << " job_b_gone_panel_pos_x=" << g_config.jobBGonePanelPosX
          << " job_b_gone_panel_pos_y=" << g_config.jobBGonePanelPosY
-         << " panel_visibility_toggle_hotkey=\"" << g_config.panelVisibilityToggleHotkey << "\"";
+         << " panel_visibility_toggle_hotkey=\"" << g_config.panelVisibilityToggleHotkey << "\""
+         << " job_b_gone_panel_hidden=" << (g_config.jobBGonePanelHidden ? "true" : "false");
     DebugLog(info.str().c_str());
 
     if (g_config.jobBGonePanelHasCustomPosition)
@@ -822,6 +836,7 @@ static void LoadConfigState()
     }
 
     g_jobBGonePanelCollapsed = g_config.jobBGonePanelCollapsed;
+    g_panelHiddenByToggle = g_config.jobBGonePanelHidden;
 }
 
 static bool SaveConfigState()

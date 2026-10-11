@@ -86,6 +86,7 @@ Supported keys:
 - `hide_panel_during_inventory_open` (bool): hide the panel while an inventory/trade window is open. Default: `true`.
 - `hide_panel_during_character_interaction` (bool): hide the panel while characters are engaged in dialogue/interaction. Default: `true`.
 - `job_b_gone_panel_collapsed` (bool): persist the panel collapsed/expanded state. Default: `false`.
+- `job_b_gone_panel_hidden` (bool): the panel was hidden with the toggle hotkey; kept across game restarts and loads. Default: `false`.
 - `job_b_gone_panel_has_custom_position` (bool): true after panel position is customized.
 - `job_b_gone_panel_pos_x` (number): persisted panel X coordinate.
 - `job_b_gone_panel_pos_y` (number): persisted panel Y coordinate.
@@ -114,3 +115,4 @@ It uses KenshiLib, which is released under GPLv3.
 - Настройки - во вкладке MCM окна «Настройки»; Mod Hub не нужен.
 - Производительность: подписи панели ставятся только при изменении текста, а не каждый кадр.
 - v2: панель прячется под меню паузы в любом языке - меню паузы ищется по имени панели MainMenuPopupPanel, а не по английским подписям кнопок (в русской игре панель висела поверх меню); заодно больше нет обхода всего интерфейса раз в 80 мс.
+- v3: панель помнит, что её спрятали горячей клавишей (CTRL+B): после перезапуска игры и загрузки сохранения остаётся спрятанной (ключ job_b_gone_panel_hidden в mod-config.json).

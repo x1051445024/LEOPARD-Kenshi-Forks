@@ -592,6 +592,25 @@ static bool ParseConfigJson(const std::string& body, PluginConfig* configOut, Co
                 }
             }
         }
+        else if (key == "job_b_gone_panel_hidden")
+        {
+            bool parsedBool = false;
+            size_t valuePos = pos;
+            if (ParseJsonBoolValue(body, &valuePos, &parsedBool))
+            {
+                diagnostics->foundJobBGonePanelHidden = true;
+                configOut->jobBGonePanelHidden = parsedBool;
+                pos = valuePos;
+            }
+            else
+            {
+                diagnostics->invalidJobBGonePanelHidden = true;
+                if (!SkipJsonValue(body, &pos))
+                {
+                    return RecordConfigSyntaxError(diagnostics, pos);
+                }
+            }
+        }
         else if (key == "job_b_gone_panel_has_custom_position")
         {
             bool parsedBool = false;
@@ -957,6 +976,11 @@ static bool ReadConfigFromFile(
         needsWriteBack = true;
         ErrorLog("Job-B-Gone WARN: invalid/missing key \"job_b_gone_panel_collapsed\"; using default");
     }
+    if (!diagnostics.foundJobBGonePanelHidden || diagnostics.invalidJobBGonePanelHidden)
+    {
+        // Key added 11.10.2026 (LEOPARD): older files simply get it written back.
+        needsWriteBack = true;
+    }
     if (!diagnostics.foundJobBGonePanelHasCustomPosition || diagnostics.invalidJobBGonePanelHasCustomPosition)
     {
         needsWriteBack = true;
@@ -1042,6 +1066,8 @@ static bool SaveConfigToFile(const std::string& configPath, const PluginConfig& 
         << (config.hidePanelDuringCharacterInteraction ? "true" : "false") << ",\n";
     out << "  \"job_b_gone_panel_collapsed\": "
         << (config.jobBGonePanelCollapsed ? "true" : "false") << ",\n";
+    out << "  \"job_b_gone_panel_hidden\": "
+        << (config.jobBGonePanelHidden ? "true" : "false") << ",\n";
     out << "  \"job_b_gone_panel_has_custom_position\": "
         << (config.jobBGonePanelHasCustomPosition ? "true" : "false") << ",\n";
     out << "  \"job_b_gone_panel_pos_x\": " << config.jobBGonePanelPosX << ",\n";
