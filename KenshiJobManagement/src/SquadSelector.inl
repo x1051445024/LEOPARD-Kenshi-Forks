@@ -397,7 +397,7 @@
                 "KJM_SquadSelectorCanvas");
         g_squadSelectorScroll =
             g_squadSelectorRoot->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarH",
+                "Kenshi_SliderHBig",
                 MyGUI::IntCoord(
                     selectorLeft,
                     SQUAD_SELECTOR_BUTTON_HEIGHT + S(4),

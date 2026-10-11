@@ -703,7 +703,7 @@
             TagThemeStandardText(g_emptyText);
 
             g_verticalScroll = g_squadTabRoot->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarV",
+                "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
                     jobLeft + g_jobWidth,
                     bodyTop,
@@ -716,7 +716,7 @@
             TagThemeScrollBar(g_verticalScroll);
 
             g_horizontalScroll = g_squadTabRoot->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarH",
+                "Kenshi_SliderHBig",
                 MyGUI::IntCoord(
                     jobLeft,
                     bodyTop + g_bodyHeight,

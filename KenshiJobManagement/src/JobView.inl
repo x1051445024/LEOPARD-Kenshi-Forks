@@ -1449,12 +1449,17 @@
             // readable above it.
             if (roleIconResource != NULL || hasStationArtworkTarget)
             {
-                const int iconSize = CARD_HEIGHT;
+                // LEOPARD: inside the frame; with no target line the
+                // picture goes under the caption instead of behind it.
+                const int iconTop = showTarget ?
+                    FRAME_FILL : FRAME_Y + S(40);
+                const int iconSize = std::max(S(16),
+                    CARD_HEIGHT - FRAME_FILL - iconTop);
                 const int iconLeft = (CARD_WIDTH - iconSize) / 2;
                 card.categoryIcon =
                     card.card->createWidget<MyGUI::ImageBox>(
                         "ImageBox",
-                        MyGUI::IntCoord(iconLeft, 0, iconSize, iconSize),
+                        MyGUI::IntCoord(iconLeft, iconTop, iconSize, iconSize),
                         MyGUI::Align::Left | MyGUI::Align::Top,
                         "KJM_JobCategoryBackground");
                 card.categoryIcon->setDepth(10);
@@ -1469,7 +1474,9 @@
                 card.categoryOverlay =
                     card.card->createWidget<MyGUI::Widget>(
                         "WhiteSkin",
-                        MyGUI::IntCoord(0, 0, CARD_WIDTH, CARD_HEIGHT),
+                        MyGUI::IntCoord(FRAME_FILL, FRAME_FILL,
+                            CARD_WIDTH - 2 * FRAME_FILL,
+                            CARD_HEIGHT - 2 * FRAME_FILL),
                         MyGUI::Align::Stretch,
                         "KJM_JobCategoryOverlay");
                 TagThemeBackground(card.categoryOverlay);

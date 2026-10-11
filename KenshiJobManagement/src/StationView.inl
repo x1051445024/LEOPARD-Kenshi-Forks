@@ -1381,11 +1381,12 @@
         {
             return;
         }
-        const int size = std::max(S(20), row->getHeight() - 2 * FRAME_FILL);
+        const int pad = S(2) + 10 + S(4);   // surface + frame + gap
+        const int size = std::max(S(20), row->getHeight() - 2 * pad);
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
-                FRAME_X - S(2), (row->getHeight() - size) / 2, size, size),
+                pad + S(2), (row->getHeight() - size) / 2, size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
@@ -1592,14 +1593,14 @@
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
-                FRAME_X + row->getHeight() - 2 * FRAME_FILL + S(6), 0,
-                std::max(S(20), row->getWidth() - row->getHeight() -
-                    2 * FRAME_X + 2 * FRAME_FILL - S(6)),
+                row->getHeight() - S(2) - 10 + S(14), 0,
+                std::max(S(20), row->getWidth() - row->getHeight() + S(2) + 10 -
+                    S(14) - (S(2) + 10 + S(6))),
                 row->getHeight()),
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonText" :
                 "KJM_StationAssignedPersonText");
-        SetFittedStationSingleLine(label, personCaption, 16, 13);
+        SetFittedStationSingleLine(label, personCaption, 16, 11);
         label->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(label);
         label->setColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
@@ -2066,7 +2067,7 @@
         const int listHeight = panelHeight - listTop - statusHeight - S(12);
         const int detailHeaderHeight = S(32);
         const int detailPaneGap = S(14);
-        const int detailScrollWidth = S(33);
+        const int detailScrollWidth = 34;   // native width of Kenshi_SliderVBig
         const int detailPaneWidth =
             (panelWidth - 24 - detailPaneGap) / 2;
         const int detailViewportWidth =
@@ -2139,7 +2140,7 @@
             MyGUI::newDelegate(OnStationDetailWheel);
         g_stationView.detailScroll =
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarV",
+                "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
                     assignedLeft + detailViewportWidth + S(2),
                     detailListTop, detailScrollWidth, detailViewportHeight),
@@ -2169,7 +2170,7 @@
             MyGUI::newDelegate(OnStationAvailableWheel);
         g_stationView.detailAvailableScroll =
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarV",
+                "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
                     availableLeft + detailViewportWidth + S(2),
                     detailListTop, detailScrollWidth, detailViewportHeight),
@@ -2537,7 +2538,7 @@
             MyGUI::newDelegate(OnStationMouseWheel);
         g_stationView.verticalScroll =
             g_stationView.root->createWidget<MyGUI::ScrollBar>(
-                "Kenshi_ScrollBarV",
+                "Kenshi_SliderVBig",
                 MyGUI::IntCoord(g_stationView.viewportWidth,
                     STATION_GRID_BANNER_HEIGHT, STATION_GRID_SCROLL_SIZE,
                     g_stationView.viewportHeight),
