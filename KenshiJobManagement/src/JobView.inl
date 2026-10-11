@@ -731,7 +731,7 @@
         // font is not monospaced, and long OrderData labels otherwise clip at
         // the fixed card edge.  Keep the normal size for short labels, then
         // scale only labels that need it so the card remains compact.
-        const int maxWidth = CARD_WIDTH - S(16);
+        const int maxWidth = CARD_WIDTH - 2 * FRAME_X;
         int fontHeight = text->getFontHeight();
         if (fontHeight <= 0)
         {
@@ -755,7 +755,7 @@
         text->setCaption(
             WrapCardJobCaption(displayLabel, 25).c_str());
         if (text->getTextSize().width <= maxWidth &&
-            text->getTextSize().height <= 38)
+            text->getTextSize().height <= S(38))
         {
             return;
         }
@@ -766,7 +766,7 @@
             fontHeight = text->getFontHeight();
         }
         if (text->getTextSize().width <= maxWidth &&
-            text->getTextSize().height <= 38)
+            text->getTextSize().height <= S(38))
         {
             return;
         }
@@ -1259,7 +1259,7 @@
         }
 
         text->setCaption(caption.c_str());
-        const int maxWidth = CARD_WIDTH - S(16);
+        const int maxWidth = CARD_WIDTH - 2 * FRAME_X;
         int fontHeight = text->getFontHeight();
         if (fontHeight <= 0)
         {
@@ -1529,7 +1529,8 @@
             // red warning border.
             card.unavailableMarker = card.card->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(S(2), S(2), CARD_WIDTH - S(4), CARD_HEIGHT - S(4)),
+                MyGUI::IntCoord(FRAME_FILL, FRAME_FILL,
+                    CARD_WIDTH - 2 * FRAME_FILL, CARD_HEIGHT - 2 * FRAME_FILL),
                 MyGUI::Align::Stretch,
                 "KJM_CardUnavailableTint");
             card.unavailableMarker->setColour(MyGUI::Colour(0.95f, 0.18f, 0.14f));
@@ -1542,7 +1543,9 @@
             // and can also sit over future job-specific artwork.
             card.selectionMarker = card.card->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(S(5), S(5), CARD_WIDTH - S(10), CARD_HEIGHT - S(10)),
+                MyGUI::IntCoord(FRAME_FILL + S(3), FRAME_FILL + S(3),
+                    CARD_WIDTH - 2 * FRAME_FILL - S(6),
+                    CARD_HEIGHT - 2 * FRAME_FILL - S(6)),
                 MyGUI::Align::Stretch,
                 "KJM_CardSelectionTint");
             card.selectionMarker->setColour(JobSelectionMarkerColour());
@@ -1591,7 +1594,7 @@
                 // The normal 20pt preset is clear for short work types;
                 // SetFittedCardJobCaption scales and wraps longer labels.
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(S(8), S(2), CARD_WIDTH - S(16), S(38)),
+                MyGUI::IntCoord(FRAME_X, FRAME_Y, CARD_WIDTH - 2 * FRAME_X, S(38)),
                 MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_CardJob");
             if (card.job->getFontHeight() > 0)
@@ -1610,7 +1613,7 @@
 
             card.arrow = card.card->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(0, S(40), CARD_WIDTH, S(15)),
+                MyGUI::IntCoord(0, FRAME_Y + S(38), CARD_WIDTH, S(14)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_CardArrow");
             if (card.arrow->getFontHeight() > 0)
@@ -1627,7 +1630,7 @@
 
             card.target = card.card->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(S(8), S(56), CARD_WIDTH - S(16), S(27)),
+                MyGUI::IntCoord(FRAME_X, FRAME_Y + S(52), CARD_WIDTH - 2 * FRAME_X, S(24)),
                 MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_CardTarget");
             if (card.target->getFontHeight() > 0)
@@ -1783,7 +1786,7 @@
         widgets.recipientMarker =
             widgets.memberRoot->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(0, S(5), S(5), ROW_HEIGHT - S(10)),
+                MyGUI::IntCoord(S(3), FRAME_FILL, S(5), ROW_HEIGHT - 2 * FRAME_FILL),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_RecipientMarker");
         widgets.recipientMarker->setColour(
@@ -1794,7 +1797,7 @@
 
         widgets.portraitBorder = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin",
-            MyGUI::IntCoord(S(7), S(11), MEMBER_PORTRAIT_SIZE, MEMBER_PORTRAIT_SIZE),
+            MyGUI::IntCoord(FRAME_X, FRAME_Y, MEMBER_PORTRAIT_SIZE, MEMBER_PORTRAIT_SIZE),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_PortraitFrame");
         widgets.portraitBorder->setNeedMouseFocus(true);
@@ -1847,7 +1850,7 @@
         widgets.name = widgets.memberRoot->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
-                MEMBER_TEXT_LEFT, S(8), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(25)),
+                MEMBER_TEXT_LEFT, FRAME_Y, g_memberWidth - MEMBER_TEXT_LEFT - FRAME_X, S(25)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberName");
         SetFontPx(widgets.name, S(21));
@@ -1856,7 +1859,7 @@
         widgets.condition = widgets.memberRoot->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
             MyGUI::IntCoord(
-                MEMBER_TEXT_LEFT, S(33), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(16)),
+                MEMBER_TEXT_LEFT, FRAME_Y + S(25), g_memberWidth - MEMBER_TEXT_LEFT - FRAME_X, S(16)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberCondition");
         SetFontPx(widgets.condition, S(15));
@@ -1865,7 +1868,7 @@
         widgets.highestSkill = widgets.memberRoot->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
             MyGUI::IntCoord(
-                MEMBER_TEXT_LEFT, S(49), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(18)),
+                MEMBER_TEXT_LEFT, FRAME_Y + S(41), g_memberWidth - MEMBER_TEXT_LEFT - FRAME_X, S(18)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberHighestSkill");
         SetFontPx(widgets.highestSkill, S(18));
@@ -1876,7 +1879,7 @@
         widgets.skills = widgets.memberRoot->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
             MyGUI::IntCoord(
-                MEMBER_TEXT_LEFT, S(67), g_memberWidth - MEMBER_TEXT_LEFT - S(7), S(32)),
+                MEMBER_TEXT_LEFT, FRAME_Y + S(59), g_memberWidth - MEMBER_TEXT_LEFT - FRAME_X, S(32)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MemberSkills");
         SetFontPx(widgets.skills, S(16));
@@ -1886,7 +1889,7 @@
 
         widgets.jobsToggle = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(S(7), ROW_HEIGHT - S(29), S(112), S(26)),
+            MyGUI::IntCoord(FRAME_X, ROW_HEIGHT - FRAME_Y - S(26), S(112), S(26)),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_JobsToggle");
         widgets.jobsToggle->setUserString("KJM_Member", IntegerString(memberIndex));
@@ -1895,7 +1898,7 @@
 
         widgets.clearButton = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(S(124), ROW_HEIGHT - S(29), S(140), S(26)),
+            MyGUI::IntCoord(FRAME_X + S(118), ROW_HEIGHT - FRAME_Y - S(26), S(140), S(26)),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_ClearMember");
         SetFittedButtonCaption(
@@ -2236,7 +2239,7 @@
         const std::string caption = LocalizeFormat(
             "ui.squad.group_header",
             "{toggle}  {squad}  |  Members: {members}",
-            "{toggle}", collapsed ? "[+]" : "[-]",
+            "{toggle}", collapsed ? "   [+]" : "   [-]",   // LEOPARD: off the frame
             "{squad}", squad.name.empty() ?
                 Localize("ui.squad.generic", "Squad") : squad.name,
             "{members}", IntegerString(squad.members.size()));
@@ -2262,7 +2265,7 @@
         MyGUI::TextBox* jobCaption =
             group.jobHeader->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(S(8), 0, std::max(S(80), g_jobWidth - S(16)),
+                MyGUI::IntCoord(FRAME_X, 0, std::max(S(80), g_jobWidth - 2 * FRAME_X),
                                 SQUAD_GROUP_HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_SquadGroupJobCaption");

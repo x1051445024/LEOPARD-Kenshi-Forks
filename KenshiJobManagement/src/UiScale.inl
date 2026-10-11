@@ -21,25 +21,31 @@
         SQUAD_SELECTOR_BUTTON_HEIGHT = S(34);
         SQUAD_SELECTOR_BUTTON_GAP = S(4);
         SQUAD_SELECTOR_SCROLL_HEIGHT = S(33);
-        ROW_HEIGHT = S(128);    // LEOPARD: 122 + room for the taller row buttons
+        FRAME_X = S(3) + 12;
+        FRAME_Y = S(3) + 8;
+        FRAME_FILL = S(3) + 6;
+        // member row: portrait + four text lines, the two buttons below
+        ROW_HEIGHT = S(121) + 2 * FRAME_Y;
         ROW_GAP = S(6);
-        CARD_HEIGHT = S(88);
+        // job card: caption (two lines), arrow, target
+        CARD_HEIGHT = S(76) + 2 * FRAME_Y;
         MEMBER_PORTRAIT_SIZE = S(80);
         MEMBER_PORTRAIT_INSET = S(2);
-        MEMBER_TEXT_LEFT = S(94);
-        CARD_WIDTH = S(168);
+        MEMBER_TEXT_LEFT = FRAME_X + MEMBER_PORTRAIT_SIZE + S(10);
+        CARD_WIDTH = S(176);
         CARD_GAP = S(4);
         DRAG_EDGE = S(32);
         STATION_GRID_BANNER_HEIGHT = S(38);
         STATION_GRID_SCROLL_SIZE = S(33);
         STATION_GRID_GROUP_HEADER_HEIGHT = S(34);
-        STATION_GRID_CARD_WIDTH = S(214);
-        STATION_GRID_CARD_HEIGHT = S(128);
+        STATION_GRID_CARD_WIDTH = S(220);
+        // name (two lines), area, assignment, status
+        STATION_GRID_CARD_HEIGHT = S(116) + 2 * FRAME_Y;
         STATION_GRID_GAP = S(10);
         STATION_GRID_SIDE_PAD = S(8);
-        STATION_DETAIL_ROW_HEIGHT = S(48);
+        STATION_DETAIL_ROW_HEIGHT = S(44) + 16;
         STATION_MEMBER_ROW_HEIGHT = S(116);
-        SQUAD_GROUP_HEADER_HEIGHT = S(30);
+        SQUAD_GROUP_HEADER_HEIGHT = S(24) + 16;
         ROW_STRIDE = ROW_HEIGHT + ROW_GAP;
         CARD_TOP = (ROW_HEIGHT - CARD_HEIGHT) / 2;
         CARD_STRIDE = CARD_WIDTH + CARD_GAP;

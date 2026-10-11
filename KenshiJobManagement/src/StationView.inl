@@ -669,7 +669,7 @@
             return;
         }
         const std::string category =
-            (IsStationCategoryCollapsed(group.category) ? "[+] " : "[-] ") +
+            (IsStationCategoryCollapsed(group.category) ? "   [+] " : "   [-] ") +
             GetStationCategoryName(group.category);
         const bool singular = group.stations.size() == 1;
         const std::string count = StationIntegerString(
@@ -728,7 +728,7 @@
     {
         // LEOPARD: fitted at the current scale, never below a readable size;
         // a name too long for one line goes on two instead of shrinking.
-        const int maxWidth = STATION_GRID_CARD_WIDTH - S(20);
+        const int maxWidth = STATION_GRID_CARD_WIDTH - 2 * FRAME_X;
         const int maxHeight = S(42);
         text->setCaption(caption);
         SetFontPx(text, S(24));
@@ -937,11 +937,11 @@
         cardSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
         TagThemeSurface(cardSurface);
 
-        const int iconSize = STATION_GRID_CARD_HEIGHT;
+        const int iconSize = STATION_GRID_CARD_HEIGHT - 2 * FRAME_FILL;
         MyGUI::ImageBox* icon = card->createWidget<MyGUI::ImageBox>(
             "ImageBox", MyGUI::IntCoord(
                 (STATION_GRID_CARD_WIDTH - iconSize) / 2,
-                0, iconSize, iconSize),
+                FRAME_FILL, iconSize, iconSize),
             MyGUI::Align::Top,
             "KJM_StationCardBackground");
         // Keep the artwork visible enough to identify the station while the
@@ -956,8 +956,9 @@
         }
 
         MyGUI::Widget* tint = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(0, 0, STATION_GRID_CARD_WIDTH,
-                STATION_GRID_CARD_HEIGHT), MyGUI::Align::Stretch,
+            "WhiteSkin", MyGUI::IntCoord(FRAME_FILL, FRAME_FILL,
+                STATION_GRID_CARD_WIDTH - 2 * FRAME_FILL,
+                STATION_GRID_CARD_HEIGHT - 2 * FRAME_FILL), MyGUI::Align::Stretch,
             "KJM_StationCardTint");
         const bool recentlyChanged =
             SameHandleIdentity(
@@ -973,9 +974,9 @@
         // inner wash makes the card easier to track without replacing any of
         // those states, on either the light or dark palette.
         MyGUI::Widget* hoverOverlay = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(S(3), S(3),
-                STATION_GRID_CARD_WIDTH - S(6),
-                STATION_GRID_CARD_HEIGHT - S(6)),
+            "WhiteSkin", MyGUI::IntCoord(FRAME_FILL, FRAME_FILL,
+                STATION_GRID_CARD_WIDTH - 2 * FRAME_FILL,
+                STATION_GRID_CARD_HEIGHT - 2 * FRAME_FILL),
             MyGUI::Align::Stretch, "KJM_StationCardHover");
         hoverOverlay->setColour(MyGUI::Colour(0.35f, 0.95f, 0.45f));
         hoverOverlay->setAlpha(0.18f);
@@ -1029,8 +1030,8 @@
         // also blocked.  The blocking tint remains red; this separate blue
         // bar is the non-competing recent-change indicator.
         MyGUI::Widget* recentMarker = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(S(2), S(2),
-                STATION_GRID_CARD_WIDTH - S(4), S(4)),
+            "WhiteSkin", MyGUI::IntCoord(FRAME_FILL, FRAME_FILL,
+                STATION_GRID_CARD_WIDTH - 2 * FRAME_FILL, S(4)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationRecentMarker");
         recentMarker->setColour(MyGUI::Colour(0.48f, 0.82f, 1.0f));
@@ -1041,7 +1042,7 @@
 
         MyGUI::TextBox* name = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(S(8), S(4), STATION_GRID_CARD_WIDTH - S(16), S(43)),
+            MyGUI::IntCoord(FRAME_X, FRAME_Y, STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(42)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationExactName");
         SetFittedStationGridName(name, station.name);
@@ -1050,7 +1051,7 @@
         name->setNeedMouseFocus(false);
         name->setNeedKeyFocus(false);
 
-        int lineTop = S(49);
+        int lineTop = FRAME_Y + S(44);
         // Keep the location row stable when a category filter changes.  The
         // old multipleAreas optimization derived this from the currently
         // visible cards, so toggling Defense could make every other card lose
@@ -1059,7 +1060,7 @@
         {
             MyGUI::TextBox* area = card->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(S(7), lineTop, STATION_GRID_CARD_WIDTH - S(14), S(17)),
+                MyGUI::IntCoord(FRAME_X, lineTop, STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(18)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationArea");
             SetFittedStationSingleLine(
@@ -1068,12 +1069,12 @@
             TagThemeAccentText(area);
             area->setNeedMouseFocus(false);
             area->setNeedKeyFocus(false);
-            lineTop += S(17);
+            lineTop += S(18);
         }
 
         MyGUI::TextBox* assignment = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(S(7), lineTop, STATION_GRID_CARD_WIDTH - S(14), S(35)),
+            MyGUI::IntCoord(FRAME_X, lineTop, STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(34)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationAssignedCount");
         SetStationCardAssignment(assignment, station);
@@ -1081,8 +1082,8 @@
 
         MyGUI::TextBox* status = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(S(7), STATION_GRID_CARD_HEIGHT - S(27),
-                STATION_GRID_CARD_WIDTH - S(14), S(20)),
+            MyGUI::IntCoord(FRAME_X, STATION_GRID_CARD_HEIGHT - FRAME_Y - S(20),
+                STATION_GRID_CARD_WIDTH - 2 * FRAME_X, S(20)),
             MyGUI::Align::Bottom | MyGUI::Align::HStretch,
             "KJM_StationBlockingStatus");
         if (station.blocking || !station.blockingStatus.empty())
@@ -1380,10 +1381,11 @@
         {
             return;
         }
-        const int size = S(36);
+        const int size = std::max(S(20), row->getHeight() - 2 * FRAME_FILL);
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
-            "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(S(4), S(4), size, size),
+            "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
+                FRAME_X - S(2), (row->getHeight() - size) / 2, size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
@@ -1590,7 +1592,10 @@
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
-                S(48), 0, std::max(S(20), row->getWidth() - S(54)), row->getHeight()),
+                FRAME_X + row->getHeight() - 2 * FRAME_FILL + S(6), 0,
+                std::max(S(20), row->getWidth() - row->getHeight() -
+                    2 * FRAME_X + 2 * FRAME_FILL - S(6)),
+                row->getHeight()),
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonText" :
                 "KJM_StationAssignedPersonText");

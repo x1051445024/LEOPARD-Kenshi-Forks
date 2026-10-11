@@ -120,6 +120,15 @@ namespace
     int ROW_GAP = 6;    // scaled in ApplyUiScale()
     int ROW_STRIDE = ROW_HEIGHT + ROW_GAP;    // scaled in ApplyUiScale()
     int CARD_HEIGHT = 88;    // scaled in ApplyUiScale()
+    // LEOPARD: cards and rows sit on the game's framed skin
+    // (Kenshi_GenericTextBoxFlatSkin: 8 px top/bottom border, 18 px corners).
+    // The border is drawn in native pixels and does not scale, so content
+    // starts this far from the widget edge: the surface offset S(3) plus
+    // the border. FRAME_X/FRAME_Y - text and buttons; FRAME_FILL - tints
+    // and pictures that may touch the inner edge of the border.
+    int FRAME_X = 15;    // scaled in ApplyUiScale()
+    int FRAME_Y = 11;    // scaled in ApplyUiScale()
+    int FRAME_FILL = 9;    // scaled in ApplyUiScale()
     int CARD_TOP = (ROW_HEIGHT - CARD_HEIGHT) / 2;    // scaled in ApplyUiScale()
     // Use the spare height in each member row for a larger portrait.  Keep
     // the same geometry in the Squad and Stations rosters so the two tabs

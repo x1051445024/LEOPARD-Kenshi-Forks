@@ -613,7 +613,10 @@
                 MyGUI::Align::Stretch,
                 "KJM_SquadTabContent");
 
-            g_memberWidth = ClampInt(size.width / 4, S(260), S(340));
+            // LEOPARD: the two row buttons and the frame must fit
+            const int minMemberWidth = 2 * FRAME_X + S(258);
+            g_memberWidth = ClampInt(size.width / 4, minMemberWidth,
+                std::max(minMemberWidth, S(360)));
             const int jobLeft = PAD + g_memberWidth + PAD;
             const int bodyTop = PAD + TOP_HEIGHT + HEADER_HEIGHT;
             g_jobWidth = std::max(

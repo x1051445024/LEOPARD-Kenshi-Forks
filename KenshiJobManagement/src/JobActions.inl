@@ -2007,7 +2007,7 @@
         {
             StationCategoryOptionButton& binding =
                 g_stationOptionButtons[index];
-            if (binding.button != widget)
+            if (binding.button != widget && binding.label != widget)
             {
                 continue;
             }
@@ -2116,29 +2116,47 @@
             const size_t row = index % 5;
             const int x = column == 0 ? leftColumn : rightColumn;
             const int y = S(46) + static_cast<int>(row) * S(40);
+            // LEOPARD: the game's own tick box (as in its import / new
+            // game panels) and a plain caption beside it; the stretched
+            // tick button squashed both the lamp and the text.
+            const int tickHeight = S(30);
+            const int tickWidth = tickHeight * 35 / 33;   // skin is 35x33
             MyGUI::Button* category = scroll->createWidget<MyGUI::Button>(
-                "Kenshi_TickButton1",
+                "Kenshi_TickBoxSkin",
                 MyGUI::IntCoord(
-                    x, y + (S(34) - 26) / 2, columnWidth, 26),
+                    x, y + (S(34) - tickHeight) / 2, tickWidth, tickHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationCategoryOption");
-            const std::string categoryCaption = Localize(
-                definition.localizationKey, definition.name);
-            SetFittedButtonCaption(
-                category, categoryCaption, 15, 10, 20);
-            // The skin's lamp stretches with the height: native 26 px tall,
-            // so the caption font stays at most the 20 px game font.
-            if (category->getFontHeight() > 20)
-            {
-                SetFontPx(category, 20);
-            }
+            category->setUserString("KJM_Native", "1");
             category->eventMouseButtonClick +=
                 MyGUI::newDelegate(OnStationCategoryOptionClicked);
             category->eventMouseWheel +=
                 MyGUI::newDelegate(OnOptionsMouseWheel);
-            TagThemeButtonText(category);
+            const int labelLeft = x + tickWidth + S(10);
+            MyGUI::TextBox* label = scroll->createWidget<MyGUI::TextBox>(
+                "Kenshi_TextboxStandardText",
+                MyGUI::IntCoord(labelLeft, y,
+                    std::max(S(40), x + columnWidth - labelLeft), S(34)),
+                MyGUI::Align::Left | MyGUI::Align::Top,
+                "KJM_StationCategoryOptionLabel");
+            const std::string categoryCaption = Localize(
+                definition.localizationKey, definition.name);
+            label->setCaption(categoryCaption.c_str());
+            SetFontPx(label, S(20));
+            while (label->getTextSize().width > label->getWidth() &&
+                StepFontDown(label, S(13)))
+            {
+            }
+            label->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
+            label->setNeedMouseFocus(true);    // a click on the text ticks too
+            label->eventMouseButtonClick +=
+                MyGUI::newDelegate(OnStationCategoryOptionClicked);
+            label->eventMouseWheel +=
+                MyGUI::newDelegate(OnOptionsMouseWheel);
+            TagThemeStandardText(label);
             StationCategoryOptionButton binding;
             binding.button = category;
+            binding.label = label;
             binding.category = definition.category;
             g_stationOptionButtons.push_back(binding);
         }

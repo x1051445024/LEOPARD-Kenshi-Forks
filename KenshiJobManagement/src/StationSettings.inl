@@ -34,7 +34,9 @@
         MyGUI::Button* button;
         StationCategory category;
 
-        StationCategoryOptionButton() : button(NULL), category(STATION_OTHER) {}
+        MyGUI::Widget* label;    // LEOPARD: the caption next to the tick box
+
+        StationCategoryOptionButton() : button(NULL), category(STATION_OTHER), label(NULL) {}
     };
 
     bool g_stationCategoryEnabled[STATION_OTHER + 1];
