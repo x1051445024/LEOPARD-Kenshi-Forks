@@ -13,20 +13,20 @@
         const HandleIdentity& station,
         const HandleIdentity& member);
 
-    const int STATION_GRID_BANNER_HEIGHT = 38;
-    const int STATION_GRID_SCROLL_SIZE = 33;
-    const int STATION_GRID_GROUP_HEADER_HEIGHT = 34;
-    const int STATION_GRID_CARD_WIDTH = 214;
-    const int STATION_GRID_CARD_HEIGHT = 128;
-    const int STATION_GRID_GAP = 10;
-    const int STATION_GRID_SIDE_PAD = 8;
-    const int STATION_GRID_OVERSCAN = STATION_GRID_CARD_HEIGHT;
-    const int STATION_DETAIL_ROW_HEIGHT = 48;
+    int STATION_GRID_BANNER_HEIGHT = 38;    // scaled in ApplyUiScale()
+    int STATION_GRID_SCROLL_SIZE = 33;    // scaled in ApplyUiScale()
+    int STATION_GRID_GROUP_HEADER_HEIGHT = 34;    // scaled in ApplyUiScale()
+    int STATION_GRID_CARD_WIDTH = 214;    // scaled in ApplyUiScale()
+    int STATION_GRID_CARD_HEIGHT = 128;    // scaled in ApplyUiScale()
+    int STATION_GRID_GAP = 10;    // scaled in ApplyUiScale()
+    int STATION_GRID_SIDE_PAD = 8;    // scaled in ApplyUiScale()
+    int STATION_GRID_OVERSCAN = STATION_GRID_CARD_HEIGHT;    // scaled in ApplyUiScale()
+    int STATION_DETAIL_ROW_HEIGHT = 48;    // scaled in ApplyUiScale()
     // JobWindow also uses these two historic sizing constants when it chooses
     // a safe minimum client size.  Keep them as view-interface constants even
     // though the matrix rows no longer exist.
-    const int STATION_HEADER_HEIGHT = STATION_GRID_CARD_HEIGHT;
-    const int STATION_MEMBER_ROW_HEIGHT = 116;
+    int STATION_HEADER_HEIGHT = STATION_GRID_CARD_HEIGHT;    // scaled in ApplyUiScale()
+    int STATION_MEMBER_ROW_HEIGHT = 116;    // scaled in ApplyUiScale()
 
     struct StationGridGroup
     {
@@ -702,12 +702,12 @@
         MyGUI::Button* header =
             g_stationView.canvas->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(4, y + 2, g_stationView.viewportWidth - 8,
-                    STATION_GRID_GROUP_HEADER_HEIGHT - 4),
+                MyGUI::IntCoord(S(4), y + S(2), g_stationView.viewportWidth - S(8),
+                    STATION_GRID_GROUP_HEADER_HEIGHT - S(4)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationCategoryHeader");
         SetStationGroupHeaderCaption(header, group);
-        header->setFontHeight(16);
+        header->setFontHeight(S(16));
         header->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         header->setUserString(
             "KJM_StationCategory", StationIntegerString(group.category));
@@ -727,7 +727,7 @@
         const std::string& caption)
     {
         text->setCaption(caption);
-        text->setFontHeight(24);
+        text->setFontHeight(S(24));
         while (text->getFontHeight() > 10 &&
             (text->getTextSize().width > STATION_GRID_CARD_WIDTH - 20 ||
              text->getTextSize().height > 42))
@@ -757,7 +757,7 @@
             assignment->setCaption(count.str());
             TagThemeSuccessText(assignment);
         }
-        assignment->setFontHeight(30);
+        assignment->setFontHeight(S(30));
         assignment->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         assignment->setNeedMouseFocus(false);
         assignment->setNeedKeyFocus(false);
@@ -911,8 +911,8 @@
         MyGUI::Widget* cardSurface = card->createWidget<MyGUI::Widget>(
             "WhiteSkin",
             MyGUI::IntCoord(
-                3, 3, STATION_GRID_CARD_WIDTH - 6,
-                STATION_GRID_CARD_HEIGHT - 6),
+                S(3), S(3), STATION_GRID_CARD_WIDTH - S(6),
+                STATION_GRID_CARD_HEIGHT - S(6)),
             MyGUI::Align::Stretch,
             "KJM_StationCardSurface");
         TagThemeSurface(cardSurface);
@@ -953,9 +953,9 @@
         // inner wash makes the card easier to track without replacing any of
         // those states, on either the light or dark palette.
         MyGUI::Widget* hoverOverlay = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(3, 3,
-                STATION_GRID_CARD_WIDTH - 6,
-                STATION_GRID_CARD_HEIGHT - 6),
+            "WhiteSkin", MyGUI::IntCoord(S(3), S(3),
+                STATION_GRID_CARD_WIDTH - S(6),
+                STATION_GRID_CARD_HEIGHT - S(6)),
             MyGUI::Align::Stretch, "KJM_StationCardHover");
         hoverOverlay->setColour(MyGUI::Colour(0.35f, 0.95f, 0.45f));
         hoverOverlay->setAlpha(0.18f);
@@ -972,22 +972,22 @@
         binding.hoverOverlay = hoverOverlay;
         binding.unassignedTop = card->createWidget<MyGUI::Widget>(
             "WhiteSkin", MyGUI::IntCoord(1, 1,
-                STATION_GRID_CARD_WIDTH - 2, 3),
+                STATION_GRID_CARD_WIDTH - S(2), S(3)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationUnassignedTop");
         binding.unassignedBottom = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(1, STATION_GRID_CARD_HEIGHT - 4,
-                STATION_GRID_CARD_WIDTH - 2, 3),
+            "WhiteSkin", MyGUI::IntCoord(1, STATION_GRID_CARD_HEIGHT - S(4),
+                STATION_GRID_CARD_WIDTH - S(2), S(3)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationUnassignedBottom");
         binding.unassignedLeft = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(1, 4, 3,
-                STATION_GRID_CARD_HEIGHT - 8),
+            "WhiteSkin", MyGUI::IntCoord(1, S(4), S(3),
+                STATION_GRID_CARD_HEIGHT - S(8)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationUnassignedLeft");
         binding.unassignedRight = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(STATION_GRID_CARD_WIDTH - 4, 4, 3,
-                STATION_GRID_CARD_HEIGHT - 8),
+            "WhiteSkin", MyGUI::IntCoord(STATION_GRID_CARD_WIDTH - S(4), S(4), S(3),
+                STATION_GRID_CARD_HEIGHT - S(8)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationUnassignedRight");
         MyGUI::Widget* unassignedEdges[4] = {
@@ -1009,8 +1009,8 @@
         // also blocked.  The blocking tint remains red; this separate blue
         // bar is the non-competing recent-change indicator.
         MyGUI::Widget* recentMarker = card->createWidget<MyGUI::Widget>(
-            "WhiteSkin", MyGUI::IntCoord(2, 2,
-                STATION_GRID_CARD_WIDTH - 4, 4),
+            "WhiteSkin", MyGUI::IntCoord(S(2), S(2),
+                STATION_GRID_CARD_WIDTH - S(4), S(4)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationRecentMarker");
         recentMarker->setColour(MyGUI::Colour(0.48f, 0.82f, 1.0f));
@@ -1021,7 +1021,7 @@
 
         MyGUI::TextBox* name = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(8, 4, STATION_GRID_CARD_WIDTH - 16, 43),
+            MyGUI::IntCoord(S(8), S(4), STATION_GRID_CARD_WIDTH - S(16), S(43)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationExactName");
         SetFittedStationGridName(name, station.name);
@@ -1030,7 +1030,7 @@
         name->setNeedMouseFocus(false);
         name->setNeedKeyFocus(false);
 
-        int lineTop = 49;
+        int lineTop = S(49);
         // Keep the location row stable when a category filter changes.  The
         // old multipleAreas optimization derived this from the currently
         // visible cards, so toggling Defense could make every other card lose
@@ -1039,7 +1039,7 @@
         {
             MyGUI::TextBox* area = card->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(7, lineTop, STATION_GRID_CARD_WIDTH - 14, 17),
+                MyGUI::IntCoord(S(7), lineTop, STATION_GRID_CARD_WIDTH - S(14), S(17)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationArea");
             SetFittedStationSingleLine(
@@ -1048,12 +1048,12 @@
             TagThemeAccentText(area);
             area->setNeedMouseFocus(false);
             area->setNeedKeyFocus(false);
-            lineTop += 17;
+            lineTop += S(17);
         }
 
         MyGUI::TextBox* assignment = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(7, lineTop, STATION_GRID_CARD_WIDTH - 14, 35),
+            MyGUI::IntCoord(S(7), lineTop, STATION_GRID_CARD_WIDTH - S(14), S(35)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_StationAssignedCount");
         SetStationCardAssignment(assignment, station);
@@ -1061,8 +1061,8 @@
 
         MyGUI::TextBox* status = card->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(7, STATION_GRID_CARD_HEIGHT - 27,
-                STATION_GRID_CARD_WIDTH - 14, 20),
+            MyGUI::IntCoord(S(7), STATION_GRID_CARD_HEIGHT - S(27),
+                STATION_GRID_CARD_WIDTH - S(14), S(20)),
             MyGUI::Align::Bottom | MyGUI::Align::HStretch,
             "KJM_StationBlockingStatus");
         if (station.blocking || !station.blockingStatus.empty())
@@ -1360,10 +1360,10 @@
         {
             return;
         }
-        const int size = 36;
-        const int inset = 2;
+        const int size = S(36);
+        const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
-            "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(4, 4, size, size),
+            "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(S(4), S(4), size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
@@ -1559,9 +1559,9 @@
         TagThemeButtonText(row);
         MyGUI::Widget* rowSurface = row->createWidget<MyGUI::Widget>(
             "WhiteSkin",
-            MyGUI::IntCoord(2, 2,
-                std::max(1, row->getWidth() - 4),
-                std::max(1, row->getHeight() - 4)),
+            MyGUI::IntCoord(S(2), S(2),
+                std::max(1, row->getWidth() - S(4)),
+                std::max(1, row->getHeight() - S(4))),
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonSurface" :
                 "KJM_StationAssignedPersonSurface");
@@ -1569,7 +1569,7 @@
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
-                48, 0, std::max(20, row->getWidth() - 54), row->getHeight()),
+                S(48), 0, std::max(S(20), row->getWidth() - S(54)), row->getHeight()),
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonText" :
                 "KJM_StationAssignedPersonText");
@@ -1758,15 +1758,15 @@
             ApplyThemeStandardText(g_stationView.detailAvailableHeader);
         }
 
-        int assignedTop = 4;
+        int assignedTop = S(4);
         if (g_stationView.assignedPeople.empty())
         {
             MyGUI::TextBox* empty =
                 g_stationView.detailCanvas->createWidget<MyGUI::TextBox>(
                     "Kenshi_TextboxStandardText_Small",
-                    MyGUI::IntCoord(8, assignedTop,
-                        g_stationView.detailCanvas->getWidth() - 16,
-                        35), MyGUI::Align::Top | MyGUI::Align::HStretch,
+                    MyGUI::IntCoord(S(8), assignedTop,
+                        g_stationView.detailCanvas->getWidth() - S(16),
+                        S(35)), MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAssignedPeople");
             empty->setCaption(Localize(
                 "station.detail.unassigned", "UNASSIGNED"));
@@ -1774,7 +1774,7 @@
             empty->setNeedMouseFocus(false);
             empty->setNeedKeyFocus(false);
             g_stationView.detailWidgets.push_back(empty);
-            assignedTop += 37;
+            assignedTop += S(37);
         }
         else
         {
@@ -1784,9 +1784,9 @@
                 MyGUI::Button* row =
                     g_stationView.detailCanvas->createWidget<MyGUI::Button>(
                         "Kenshi_Button1",
-                        MyGUI::IntCoord(4, assignedTop,
-                            g_stationView.detailCanvas->getWidth() - 8,
-                            STATION_DETAIL_ROW_HEIGHT - 4),
+                        MyGUI::IntCoord(S(4), assignedTop,
+                            g_stationView.detailCanvas->getWidth() - S(8),
+                            STATION_DETAIL_ROW_HEIGHT - S(4)),
                         MyGUI::Align::Top | MyGUI::Align::HStretch,
                         "KJM_StationAssignedPerson");
                 SetStationDetailPersonCaption(
@@ -1797,15 +1797,15 @@
         }
         g_stationView.detailContentHeight = assignedTop + 6;
 
-        int availableTop = 4;
+        int availableTop = S(4);
         if (!station->assignmentSupported)
         {
             MyGUI::TextBox* unsupported =
                 g_stationView.detailAvailableCanvas->createWidget<MyGUI::TextBox>(
                     "Kenshi_TextboxStandardText_Small",
-                    MyGUI::IntCoord(8, availableTop,
-                        g_stationView.detailAvailableCanvas->getWidth() - 16,
-                        52),
+                    MyGUI::IntCoord(S(8), availableTop,
+                        g_stationView.detailAvailableCanvas->getWidth() - S(16),
+                        S(52)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationAssignmentUnsupported");
             unsupported->setCaption(Localize(
@@ -1815,16 +1815,16 @@
             unsupported->setNeedMouseFocus(false);
             unsupported->setNeedKeyFocus(false);
             g_stationView.detailWidgets.push_back(unsupported);
-            availableTop += 54;
+            availableTop += S(54);
         }
         else if (g_stationView.addPeople.empty())
         {
             MyGUI::TextBox* none =
                 g_stationView.detailAvailableCanvas->createWidget<MyGUI::TextBox>(
                     "Kenshi_TextboxStandardText_Small",
-                    MyGUI::IntCoord(8, availableTop,
-                        g_stationView.detailAvailableCanvas->getWidth() - 16,
-                        34),
+                    MyGUI::IntCoord(S(8), availableTop,
+                        g_stationView.detailAvailableCanvas->getWidth() - S(16),
+                        S(34)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAddCandidates");
             none->setCaption(Localize(
@@ -1834,7 +1834,7 @@
             none->setNeedMouseFocus(false);
             none->setNeedKeyFocus(false);
             g_stationView.detailWidgets.push_back(none);
-            availableTop += 36;
+            availableTop += S(36);
         }
         else
         {
@@ -1844,9 +1844,9 @@
                 MyGUI::Button* row =
                     g_stationView.detailAvailableCanvas->createWidget<MyGUI::Button>(
                         "Kenshi_Button1",
-                        MyGUI::IntCoord(4, availableTop,
-                            g_stationView.detailAvailableCanvas->getWidth() - 8,
-                            STATION_DETAIL_ROW_HEIGHT - 4),
+                        MyGUI::IntCoord(S(4), availableTop,
+                            g_stationView.detailAvailableCanvas->getWidth() - S(8),
+                            STATION_DETAIL_ROW_HEIGHT - S(4)),
                         MyGUI::Align::Top | MyGUI::Align::HStretch,
                         "KJM_StationAddCandidate");
                 SetStationDetailPersonCaption(
@@ -1949,7 +1949,7 @@
         MyGUI::Widget* modalBackground =
             g_stationView.modalPanel->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(4, 4, panelWidth - 8, panelHeight - 8),
+                MyGUI::IntCoord(S(4), S(4), panelWidth - S(8), panelHeight - S(8)),
                 MyGUI::Align::Stretch,
                 "KJM_StationDetailBackground");
         TagThemeBackground(modalBackground);
@@ -1960,11 +1960,11 @@
         MyGUI::TextBox* title =
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(14, 8, panelWidth - 70, 34),
+                MyGUI::IntCoord(S(14), S(8), panelWidth - S(70), S(34)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailTitle");
         title->setCaption(station->name);
-        title->setFontHeight(23);
+        title->setFontHeight(S(23));
         TagThemeStandardText(title);
         while (title->getFontHeight() > 15 &&
             title->getTextSize().width > panelWidth - 70)
@@ -1975,7 +1975,7 @@
         AttachStationTooltip(title, station->name);
         MyGUI::Button* close =
             g_stationView.modalPanel->createWidget<MyGUI::Button>(
-                "Kenshi_Button1", MyGUI::IntCoord(panelWidth - 48, 7, 38, 32),
+                "Kenshi_Button1", MyGUI::IntCoord(panelWidth - S(48), S(7), S(38), S(32)),
                 MyGUI::Align::Right | MyGUI::Align::Top,
                 "KJM_StationDetailClose");
         close->setCaption("X");
@@ -1986,7 +1986,7 @@
         MyGUI::TextBox* summary =
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(14, 43, panelWidth - 28, 66),
+                MyGUI::IntCoord(S(14), S(43), panelWidth - S(28), S(66)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailSummary");
         TagThemeStandardText(summary);
@@ -2028,22 +2028,22 @@
                 "Assignment: Not supported for this station");
         }
         summary->setCaption(summaryCaption);
-        summary->setFontHeight(14);
+        summary->setFontHeight(S(14));
         AttachStationTooltip(summary, summaryCaption);
 
-        const int listTop = 114;
-        const int statusHeight = 30;
-        const int listHeight = panelHeight - listTop - statusHeight - 12;
-        const int detailHeaderHeight = 32;
-        const int detailPaneGap = 14;
-        const int detailScrollWidth = 33;
+        const int listTop = S(114);
+        const int statusHeight = S(30);
+        const int listHeight = panelHeight - listTop - statusHeight - S(12);
+        const int detailHeaderHeight = S(32);
+        const int detailPaneGap = S(14);
+        const int detailScrollWidth = S(33);
         const int detailPaneWidth =
             (panelWidth - 24 - detailPaneGap) / 2;
         const int detailViewportWidth =
             detailPaneWidth - detailScrollWidth - 3;
         const int detailListTop = listTop + detailHeaderHeight;
         const int detailViewportHeight = listHeight - detailHeaderHeight;
-        const int assignedLeft = 12;
+        const int assignedLeft = S(12);
         const int availableLeft =
             assignedLeft + detailPaneWidth + detailPaneGap;
 
@@ -2051,11 +2051,11 @@
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
                 MyGUI::IntCoord(
-                    assignedLeft + 4, listTop, detailPaneWidth - 8,
+                    assignedLeft + S(4), listTop, detailPaneWidth - S(8),
                     detailHeaderHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAssignedHeader");
-        g_stationView.detailAssignedHeader->setFontHeight(17);
+        g_stationView.detailAssignedHeader->setFontHeight(S(17));
         g_stationView.detailAssignedHeader->setTextAlign(
             MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(g_stationView.detailAssignedHeader);
@@ -2066,11 +2066,11 @@
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
                 MyGUI::IntCoord(
-                    availableLeft + 4, listTop, detailPaneWidth - 8,
+                    availableLeft + S(4), listTop, detailPaneWidth - S(8),
                     detailHeaderHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAvailableHeader");
-        g_stationView.detailAvailableHeader->setFontHeight(17);
+        g_stationView.detailAvailableHeader->setFontHeight(S(17));
         g_stationView.detailAvailableHeader->setTextAlign(
             MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(g_stationView.detailAvailableHeader);
@@ -2111,7 +2111,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_ScrollBarV",
                 MyGUI::IntCoord(
-                    assignedLeft + detailViewportWidth + 2,
+                    assignedLeft + detailViewportWidth + S(2),
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationDetailScroll");
@@ -2141,7 +2141,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_ScrollBarV",
                 MyGUI::IntCoord(
-                    availableLeft + detailViewportWidth + 2,
+                    availableLeft + detailViewportWidth + S(2),
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAvailableScroll");
@@ -2151,13 +2151,13 @@
         g_stationView.detailStatus =
             g_stationView.modalPanel->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(12, panelHeight - statusHeight - 6,
-                    panelWidth - 24, statusHeight),
+                MyGUI::IntCoord(S(12), panelHeight - statusHeight - S(6),
+                    panelWidth - S(24), statusHeight),
                 MyGUI::Align::Bottom | MyGUI::Align::HStretch,
                 "KJM_StationDetailStatus");
         g_stationView.detailStatus->setTextAlign(
             MyGUI::Align::Center | MyGUI::Align::VCenter);
-        g_stationView.detailStatus->setFontHeight(13);
+        g_stationView.detailStatus->setFontHeight(S(13));
         TagThemeAccentText(g_stationView.detailStatus);
         g_stationView.detailStatus->setNeedMouseFocus(false);
         g_stationView.detailStatusText.clear();
@@ -2464,7 +2464,7 @@
         g_stationView.scanBanner =
             g_stationView.root->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(4, 0, bounds.width - 8, 28),
+                MyGUI::IntCoord(S(4), 0, bounds.width - S(8), S(28)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationScanBanner");
         g_stationView.scanBanner->setTextAlign(MyGUI::Align::Center);
@@ -2473,7 +2473,7 @@
             MyGUI::newDelegate(OnCardToolTip);
         g_stationView.progressTrack =
             g_stationView.root->createWidget<MyGUI::Widget>(
-                "WhiteSkin", MyGUI::IntCoord(4, 29, bounds.width - 8, 5),
+                "WhiteSkin", MyGUI::IntCoord(S(4), S(29), bounds.width - S(8), S(5)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationProgressTrack");
         g_stationView.progressTrack->setColour(
@@ -2481,7 +2481,7 @@
         g_stationView.progressTrack->setNeedMouseFocus(false);
         g_stationView.progressFill =
             g_stationView.progressTrack->createWidget<MyGUI::Widget>(
-                "WhiteSkin", MyGUI::IntCoord(0, 0, 0, 5),
+                "WhiteSkin", MyGUI::IntCoord(0, 0, 0, S(5)),
                 MyGUI::Align::Left | MyGUI::Align::VStretch,
                 "KJM_StationProgressFill");
         g_stationView.progressFill->setColour(
@@ -2518,8 +2518,8 @@
         g_stationView.emptyText =
             g_stationView.root->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(40, STATION_GRID_BANNER_HEIGHT + 50,
-                    bounds.width - 80, 80),
+                MyGUI::IntCoord(S(40), STATION_GRID_BANNER_HEIGHT + S(50),
+                    bounds.width - S(80), S(80)),
                 MyGUI::Align::Center, "KJM_StationEmpty");
         g_stationView.emptyText->setTextAlign(MyGUI::Align::Center);
         g_stationView.emptyText->setNeedMouseFocus(false);

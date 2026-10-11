@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Value-only bindings and widget ownership for the multi-squad Jobs board.
 
-    const int SQUAD_GROUP_HEADER_HEIGHT = 30;
-    const int SQUAD_GROUP_GAP = ROW_HEIGHT / 2;
+    int SQUAD_GROUP_HEADER_HEIGHT = 30;    // scaled in ApplyUiScale()
+    int SQUAD_GROUP_GAP = ROW_HEIGHT / 2;    // scaled in ApplyUiScale()
 
     struct VisibleMemberBinding
     {

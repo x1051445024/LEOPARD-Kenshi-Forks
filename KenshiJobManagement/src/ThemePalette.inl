@@ -428,18 +428,18 @@
         if (scrollBar->getVerticalAlignment())
         {
             thumb->setCoord(
-                3,
+                S(3),
                 trackStart + trackOffset,
-                25,
+                S(25),
                 thumbLength);
         }
         else
         {
             thumb->setCoord(
                 trackStart + trackOffset,
-                5,
+                S(5),
                 thumbLength,
-                22);
+                S(22));
         }
     }
 
@@ -493,7 +493,7 @@
 
         // The small vanilla layouts permit a 10-pixel thumb. Keep a larger
         // floor in both modes; the dark large-slider skins already exceed it.
-        const int minimumThumbLength = 36;
+        const int minimumThumbLength = S(36);
         scrollBar->setMinTrackSize(minimumThumbLength);
         scrollBar->setTrackSize(std::max(
             minimumThumbLength, scrollBar->getTrackSize()));
@@ -523,13 +523,13 @@
             vertical ?
                 MyGUI::IntCoord(
                     (width - trackThickness) / 2,
-                    2,
+                    S(2),
                     trackThickness,
-                    std::max(1, height - 4)) :
+                    std::max(1, height - S(4))) :
                 MyGUI::IntCoord(
-                    2,
+                    S(2),
                     (height - trackThickness) / 2,
-                    std::max(1, width - 4),
+                    std::max(1, width - S(4)),
                     trackThickness),
             vertical ?
                 (MyGUI::Align::Top | MyGUI::Align::VStretch) :
@@ -549,19 +549,19 @@
 
         CreateThemeScrollBarEdge(
             scrollBar,
-            MyGUI::IntCoord(0, 0, width, 2),
+            MyGUI::IntCoord(0, 0, width, S(2)),
             MyGUI::Align::Top | MyGUI::Align::HStretch);
         CreateThemeScrollBarEdge(
             scrollBar,
-            MyGUI::IntCoord(0, std::max(0, height - 2), width, 2),
+            MyGUI::IntCoord(0, std::max(0, height - S(2)), width, S(2)),
             MyGUI::Align::Bottom | MyGUI::Align::HStretch);
         CreateThemeScrollBarEdge(
             scrollBar,
-            MyGUI::IntCoord(0, 0, 2, height),
+            MyGUI::IntCoord(0, 0, S(2), height),
             MyGUI::Align::Left | MyGUI::Align::VStretch);
         CreateThemeScrollBarEdge(
             scrollBar,
-            MyGUI::IntCoord(std::max(0, width - 2), 0, 2, height),
+            MyGUI::IntCoord(std::max(0, width - S(2)), 0, S(2), height),
             MyGUI::Align::Right | MyGUI::Align::VStretch);
     }
 

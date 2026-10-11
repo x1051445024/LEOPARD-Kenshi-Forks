@@ -90,22 +90,22 @@ namespace
     const DWORD RESET_HOTKEY_COOLDOWN_MS = 1000;
     const DWORD RECENT_MESSAGE_DEDUP_WINDOW_MS = 50;
     const int MAX_SAFE_JOB_ROWS = 64;
-    const int PAD = 12;
-    const int TOP_HEIGHT = 46;
-    const int HEADER_HEIGHT = 38;
+    int PAD = 12;    // scaled in ApplyUiScale()
+    int TOP_HEIGHT = 46;    // scaled in ApplyUiScale()
+    int HEADER_HEIGHT = 38;    // scaled in ApplyUiScale()
     // The status frame now keeps three timestamped message lines. Reserve
     // enough bottom-bar height for that frame and the compact action buttons.
-    const int ACTION_HEIGHT = 82;
+    int ACTION_HEIGHT = 82;    // scaled in ApplyUiScale()
     // Give the scrollbars a larger cross-axis hit area than Kenshi's compact
     // native 16-20 pixel controls. ThemePalette also enforces a larger thumb
     // length and draws the optional dark-mode contrast treatment.
-    const int SCROLL_SIZE = 33;
-    const int SQUAD_SELECTOR_HEIGHT = 71;
-    const int SQUAD_SELECTOR_LABEL_WIDTH = 76;
-    const int SQUAD_SELECTOR_BUTTON_WIDTH = 150;
-    const int SQUAD_SELECTOR_BUTTON_HEIGHT = 34;
-    const int SQUAD_SELECTOR_BUTTON_GAP = 4;
-    const int SQUAD_SELECTOR_SCROLL_HEIGHT = 33;
+    int SCROLL_SIZE = 33;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_HEIGHT = 71;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_LABEL_WIDTH = 76;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_BUTTON_WIDTH = 150;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_BUTTON_HEIGHT = 34;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_BUTTON_GAP = 4;    // scaled in ApplyUiScale()
+    int SQUAD_SELECTOR_SCROLL_HEIGHT = 33;    // scaled in ApplyUiScale()
     // Keep the member rows compact enough to show a full squad without
     // wasting vertical space.  Card dimensions are intentionally modest:
     // the original tick-button skin was being stretched over a very large
@@ -114,26 +114,26 @@ namespace
     // The first skill is two points larger, so keep two extra pixels between
     // the skill block and the bottom controls.
     // Job cards keep their compact 88px height and are centered in the row.
-    const int ROW_HEIGHT = 122;
-    const int ROW_GAP = 6;
-    const int ROW_STRIDE = ROW_HEIGHT + ROW_GAP;
-    const int CARD_HEIGHT = 88;
-    const int CARD_TOP = (ROW_HEIGHT - CARD_HEIGHT) / 2;
+    int ROW_HEIGHT = 122;    // scaled in ApplyUiScale()
+    int ROW_GAP = 6;    // scaled in ApplyUiScale()
+    int ROW_STRIDE = ROW_HEIGHT + ROW_GAP;    // scaled in ApplyUiScale()
+    int CARD_HEIGHT = 88;    // scaled in ApplyUiScale()
+    int CARD_TOP = (ROW_HEIGHT - CARD_HEIGHT) / 2;    // scaled in ApplyUiScale()
     // Use the spare height in each member row for a larger portrait.  Keep
     // the same geometry in the Squad and Stations rosters so the two tabs
     // remain visually consistent.
-    const int MEMBER_PORTRAIT_SIZE = 80;
-    const int MEMBER_PORTRAIT_INSET = 2;
-    const int MEMBER_TEXT_LEFT = 94;
+    int MEMBER_PORTRAIT_SIZE = 80;    // scaled in ApplyUiScale()
+    int MEMBER_PORTRAIT_INSET = 2;    // scaled in ApplyUiScale()
+    int MEMBER_TEXT_LEFT = 94;    // scaled in ApplyUiScale()
     // Keep the priority columns narrow around the actual three-line caption.
     // The previous 196px card left conspicuous empty space on both sides of
     // ordinary work and target names.  A 168px card still leaves room for
     // the fitter below to wrap or reduce unusually long labels.
-    const int CARD_WIDTH = 168;
-    const int CARD_GAP = 4;
-    const int CARD_STRIDE = CARD_WIDTH + CARD_GAP;
+    int CARD_WIDTH = 168;    // scaled in ApplyUiScale()
+    int CARD_GAP = 4;    // scaled in ApplyUiScale()
+    int CARD_STRIDE = CARD_WIDTH + CARD_GAP;    // scaled in ApplyUiScale()
     const int DRAG_THRESHOLD = 5;
-    const int DRAG_EDGE = 32;
+    int DRAG_EDGE = 32;    // scaled in ApplyUiScale()
 
     typedef void (*PlayerInterfaceUpdateFunction)(PlayerInterface*);
     typedef void (*PlayerInterfaceClearAndResetFunction)(PlayerInterface*);
@@ -622,6 +622,7 @@ namespace
 #include "JobActions.inl"
 #include "SquadSelector.inl"
 #include "StationView.inl"
+#include "UiScale.inl"
 #include "JobWindow.inl"
 #include "HudButton.inl"
 #include "Hooks.inl"
@@ -747,4 +748,5 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
     api->toggle(api, "General", "Enabled", Tr("Enabled"), Tr("Turns the whole mod on or off."), 1, MCM_RESTART);
     api->hotkey(api, "General", "Hotkey", Tr("Open key"), Tr("Opens and closes the Job Manager. NONE (Backspace when assigning) - only the button on the panel."), "CTRL+J", 0);
     api->toggle(api, "General", "HudButton", Tr("Button on the panel"), Tr("The JM button next to the game's Jobs button on the bottom panel."), 1, 0);
+    api->integer(api, "General", "UiScale", Tr("Interface size, %"), Tr("Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."), 100, 70, 200, 0);
 }

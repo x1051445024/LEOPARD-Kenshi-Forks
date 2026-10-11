@@ -559,6 +559,10 @@
             return;
         }
 
+        // LEOPARD: sizes and fonts at the current scale (screen height and
+        // the MCM interface size).
+        ApplyUiScale();
+
         PrepareLocalizationForWindow();
         LoadStationCategorySettings();
         LoadThemePaletteSettings();
@@ -613,7 +617,7 @@
                 MyGUI::Align::Stretch,
                 "KJM_SquadTabContent");
 
-            g_memberWidth = ClampInt(size.width / 4, 260, 340);
+            g_memberWidth = ClampInt(size.width / 4, S(260), S(340));
             const int jobLeft = PAD + g_memberWidth + PAD;
             const int bodyTop = PAD + TOP_HEIGHT + HEADER_HEIGHT;
             g_jobWidth = std::max(
@@ -629,9 +633,9 @@
                 // name and member count the requested four-point increase.
                 "Kenshi_TextboxStandardText_Large",
                 MyGUI::IntCoord(
-                    PAD + 300, PAD,
-                    std::max(160, size.width - 2 * PAD - 300),
-                    TOP_HEIGHT - 6),
+                    PAD + S(300), PAD,
+                    std::max(S(160), size.width - 2 * PAD - S(300)),
+                    TOP_HEIGHT - S(6)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_SquadHeading");
             g_squadText->setCaption(Localize(
@@ -690,7 +694,7 @@
 
             g_emptyText = g_squadTabRoot->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(jobLeft + 20, bodyTop + 40, g_jobWidth - 40, 80),
+                MyGUI::IntCoord(jobLeft + S(20), bodyTop + S(40), g_jobWidth - S(40), S(80)),
                 MyGUI::Align::Center,
                 "KJM_EmptySquad");
             g_emptyText->setTextAlign(MyGUI::Align::Center);
@@ -736,9 +740,9 @@
 
             const int actionTop =
                 squadSelectorTop + SQUAD_SELECTOR_HEIGHT + PAD;
-            const int closeLeft = size.width - PAD - 120;
-            const int invalidButtonLeft = PAD + 616;
-            const int optionsWidth = 110;
+            const int closeLeft = size.width - PAD - S(120);
+            const int invalidButtonLeft = PAD + S(616);
+            const int optionsWidth = S(110);
             const int availableInvalidWidth =
                 closeLeft - invalidButtonLeft - PAD - optionsWidth;
             // Keep the new action beside Prioritize Healing. At compact
@@ -750,7 +754,7 @@
                 invalidButtonLeft + invalidButtonWidth + PAD;
             g_removeButton = g_squadTabRoot->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(PAD, actionTop, 190, 40),
+                MyGUI::IntCoord(PAD, actionTop, S(190), S(40)),
                 MyGUI::Align::Left | MyGUI::Align::Bottom,
                 "KJM_RemoveSelected");
             SetFittedButtonCaption(
@@ -765,7 +769,7 @@
             g_addHealingJobsButton =
                 g_squadTabRoot->createWidget<MyGUI::Button>(
                     "Kenshi_Button1",
-                    MyGUI::IntCoord(PAD + 202, actionTop, 200, 40),
+                    MyGUI::IntCoord(PAD + S(202), actionTop, S(200), S(40)),
                     MyGUI::Align::Left | MyGUI::Align::Bottom,
                     "KJM_AddHealingJobs");
             // The healing action keeps its descriptive tooltip/callback
@@ -773,7 +777,7 @@
             // button itself is intentionally compact: "Add" followed by the
             // existing Medic and Robotics artwork.
             g_addHealingJobsButton->setCaption("");
-            g_addHealingJobsButton->setFontHeight(14);
+            g_addHealingJobsButton->setFontHeight(S(14));
             g_addHealingJobsButton->setTextAlign(
                 MyGUI::Align::Left | MyGUI::Align::VCenter);
             g_addHealingJobsButton->setEnabled(false);
@@ -784,7 +788,7 @@
             g_prioritizeCoreJobsButton =
                 g_squadTabRoot->createWidget<MyGUI::Button>(
                     "Kenshi_Button1",
-                    MyGUI::IntCoord(PAD + 414, actionTop, 190, 40),
+                    MyGUI::IntCoord(PAD + S(414), actionTop, S(190), S(40)),
                     MyGUI::Align::Left | MyGUI::Align::Bottom,
                     "KJM_PrioritizeCoreJobs");
             SetFittedButtonCaption(
@@ -804,7 +808,7 @@
                     "Kenshi_Button1",
                     MyGUI::IntCoord(
                         invalidButtonLeft, actionTop,
-                        invalidButtonWidth, 40),
+                        invalidButtonWidth, S(40)),
                     MyGUI::Align::Left | MyGUI::Align::Bottom,
                     "KJM_RemoveInvalidJobs");
             SetFittedButtonCaption(
@@ -822,7 +826,7 @@
 
             g_optionsButton = client->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(optionsLeft, actionTop, optionsWidth, 40),
+                MyGUI::IntCoord(optionsLeft, actionTop, optionsWidth, S(40)),
                 MyGUI::Align::Left | MyGUI::Align::Bottom,
                 "KJM_Options");
             SetFittedButtonCaption(
@@ -834,7 +838,7 @@
 
             g_closeButton = client->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(size.width - PAD - 120, actionTop, 120, 40),
+                MyGUI::IntCoord(size.width - PAD - S(120), actionTop, S(120), S(40)),
                 MyGUI::Align::Right | MyGUI::Align::Bottom,
                 "KJM_Close");
             SetFittedButtonCaption(
@@ -859,8 +863,8 @@
             const int statusWidgetLeft = narrowActionBar ? PAD : statusLeft;
             const int statusWidgetWidth = narrowActionBar ?
                 std::max(1, size.width - 2 * PAD) : statusWidth;
-            const int statusTop = narrowActionBar ? actionTop + 40 : actionTop;
-            const int statusHeight = narrowActionBar ? 48 : 60;
+            const int statusTop = narrowActionBar ? actionTop + S(40) : actionTop;
+            const int statusHeight = narrowActionBar ? S(48) : S(60);
             const MyGUI::Align statusAlign = narrowActionBar ?
                 (MyGUI::Align::Left | MyGUI::Align::Top |
                  MyGUI::Align::HStretch) :
@@ -879,14 +883,14 @@
             g_statusText = client->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
                 MyGUI::IntCoord(
-                    statusWidgetLeft + 8,
-                    statusTop + 3,
-                    std::max(1, statusWidgetWidth - 16),
-                    std::max(1, statusHeight - 6)),
+                    statusWidgetLeft + S(8),
+                    statusTop + S(3),
+                    std::max(1, statusWidgetWidth - S(16)),
+                    std::max(1, statusHeight - S(6))),
                 statusAlign,
                 "KJM_Status");
             g_statusText->setCaption("");
-            g_statusText->setFontHeight(narrowActionBar ? 11 : 13);
+            g_statusText->setFontHeight(narrowActionBar ? S(11) : S(13));
             g_statusText->setTextAlign(
                 MyGUI::Align::Left | MyGUI::Align::Top);
             g_statusText->setNeedMouseFocus(true);
@@ -899,7 +903,7 @@
 
             g_insertionLine = g_squadTabRoot->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(0, 0, 4, ROW_HEIGHT),
+                MyGUI::IntCoord(0, 0, S(4), ROW_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_InsertionLine");
             g_insertionLine->setColour(MyGUI::Colour(0.35f, 0.95f, 0.45f));
@@ -913,22 +917,22 @@
                 1.0f, 0.84f, 0.24f);
             g_dragDestinationOutlineTop =
                 g_squadTabRoot->createWidget<MyGUI::Widget>(
-                    "WhiteSkin", MyGUI::IntCoord(0, 0, 1, 3),
+                    "WhiteSkin", MyGUI::IntCoord(0, 0, 1, S(3)),
                     MyGUI::Align::Left | MyGUI::Align::Top,
                     "KJM_DragDestinationOutlineTop");
             g_dragDestinationOutlineBottom =
                 g_squadTabRoot->createWidget<MyGUI::Widget>(
-                    "WhiteSkin", MyGUI::IntCoord(0, 0, 1, 3),
+                    "WhiteSkin", MyGUI::IntCoord(0, 0, 1, S(3)),
                     MyGUI::Align::Left | MyGUI::Align::Top,
                     "KJM_DragDestinationOutlineBottom");
             g_dragDestinationOutlineLeft =
                 g_squadTabRoot->createWidget<MyGUI::Widget>(
-                    "WhiteSkin", MyGUI::IntCoord(0, 0, 3, 1),
+                    "WhiteSkin", MyGUI::IntCoord(0, 0, S(3), 1),
                     MyGUI::Align::Left | MyGUI::Align::Top,
                     "KJM_DragDestinationOutlineLeft");
             g_dragDestinationOutlineRight =
                 g_squadTabRoot->createWidget<MyGUI::Widget>(
-                    "WhiteSkin", MyGUI::IntCoord(0, 0, 3, 1),
+                    "WhiteSkin", MyGUI::IntCoord(0, 0, S(3), 1),
                     MyGUI::Align::Left | MyGUI::Align::Top,
                     "KJM_DragDestinationOutlineRight");
             MyGUI::Widget* dragOutlineWidgets[] =
@@ -955,13 +959,13 @@
                     PAD + TOP_HEIGHT,
                     size.width - 2 * PAD,
                     std::max(
-                        STATION_MEMBER_ROW_HEIGHT + STATION_HEADER_HEIGHT + 60,
+                        STATION_MEMBER_ROW_HEIGHT + STATION_HEADER_HEIGHT + S(60),
                         actionTop - (PAD + TOP_HEIGHT) - PAD)));
             SetStationBoardSnapshot(&g_stationScan);
 
             g_squadTabButton = client->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(PAD, PAD, 138, 36),
+                MyGUI::IntCoord(PAD, PAD, S(138), S(36)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_SquadTabButton");
             SetFittedButtonCaption(
@@ -973,7 +977,7 @@
             TagThemeButtonText(g_squadTabButton);
             g_stationTabButton = client->createWidget<MyGUI::Button>(
                 "Kenshi_Button1",
-                MyGUI::IntCoord(PAD + 146, PAD, 138, 36),
+                MyGUI::IntCoord(PAD + S(146), PAD, S(138), S(36)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationTabButton");
             SetFittedButtonCaption(
@@ -1006,19 +1010,19 @@
                 MyGUI::TextBox* addLabel =
                     g_addHealingJobsButton->createWidget<MyGUI::TextBox>(
                         "Kenshi_TextboxStandardText_Small",
-                        MyGUI::IntCoord(22, 0, 48, 40),
+                        MyGUI::IntCoord(S(22), 0, S(48), S(40)),
                         MyGUI::Align::Left | MyGUI::Align::VCenter,
                         "KJM_AddHealingLabel");
                 addLabel->setCaption(Localize(
                     "ui.action.add_short", "Add"));
-                addLabel->setFontHeight(14);
+                addLabel->setFontHeight(S(14));
                 addLabel->setTextAlign(MyGUI::Align::Center);
                 addLabel->setNeedMouseFocus(false);
                 TagThemeButtonCaptionText(addLabel);
 
                 MyGUI::ImageBox* medicIcon =
                     g_addHealingJobsButton->createWidget<MyGUI::ImageBox>(
-                        "ImageBox", MyGUI::IntCoord(78, 7, 26, 26),
+                        "ImageBox", MyGUI::IntCoord(S(78), S(7), S(26), S(26)),
                         MyGUI::Align::Left | MyGUI::Align::Top,
                         "KJM_AddHealingMedicIcon");
                 medicIcon->setNeedMouseFocus(false);
@@ -1031,18 +1035,18 @@
                 MyGUI::TextBox* separator =
                     g_addHealingJobsButton->createWidget<MyGUI::TextBox>(
                         "Kenshi_TextboxStandardText_Small",
-                        MyGUI::IntCoord(105, 0, 14, 40),
+                        MyGUI::IntCoord(S(105), 0, S(14), S(40)),
                         MyGUI::Align::Left | MyGUI::Align::VCenter,
                         "KJM_AddHealingSeparator");
                 separator->setCaption("/");
-                separator->setFontHeight(16);
+                separator->setFontHeight(S(16));
                 separator->setTextAlign(MyGUI::Align::Center);
                 separator->setNeedMouseFocus(false);
                 TagThemeButtonCaptionText(separator);
 
                 MyGUI::ImageBox* roboticsIcon =
                     g_addHealingJobsButton->createWidget<MyGUI::ImageBox>(
-                        "ImageBox", MyGUI::IntCoord(121, 7, 26, 26),
+                        "ImageBox", MyGUI::IntCoord(S(121), S(7), S(26), S(26)),
                         MyGUI::Align::Left | MyGUI::Align::Top,
                         "KJM_AddHealingRoboticsIcon");
                 roboticsIcon->setNeedMouseFocus(false);
@@ -1061,7 +1065,7 @@
                     // confusing than the short text fallback.
                     medicIcon->setVisible(false);
                     roboticsIcon->setVisible(false);
-                    addLabel->setCoord(20, 0, 160, 40);
+                    addLabel->setCoord(S(20), 0, S(160), S(40));
                     addLabel->setCaption(Localize(
                         "ui.action.add_healing", "Add Healing"));
                 }

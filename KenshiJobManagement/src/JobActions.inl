@@ -889,7 +889,7 @@
             return;
         }
 
-        const int thickness = 3;
+        const int thickness = S(3);
         g_dragDestinationOutlineTop->setCoord(
             left, clippedTop, width, thickness);
         g_dragDestinationOutlineBottom->setCoord(
@@ -1021,7 +1021,7 @@
             g_horizontalOffset - 2;
         const int lineY = view.top - clientCoord.top +
             g_visibleMemberBindings[destinationIndex].rowTop - g_verticalOffset;
-        g_insertionLine->setCoord(lineX, lineY, 4, ROW_HEIGHT);
+        g_insertionLine->setCoord(lineX, lineY, S(4), ROW_HEIGHT);
         g_insertionLine->setVisible(true);
     }
 
@@ -1341,7 +1341,7 @@
         {
             g_tooltip = gui->createWidget<MyGUI::Widget>(
                 "WhiteSkin",
-                MyGUI::IntCoord(0, 0, 520, 104),
+                MyGUI::IntCoord(0, 0, S(520), S(104)),
                 MyGUI::Align::Default,
                 "ToolTip",
                 "KJM_ToolTip");
@@ -1349,7 +1349,7 @@
             g_tooltip->setNeedMouseFocus(false);
             g_tooltipText = g_tooltip->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
-                MyGUI::IntCoord(8, 6, 504, 92),
+                MyGUI::IntCoord(S(8), S(6), S(504), S(92)),
                 MyGUI::Align::Stretch,
                 "KJM_ToolTipText");
             g_tooltipText->setNeedMouseFocus(false);
@@ -1357,7 +1357,7 @@
         }
         const MyGUI::IntSize view =
             MyGUI::RenderManager::getInstance().getViewSize();
-        const int tooltipWidth = ClampInt(520, 240, std::max(240, view.width - 20));
+        const int tooltipWidth = ClampInt(S(520), S(240), std::max(S(240), view.width - S(20)));
         size_t lineCount = 1;
         if (widget->isUserString("KJM_ToolTip") && g_tooltipText != NULL)
         {
@@ -1377,7 +1377,7 @@
         if (g_tooltipText != NULL)
         {
             g_tooltipText->setCoord(
-                8, 6, tooltipWidth - 16, tooltipHeight - 12);
+                S(8), S(6), tooltipWidth - S(16), tooltipHeight - S(12));
         }
         const int x = ClampInt(
             info.point.left + 16, 0, std::max(0, view.width - tooltipWidth));
@@ -1730,14 +1730,14 @@
         const MyGUI::IntSize clientSize = client->getSize();
         MyGUI::TextBox* help = client->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(16, 10, clientSize.width - 32, 26),
+            MyGUI::IntCoord(S(16), S(10), clientSize.width - S(32), S(26)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_MessageLogHelp");
         const std::string helpCaption = Localize(
             "modal.message_log.help",
             "The 10 most recent non-empty timestamped messages from this game session (oldest to newest).");
         help->setCaption(helpCaption.c_str());
-        help->setFontHeight(15);
+        help->setFontHeight(S(15));
         help->setTextAlign(MyGUI::Align::Center);
         help->setNeedMouseFocus(false);
         TagThemeStandardText(help);
@@ -1786,7 +1786,7 @@
         scroll->eventMouseWheel +=
             MyGUI::newDelegate(OnMessageLogMouseWheel);
         const MyGUI::IntCoord view = scroll->getViewCoord();
-        const int canvasWidth = std::max(1, view.width - 8);
+        const int canvasWidth = std::max(1, view.width - S(8));
         const int canvasHeight = std::max(
             view.height,
             static_cast<int>(historyLineCount) * 22 + 20);
@@ -1801,7 +1801,7 @@
         // private translucent handle.
         if (showVerticalScroll && IsDarkUIFriendlyFontColorsEnabled())
         {
-            const int scrollBarWidth = 32;
+            const int scrollBarWidth = S(32);
             const int scrollBarLeft =
                 messageLogScrollCoord.left +
                 messageLogScrollCoord.width - scrollBarWidth;
@@ -1811,28 +1811,28 @@
                 client,
                 MyGUI::IntCoord(
                     scrollBarLeft, scrollBarTop,
-                    scrollBarWidth, 2),
+                    scrollBarWidth, S(2)),
                 MyGUI::Align::Top);
             CreateThemeScrollBarEdge(
                 client,
                 MyGUI::IntCoord(
                     scrollBarLeft,
-                    scrollBarTop + std::max(0, scrollBarHeight - 2),
+                    scrollBarTop + std::max(0, scrollBarHeight - S(2)),
                     scrollBarWidth,
-                    2),
+                    S(2)),
                 MyGUI::Align::Top);
             CreateThemeScrollBarEdge(
                 client,
                 MyGUI::IntCoord(
                     scrollBarLeft, scrollBarTop,
-                    2, scrollBarHeight),
+                    S(2), scrollBarHeight),
                 MyGUI::Align::Top);
             CreateThemeScrollBarEdge(
                 client,
                 MyGUI::IntCoord(
-                    scrollBarLeft + scrollBarWidth - 2,
+                    scrollBarLeft + scrollBarWidth - S(2),
                     scrollBarTop,
-                    2,
+                    S(2),
                     scrollBarHeight),
                 MyGUI::Align::Top);
         }
@@ -1849,11 +1849,11 @@
 
         MyGUI::TextBox* history = scroll->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(14, 10, canvasWidth - 28, canvasHeight - 20),
+            MyGUI::IntCoord(S(14), S(10), canvasWidth - S(28), canvasHeight - S(20)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_MessageLogText");
         history->setCaption(historyCaption.str().c_str());
-        history->setFontHeight(16);
+        history->setFontHeight(S(16));
         history->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Top);
         history->setNeedMouseFocus(false);
         TagThemeStandardText(history);
@@ -1861,7 +1861,7 @@
         MyGUI::Button* close = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
             MyGUI::IntCoord(
-                clientSize.width - 156, clientSize.height - 50, 140, 38),
+                clientSize.width - S(156), clientSize.height - S(50), S(140), S(38)),
             MyGUI::Align::Right | MyGUI::Align::Bottom,
             "KJM_MessageLogClose");
         const std::string closeCaption = Localize(
@@ -1895,7 +1895,7 @@
         MyGUI::Widget* client = g_modal.window->getClientWidget();
         MyGUI::TextBox* prompt = client->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(18, 18, 484, 78),
+            MyGUI::IntCoord(S(18), S(18), S(484), S(78)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_ClearPrompt");
         const std::string promptCaption = LocalizeFormat(
@@ -1910,7 +1910,7 @@
 
         MyGUI::Button* yes = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(88, 115, 150, 38),
+            MyGUI::IntCoord(S(88), S(115), S(150), S(38)),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_ClearYes");
         const std::string yesCaption = Localize(
@@ -1920,7 +1920,7 @@
         TagThemeButtonText(yes);
         MyGUI::Button* no = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(282, 115, 150, 38),
+            MyGUI::IntCoord(S(282), S(115), S(150), S(38)),
             MyGUI::Align::Right | MyGUI::Align::Bottom,
             "KJM_ClearNo");
         const std::string noCaption = Localize(
@@ -2048,7 +2048,7 @@
         const MyGUI::IntSize clientSize = client->getSize();
         MyGUI::TextBox* help = client->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
-            MyGUI::IntCoord(16, 8, clientSize.width - 32, 44),
+            MyGUI::IntCoord(S(16), S(8), clientSize.width - S(32), S(44)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_OptionsHelp");
         const std::string helpCaption = Localize(
@@ -2062,10 +2062,10 @@
         MyGUI::ScrollView* scroll = client->createWidget<MyGUI::ScrollView>(
             "Kenshi_ScrollView",
             MyGUI::IntCoord(
-                16,
-                56,
-                clientSize.width - 32,
-                std::max(180, clientSize.height - 122)),
+                S(16),
+                S(56),
+                clientSize.width - S(32),
+                std::max(S(180), clientSize.height - S(122))),
             MyGUI::Align::Stretch,
             "KJM_OptionsScroll");
         scroll->setVisibleVScroll(false);
@@ -2073,8 +2073,8 @@
         scroll->eventMouseWheel += MyGUI::newDelegate(OnOptionsMouseWheel);
         g_optionsScroll = scroll;
 
-        const int canvasWidth = std::max(240, clientSize.width - 60);
-        const int columnGap = 16;
+        const int canvasWidth = std::max(S(240), clientSize.width - S(60));
+        const int columnGap = S(16);
         const int columnWidth = std::max(
             100, (canvasWidth - 16 - columnGap) / 2);
         const int leftColumn = 8;
@@ -2083,7 +2083,7 @@
         MyGUI::TextBox* appearanceSection =
             scroll->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText",
-                MyGUI::IntCoord(leftColumn, 8, canvasWidth, 30),
+                MyGUI::IntCoord(leftColumn, S(8), canvasWidth, S(30)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_AppearanceSection");
         const std::string appearanceSectionCaption = Localize(
@@ -2094,7 +2094,7 @@
 
         g_darkUiOptionButton = scroll->createWidget<MyGUI::Button>(
             "Kenshi_TickButton1",
-            MyGUI::IntCoord(leftColumn, 44, columnWidth, 34),
+            MyGUI::IntCoord(leftColumn, S(44), columnWidth, S(34)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_DarkUiOption");
         const std::string darkUiCaption = Localize(
@@ -2111,7 +2111,7 @@
             scroll->createWidget<MyGUI::TextBox>(
                 "Kenshi_TextboxStandardText_Small",
                 MyGUI::IntCoord(
-                    rightColumn, 42, columnWidth, 42),
+                    rightColumn, S(42), columnWidth, S(42)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_AppearanceHelp");
         const std::string appearanceHelpCaption = Localize(
@@ -2123,7 +2123,7 @@
 
         MyGUI::TextBox* stationSection = scroll->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
-            MyGUI::IntCoord(leftColumn, 104, canvasWidth, 30),
+            MyGUI::IntCoord(leftColumn, S(104), canvasWidth, S(30)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationFilterSection");
         const std::string stationSectionCaption = Localize(
@@ -2140,11 +2140,11 @@
             const size_t column = index / 5;
             const size_t row = index % 5;
             const int x = column == 0 ? leftColumn : rightColumn;
-            const int y = 142 + static_cast<int>(row) * 40;
+            const int y = S(142) + static_cast<int>(row) * S(40);
             MyGUI::Button* category = scroll->createWidget<MyGUI::Button>(
                 "Kenshi_TickButton1",
                 MyGUI::IntCoord(
-                    x, y, columnWidth, 34),
+                    x, y, columnWidth, S(34)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationCategoryOption");
             const std::string categoryCaption = Localize(
@@ -2162,16 +2162,16 @@
             g_stationOptionButtons.push_back(binding);
         }
         scroll->setCanvasSize(
-            canvasWidth, 142 + 5 * 40 + 8);
+            canvasWidth, S(142) + 5 * S(40) + S(8));
         MyGUI::Widget* optionsSurface = scroll->createWidget<MyGUI::Widget>(
             "WhiteSkin",
-            MyGUI::IntCoord(0, 0, canvasWidth, 142 + 5 * 40 + 8),
+            MyGUI::IntCoord(0, 0, canvasWidth, S(142) + 5 * S(40) + S(8)),
             MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_OptionsSurface");
         TagThemeSurface(optionsSurface);
 
         MyGUI::Button* reset = client->createWidget<MyGUI::Button>(
-            "Kenshi_Button1", MyGUI::IntCoord(16, clientSize.height - 50, 160, 38),
+            "Kenshi_Button1", MyGUI::IntCoord(S(16), clientSize.height - S(50), S(160), S(38)),
             MyGUI::Align::Left | MyGUI::Align::Bottom, "KJM_OptionReset");
         const std::string resetCaption = Localize(
             "ui.action.reset_default", "Reset Default");
@@ -2180,7 +2180,7 @@
         TagThemeButtonText(reset);
         MyGUI::Button* close = client->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(clientSize.width - 156, clientSize.height - 50, 140, 38),
+            MyGUI::IntCoord(clientSize.width - S(156), clientSize.height - S(50), S(140), S(38)),
             MyGUI::Align::Right | MyGUI::Align::Bottom, "KJM_OptionClose");
         const std::string closeCaption = Localize(
             "ui.action.close", "Close");

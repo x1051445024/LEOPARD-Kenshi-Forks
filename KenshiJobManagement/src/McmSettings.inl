@@ -10,10 +10,41 @@
 #define KENSHI_JOB_MANAGEMENT_MCM_SETTINGS_INL
 
     bool g_settingHudButton = true;      // the "JM" button on the game's panel
+    int g_settingUiScale = 100;          // interface size, percent of the base scale
+
+    // One scale for the whole manager: the original was laid out for 1080
+    // lines with 11-16 px fonts, unreadable on larger screens. Base = screen
+    // height / 1080, times the MCM size setting. S() - a length at that scale.
+    float g_uiScale = 1.0f;
+
+    int S(int value)
+    {
+        return static_cast<int>(value * g_uiScale + (value >= 0 ? 0.5f : -0.5f));
+    }
+
+    void ComputeUiScale()
+    {
+        float base = 1.0f;
+        MyGUI::RenderManager* const render = MyGUI::RenderManager::getInstancePtr();
+        if (render != NULL && render->getViewSize().height > 0)
+        {
+            base = render->getViewSize().height / 1080.0f;
+        }
+        g_uiScale = base * g_settingUiScale / 100.0f;
+        if (g_uiScale < 0.75f)
+        {
+            g_uiScale = 0.75f;
+        }
+        if (g_uiScale > 3.0f)
+        {
+            g_uiScale = 3.0f;
+        }
+    }
     HoldKey::Key g_hotkey;               // opens / closes the manager
     std::string g_hotkeyText = "CTRL+J";
 
     void RestoreHudManagerButton();      // HudButton.inl
+    void ApplyUiScale();                 // UiScale.inl
 
     std::string LeopardIniPath()
     {
@@ -51,6 +82,16 @@
         GetPrivateProfileStringA("General", "Hotkey", "CTRL+J", key, sizeof(key), ini.c_str());
         g_hotkey = HoldKey::Parse(key);
         g_hotkeyText = g_hotkey.vk != 0 ? std::string(key) : std::string();
+
+        g_settingUiScale = GetPrivateProfileIntA("General", "UiScale", 100, ini.c_str());
+        if (g_settingUiScale < 70)
+        {
+            g_settingUiScale = 70;
+        }
+        if (g_settingUiScale > 200)
+        {
+            g_settingUiScale = 200;
+        }
 
         const bool hud = GetPrivateProfileIntA("General", "HudButton", 1, ini.c_str()) != 0;
         if (g_settingHudButton && !hud && g_enabled)

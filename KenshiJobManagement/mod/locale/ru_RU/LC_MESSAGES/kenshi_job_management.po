@@ -1255,3 +1255,9 @@ msgstr "Кнопка на панели"
 
 msgid "The JM button next to the game's Jobs button on the bottom panel."
 msgstr "Кнопка JM рядом с кнопкой \"Работа\" на нижней панели игры."
+
+msgid "Interface size, %"
+msgstr "Размер окна, %"
+
+msgid "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
+msgstr "Размер всего окна работ: текст, кнопки и карточки. 100 - по высоте экрана; действует при следующем открытии окна."

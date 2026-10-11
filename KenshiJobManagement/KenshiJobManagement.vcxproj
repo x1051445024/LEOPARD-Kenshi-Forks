@@ -73,6 +73,7 @@ xcopy /Y /I "$(ProjectDir)mod\locale\*.lang" "$(OutDir)locale\"</Command>
   <ItemGroup>
     <None Include="src\Localization.inl" />
     <None Include="src\McmSettings.inl" />
+    <None Include="src\UiScale.inl" />
     <None Include="src\RuntimeAccess.inl" />
     <None Include="src\ThemePalette.inl" />
     <None Include="src\JobView.inl" />

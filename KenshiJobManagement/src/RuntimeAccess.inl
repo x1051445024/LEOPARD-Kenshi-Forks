@@ -163,7 +163,7 @@
         // Keep all three latest messages visible when a translation is wider
         // than English. Restore the preferred size first so a later short
         // message does not remain needlessly small.
-        int fontHeight = g_statusText->getHeight() <= 42 ? 11 : 13;
+        int fontHeight = g_statusText->getHeight() <= S(42) ? S(11) : S(13);
         g_statusText->setFontHeight(fontHeight);
         while (fontHeight > 9 &&
             (g_statusText->getTextSize().width > g_statusText->getWidth() ||

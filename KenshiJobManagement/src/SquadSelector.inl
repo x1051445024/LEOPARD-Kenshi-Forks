@@ -99,7 +99,7 @@
             return;
         }
         button->setCaption(caption.c_str());
-        int fontHeight = 14;
+        int fontHeight = S(14);
         button->setFontHeight(fontHeight);
         while (fontHeight > 10 &&
             button->getTextSize().width > button->getWidth() - 14)
@@ -374,11 +374,11 @@
                 "KJM_SquadSelectorLabel");
         g_squadSelectorLabel->setCaption(Localize(
             "ui.squad_selector.label", "SQUADS"));
-        g_squadSelectorLabel->setFontHeight(16);
+        g_squadSelectorLabel->setFontHeight(S(16));
         g_squadSelectorLabel->setTextAlign(MyGUI::Align::Center);
         TagThemeStandardText(g_squadSelectorLabel);
 
-        const int selectorLeft = SQUAD_SELECTOR_LABEL_WIDTH + 4;
+        const int selectorLeft = SQUAD_SELECTOR_LABEL_WIDTH + S(4);
         const int selectorWidth = std::max(1, coord.width - selectorLeft);
         g_squadSelectorViewport =
             g_squadSelectorRoot->createWidget<MyGUI::Widget>(
@@ -403,7 +403,7 @@
                 "Kenshi_ScrollBarH",
                 MyGUI::IntCoord(
                     selectorLeft,
-                    SQUAD_SELECTOR_BUTTON_HEIGHT + 4,
+                    SQUAD_SELECTOR_BUTTON_HEIGHT + S(4),
                     selectorWidth,
                     SQUAD_SELECTOR_SCROLL_HEIGHT),
                 MyGUI::Align::Bottom | MyGUI::Align::HStretch,

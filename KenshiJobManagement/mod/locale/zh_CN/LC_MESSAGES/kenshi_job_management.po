@@ -1255,3 +1255,9 @@ msgstr "面板按钮"
 
 msgid "The JM button next to the game's Jobs button on the bottom panel."
 msgstr "底部面板上游戏\"工作\"按钮旁的 JM 按钮。"
+
+msgid "Interface size, %"
+msgstr "界面大小，%"
+
+msgid "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
+msgstr "整个工作管理器窗口的大小：文字、按钮和卡片。100 - 按屏幕高度适配；下次打开窗口时生效。"

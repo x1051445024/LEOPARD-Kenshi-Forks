@@ -1255,3 +1255,9 @@ msgstr "Button on the panel"
 
 msgid "The JM button next to the game's Jobs button on the bottom panel."
 msgstr "The JM button next to the game's Jobs button on the bottom panel."
+
+msgid "Interface size, %"
+msgstr "Interface size, %"
+
+msgid "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
+msgstr "Size of the whole Job Manager window: text, buttons and cards. 100 - fitted to the screen height; applies the next time the window opens."
