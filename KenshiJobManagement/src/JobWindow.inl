@@ -1101,9 +1101,8 @@
 
     void TickHotkey()
     {
-        const bool controlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-        const bool jDown = (GetAsyncKeyState('J') & 0x8000) != 0;
-        const bool hotkeyDown = controlDown && jDown;
+        // LEOPARD: the key comes from MCM (Hotkey, default CTRL+J; NONE - none).
+        const bool hotkeyDown = g_hotkey.vk != 0 && HoldKey::Held(g_hotkey);
         const DWORD now = GetTickCount();
         if (g_lastResetTick != 0 &&
             !HasElapsed(now, g_lastResetTick, RESET_HOTKEY_COOLDOWN_MS))

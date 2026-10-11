@@ -1152,8 +1152,8 @@ msgid "Yes"
 msgstr "是"
 
 # ui.hud.open_manager_tooltip
-msgid "Open Job Manager (Ctrl+J)"
-msgstr "打开工作管理器 (Ctrl+J)"
+msgid "Open Job Manager"
+msgstr "打开工作管理器"
 
 # ui.jobs.toggle_off
 msgid "Jobs: OFF"
@@ -1234,3 +1234,24 @@ msgstr "站点"
 # ui.window.title
 msgid "Kenshi Job Management {version}"
 msgstr "Kenshi工作管理器 {version}"
+
+msgid "A window for squad job queues and work stations: who does what, in which order, and who works where."
+msgstr "管理小队工作队列与工作站的窗口：谁做什么、按什么顺序、谁在哪里工作。"
+
+msgid "Enabled"
+msgstr "启用"
+
+msgid "Turns the whole mod on or off."
+msgstr "启用或禁用整个模组。"
+
+msgid "Open key"
+msgstr "打开按键"
+
+msgid "Opens and closes the Job Manager. NONE (Backspace when assigning) - only the button on the panel."
+msgstr "打开或关闭工作管理器。NONE（设置时按 Backspace）- 仅使用面板按钮。"
+
+msgid "Button on the panel"
+msgstr "面板按钮"
+
+msgid "The JM button next to the game's Jobs button on the bottom panel."
+msgstr "底部面板上游戏\"工作\"按钮旁的 JM 按钮。"

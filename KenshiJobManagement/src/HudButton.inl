@@ -363,10 +363,7 @@
             // applies, but a disabled Jobs toggle does not disable this entry.
             managerButton->setEnabled(true);
             managerButton->setCaption("JM");
-            managerButton->setUserString(
-                "KJM_ToolTip", Localize(
-                    "ui.hud.open_manager_tooltip",
-                    "Open Job Manager (Ctrl+J)"));
+            managerButton->setUserString("KJM_ToolTip", HudButtonTooltip());
             managerButton->setNeedToolTip(true);
             managerButton->eventToolTip +=
                 MyGUI::newDelegate(OnCardToolTip);
@@ -605,7 +602,7 @@
 
     void TickHudManagerButton()
     {
-        if (!g_enabled)
+        if (!g_enabled || !g_settingHudButton)
         {
             return;
         }

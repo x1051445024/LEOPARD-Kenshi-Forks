@@ -12,6 +12,12 @@
 // LEOPARD: translations through the shared .po loader (en/ru/zh).
 #define KLOC_DOMAIN "kenshi_job_management"
 #include <Localization.h>
+// LEOPARD: settings page in Mod Config Menu, hold-key parsing, ini defaults.
+#include <ModConfigMenu.h>
+#include <HoldKey.h>
+#include <IniDefaults.h>
+
+extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 #include <Debug.h>
 #include <core/Functions.h>
@@ -596,6 +602,7 @@ namespace
     void ShowToast(const std::string& message);
 
 #include "Localization.inl"
+#include "McmSettings.inl"
 #include "RuntimeAccess.inl"
 #include "ThemePalette.inl"
 #include "SquadPriority.inl"
@@ -674,6 +681,15 @@ __declspec(dllexport) void startPlugin()
         return;
     }
 
+    // LEOPARD: switched off in MCM - no hooks at all (takes effect after a
+    // restart, the page says so).
+    if (!LeopardEnabledSetting())
+    {
+        DebugLog("[KenshiJobManagement] disabled in KenshiJobManagement.ini");
+        return;
+    }
+    LoadLeopardSettings();
+
     if (KenshiLib::SUCCESS != KenshiLib::AddHook(
             KenshiLib::GetRealAddress(&PlayerInterface::updateUT),
             &PlayerInterfaceUpdateHook,
@@ -712,6 +728,23 @@ __declspec(dllexport) void startPlugin()
 
     std::ostringstream message;
     message << "[KenshiJobManagement] " << PLUGIN_NAME << " "
-            << PLUGIN_VERSION << " loaded. Press Ctrl+J to open the squad manager.";
+            << PLUGIN_VERSION << " (LEOPARD fork) loaded. Open key: "
+            << (g_hotkeyText.empty() ? std::string("none") : g_hotkeyText) << ".";
     DebugLog(message.str().c_str());
+}
+
+
+// LEOPARD: page in Mod Config Menu (MCM tab of the game's Options window).
+// Strings go through Tr() - translations in the plug-in's .po files.
+extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
+{
+    static const std::string ini = LeopardIniPath();
+    api->beginMod(api, "KenshiJobManagement", "Kenshi Job Management", ini.c_str(), &LoadLeopardSettings);
+    if (api->version >= 2)
+    {
+        api->info(api, Tr("A window for squad job queues and work stations: who does what, in which order, and who works where."));
+    }
+    api->toggle(api, "General", "Enabled", Tr("Enabled"), Tr("Turns the whole mod on or off."), 1, MCM_RESTART);
+    api->hotkey(api, "General", "Hotkey", Tr("Open key"), Tr("Opens and closes the Job Manager. NONE (Backspace when assigning) - only the button on the panel."), "CTRL+J", 0);
+    api->toggle(api, "General", "HudButton", Tr("Button on the panel"), Tr("The JM button next to the game's Jobs button on the bottom panel."), 1, 0);
 }
