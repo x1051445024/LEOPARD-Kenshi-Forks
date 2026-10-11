@@ -669,7 +669,7 @@
             return;
         }
         const std::string category =
-            (IsStationCategoryCollapsed(group.category) ? "+ " : "- ") +
+            (IsStationCategoryCollapsed(group.category) ? "[+] " : "[-] ") +
             GetStationCategoryName(group.category);
         const bool singular = group.stations.size() == 1;
         const std::string count = StationIntegerString(
@@ -726,11 +726,30 @@
         MyGUI::TextBox* text,
         const std::string& caption)
     {
+        // LEOPARD: fitted at the current scale, never below a readable size;
+        // a name too long for one line goes on two instead of shrinking.
+        const int maxWidth = STATION_GRID_CARD_WIDTH - S(20);
+        const int maxHeight = S(42);
         text->setCaption(caption);
         text->setFontHeight(S(24));
-        while (text->getFontHeight() > 10 &&
-            (text->getTextSize().width > STATION_GRID_CARD_WIDTH - 20 ||
-             text->getTextSize().height > 42))
+        while (text->getFontHeight() > S(17) &&
+            text->getTextSize().width > maxWidth)
+        {
+            text->setFontHeight(text->getFontHeight() - 1);
+        }
+        if (text->getTextSize().width <= maxWidth)
+        {
+            return;
+        }
+        text->setFontHeight(S(17));
+        const int perChar = std::max(1, text->getTextSize().width /
+            std::max<int>(1, static_cast<int>(LocalizationTextColumns(MyGUI::UString(caption)))));
+        const std::string wrapped = WrapUtf8Text(
+            caption, static_cast<size_t>(std::max(6, maxWidth / perChar)), NULL);
+        text->setCaption(wrapped);
+        while (text->getFontHeight() > S(13) &&
+            (text->getTextSize().width > maxWidth ||
+             text->getTextSize().height > maxHeight))
         {
             text->setFontHeight(text->getFontHeight() - 1);
         }
@@ -860,10 +879,13 @@
         {
             return;
         }
+        // LEOPARD: sizes at the base scale; never below 13.
+        initialFontHeight = S(initialFontHeight);
+        minimumFontHeight = S(std::max(minimumFontHeight, 13));
         text->setCaption(caption);
         text->setFontHeight(initialFontHeight);
         while (text->getFontHeight() > minimumFontHeight &&
-            (text->getTextSize().width > text->getWidth() - 4 ||
+            (text->getTextSize().width > text->getWidth() - S(4) ||
              text->getTextSize().height > text->getHeight()))
         {
             text->setFontHeight(text->getFontHeight() - 1);
@@ -1768,6 +1790,7 @@
                         g_stationView.detailCanvas->getWidth() - S(16),
                         S(35)), MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAssignedPeople");
+            empty->setFontHeight(S(16));
             empty->setCaption(Localize(
                 "station.detail.unassigned", "UNASSIGNED"));
             TagThemeAccentText(empty);
@@ -1808,6 +1831,7 @@
                         S(52)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationAssignmentUnsupported");
+            unsupported->setFontHeight(S(15));
             unsupported->setCaption(Localize(
                 "station.detail.assignment_unsupported",
                 "This station does not expose a verified permanent-job mapping."));
@@ -1827,6 +1851,7 @@
                         S(34)),
                     MyGUI::Align::Top | MyGUI::Align::HStretch,
                     "KJM_StationNoAddCandidates");
+            none->setFontHeight(S(15));
             none->setCaption(Localize(
                 "station.detail.no_candidates",
                 "No loaded readable unassigned characters."));
@@ -1989,6 +2014,7 @@
                 MyGUI::IntCoord(S(14), S(43), panelWidth - S(28), S(66)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationDetailSummary");
+        summary->setFontHeight(S(15));
         TagThemeStandardText(summary);
         const std::string relevantSkill =
             station->relevantSkillName.empty() ?
@@ -2467,6 +2493,7 @@
                 MyGUI::IntCoord(S(4), 0, bounds.width - S(8), S(28)),
                 MyGUI::Align::Top | MyGUI::Align::HStretch,
                 "KJM_StationScanBanner");
+        g_stationView.scanBanner->setFontHeight(S(16));
         g_stationView.scanBanner->setTextAlign(MyGUI::Align::Center);
         TagThemeSuccessText(g_stationView.scanBanner);
         g_stationView.scanBanner->eventToolTip +=

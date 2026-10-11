@@ -649,6 +649,7 @@
                 MyGUI::IntCoord(PAD, PAD + TOP_HEIGHT, g_memberWidth, HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_MemberHeader");
+            memberHeader->setFontHeight(S(16));
             memberHeader->setCaption(Localize(
                 "ui.squad.member_stats_header",
                 "SQUAD MEMBER  |  TOP STATS"));
@@ -1015,7 +1016,7 @@
                         "KJM_AddHealingLabel");
                 addLabel->setCaption(Localize(
                     "ui.action.add_short", "Add"));
-                addLabel->setFontHeight(S(14));
+                addLabel->setFontHeight(S(15));
                 addLabel->setTextAlign(MyGUI::Align::Center);
                 addLabel->setNeedMouseFocus(false);
                 TagThemeButtonCaptionText(addLabel);
@@ -1058,6 +1059,22 @@
                 const bool bothIconsApplied =
                     medicApplied && roboticsApplied;
                 separator->setVisible(bothIconsApplied);
+                if (bothIconsApplied)
+                {
+                    // LEOPARD: the label width comes from its text ("Add" is
+                    // short, "Dobavit'" is not - it ran into the icon), and
+                    // the whole group is centred on the button.
+                    const int labelWidth = addLabel->getTextSize().width + S(4);
+                    const int groupWidth = labelWidth + S(6) + S(26) + S(14) + S(26);
+                    int x = std::max(S(4), (g_addHealingJobsButton->getWidth() - groupWidth) / 2);
+                    addLabel->setCoord(x, 0, labelWidth, S(40));
+                    x += labelWidth + S(6);
+                    medicIcon->setCoord(x, S(7), S(26), S(26));
+                    x += S(26);
+                    separator->setCoord(x, 0, S(14), S(40));
+                    x += S(14);
+                    roboticsIcon->setCoord(x, S(7), S(26), S(26));
+                }
                 if (!bothIconsApplied)
                 {
                     // Keep a clear action caption if either optional texture

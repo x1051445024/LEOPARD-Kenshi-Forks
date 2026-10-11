@@ -344,9 +344,10 @@
         {
             return;
         }
-        // LEOPARD: sizes are given at the base scale (see S()).
+        // LEOPARD: sizes are given at the base scale (see S()); never below
+        // 13 - smaller is unreadable in the game fonts.
         preferredFontHeight = S(preferredFontHeight);
-        minimumFontHeight = S(minimumFontHeight);
+        minimumFontHeight = S(std::max(minimumFontHeight, 13));
         horizontalPadding = S(horizontalPadding);
         button->setCaption(caption);
         int fontHeight = preferredFontHeight;
@@ -1362,6 +1363,7 @@
                 MyGUI::IntCoord(S(10), S(20), g_jobWidth - S(20), S(40)),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_EmptyQueue");
+            widgets.emptyJobs->setFontHeight(S(16));
             widgets.emptyJobs->setNeedMouseFocus(false);
             widgets.emptyJobs->setCaption(member.queueAvailable ?
                 Localize(
@@ -1704,12 +1706,15 @@
             member.jobsEnabled ?
                 Localize("ui.jobs.toggle_on", "Jobs: ON") :
                 Localize("ui.jobs.toggle_off", "Jobs: OFF"),
-            12, 9, 10);
+            15, 13, 10);
         widgets.jobsToggle->setTextAlign(MyGUI::Align::Center);
         ApplyThemeButtonText(widgets.jobsToggle);
         widgets.jobsToggle->setEnabled(member.queueAvailable);
         widgets.clearButton->setEnabled(member.queueAvailable && !member.jobs.empty());
-        widgets.clearButton->setFontHeight(S(12));
+        SetFittedButtonCaption(
+            widgets.clearButton,
+            Localize("ui.action.clear_queue", "Clear Queue"),
+            15, 13, 10);
         widgets.clearButton->setTextAlign(MyGUI::Align::Center);
         ApplyThemeButtonText(widgets.clearButton);
         widgets.jobsRoot->setAlpha(
@@ -1885,7 +1890,7 @@
 
         widgets.jobsToggle = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(S(7), ROW_HEIGHT - S(23), S(102), S(20)),
+            MyGUI::IntCoord(S(7), ROW_HEIGHT - S(29), S(112), S(26)),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_JobsToggle");
         widgets.jobsToggle->setUserString("KJM_Member", IntegerString(memberIndex));
@@ -1894,13 +1899,13 @@
 
         widgets.clearButton = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_Button1",
-            MyGUI::IntCoord(S(114), ROW_HEIGHT - S(23), S(122), S(20)),
+            MyGUI::IntCoord(S(124), ROW_HEIGHT - S(29), S(140), S(26)),
             MyGUI::Align::Left | MyGUI::Align::Bottom,
             "KJM_ClearMember");
         SetFittedButtonCaption(
             widgets.clearButton,
             Localize("ui.action.clear_queue", "Clear Queue"),
-            12, 9, 10);
+            15, 13, 10);
         widgets.clearButton->setTextAlign(MyGUI::Align::Center);
         TagThemeButtonText(widgets.clearButton);
         widgets.clearButton->setUserString("KJM_Member", IntegerString(memberIndex));
@@ -1967,6 +1972,7 @@
                     HEADER_HEIGHT),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_PriorityHeader");
+            label->setFontHeight(S(16));
             label->setCaption(LocalizeFormat(
                 "ui.priority.label", "Priority {number}",
                 "{number}", IntegerString(slot + 1)));
@@ -2234,7 +2240,7 @@
         const std::string caption = LocalizeFormat(
             "ui.squad.group_header",
             "{toggle}  {squad}  |  Members: {members}",
-            "{toggle}", collapsed ? "+" : "-",
+            "{toggle}", collapsed ? "[+]" : "[-]",
             "{squad}", squad.name.empty() ?
                 Localize("ui.squad.generic", "Squad") : squad.name,
             "{members}", IntegerString(squad.members.size()));

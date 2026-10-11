@@ -1355,6 +1355,13 @@
             g_tooltipText->setNeedMouseFocus(false);
             TagThemeStandardText(g_tooltipText);
         }
+        // LEOPARD: an explicit font at the current scale, and the height is
+        // measured from the text below - the original 12 + lines * 16 cut the
+        // last line off at any scale above 1.
+        if (g_tooltipText != NULL)
+        {
+            g_tooltipText->setFontHeight(S(15));
+        }
         const MyGUI::IntSize view =
             MyGUI::RenderManager::getInstance().getViewSize();
         const int tooltipWidth = ClampInt(S(520), S(240), std::max(S(240), view.width - S(20)));
@@ -1362,17 +1369,20 @@
         if (widget->isUserString("KJM_ToolTip") && g_tooltipText != NULL)
         {
             const size_t maximumCharacters = static_cast<size_t>(std::max(
-                28, (tooltipWidth - 16) / 7));
+                28, (tooltipWidth - S(16)) / std::max(1, S(15) / 2)));
             const std::string caption = WrapToolTipCaption(
                 widget->getUserString("KJM_ToolTip"),
                 maximumCharacters,
                 &lineCount);
             g_tooltipText->setCaption(caption);
         }
+        (void)lineCount;
+        const int textHeight = g_tooltipText != NULL ?
+            g_tooltipText->getTextSize().height : S(16);
         const int tooltipHeight = ClampInt(
-            12 + static_cast<int>(lineCount) * 16,
-            44,
-            std::max(44, view.height - 20));
+            textHeight + S(16),
+            S(30),
+            std::max(S(30), view.height - S(20)));
         g_tooltip->setSize(tooltipWidth, tooltipHeight);
         if (g_tooltipText != NULL)
         {
@@ -1380,9 +1390,9 @@
                 S(8), S(6), tooltipWidth - S(16), tooltipHeight - S(12));
         }
         const int x = ClampInt(
-            info.point.left + 16, 0, std::max(0, view.width - tooltipWidth));
+            info.point.left + S(16), 0, std::max(0, view.width - tooltipWidth));
         const int y = ClampInt(
-            info.point.top + 20, 0, std::max(0, view.height - tooltipHeight));
+            info.point.top + S(20), 0, std::max(0, view.height - tooltipHeight));
         g_tooltip->setPosition(x, y);
         g_tooltip->setVisible(true);
     }
@@ -2051,6 +2061,7 @@
             MyGUI::IntCoord(S(16), S(8), clientSize.width - S(32), S(44)),
             MyGUI::Align::Top | MyGUI::Align::HStretch,
             "KJM_OptionsHelp");
+        help->setFontHeight(S(15));
         const std::string helpCaption = Localize(
             "modal.options.help",
             "Appearance applies to the complete manager. Station category filters apply only to Stations.\nChanges save globally and apply immediately.");

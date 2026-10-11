@@ -21,7 +21,7 @@
         SQUAD_SELECTOR_BUTTON_HEIGHT = S(34);
         SQUAD_SELECTOR_BUTTON_GAP = S(4);
         SQUAD_SELECTOR_SCROLL_HEIGHT = S(33);
-        ROW_HEIGHT = S(122);
+        ROW_HEIGHT = S(128);    // LEOPARD: 122 + room for the taller row buttons
         ROW_GAP = S(6);
         CARD_HEIGHT = S(88);
         MEMBER_PORTRAIT_SIZE = S(80);
