@@ -1659,7 +1659,7 @@ bool BuildControlsScaffold(
         DestroyWidgetDirect(container);
         return false;
     }
-    sortLabel->setCaption(MyGUI::UString(L"\u0421\u043e\u0440\u0442"));
+    sortLabel->setCaption(MyGUI::UString(Tr("Sort")));
     sortLabel->setTextColour(MyGUI::Colour(0.65f, 0.63f, 0.59f, 1.0f));
     sortLabel->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
 
@@ -1681,13 +1681,13 @@ bool BuildControlsScaffold(
     }
     sortModeCombo->setComboModeDrop(true);
     sortModeCombo->setSmoothShow(false);
-    sortModeCombo->addItem(MyGUI::UString(L"\u041f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u041f\u043e \u0438\u043c\u0435\u043d\u0438"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u0426\u0435\u043d\u0430 \u0437\u0430 \u0448\u0442\u0443\u043a\u0443"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0441\u0442\u043e\u043f\u043a\u0438"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u0412\u0435\u0441 \u0437\u0430 \u0448\u0442\u0443\u043a\u0443"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u0412\u0435\u0441 \u0441\u0442\u043e\u043f\u043a\u0438"));
-    sortModeCombo->addItem(MyGUI::UString(L"\u0426\u0435\u043d\u0430 / \u0432\u0435\u0441"));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Default")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("By name")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Unit price")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Stack value")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Unit weight")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Stack weight")));
+    sortModeCombo->addItem(MyGUI::UString(Tr("Price / weight")));
     sortModeCombo->setIndexSelected(ResolveSortModeComboIndex(g_sortMode));
     sortModeCombo->eventComboAccept += MyGUI::newDelegate(&OnSortModeComboAccepted);
 

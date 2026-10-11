@@ -70,3 +70,27 @@ msgstr "Write detailed logs to RE_Kenshi_log.txt"
 
 msgid "Search items..."
 msgstr "Search items..."
+
+msgid "Sort"
+msgstr "Sort"
+
+msgid "Default"
+msgstr "Default"
+
+msgid "By name"
+msgstr "By name"
+
+msgid "Unit price"
+msgstr "Unit price"
+
+msgid "Stack value"
+msgstr "Stack value"
+
+msgid "Unit weight"
+msgstr "Unit weight"
+
+msgid "Stack weight"
+msgstr "Stack weight"
+
+msgid "Price / weight"
+msgstr "Price / weight"

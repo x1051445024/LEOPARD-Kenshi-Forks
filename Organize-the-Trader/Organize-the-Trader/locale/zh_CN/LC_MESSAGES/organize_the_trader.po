@@ -70,3 +70,27 @@ msgstr "将详细日志写入 RE_Kenshi_log.txt"
 
 msgid "Search items..."
 msgstr "搜索物品..."
+
+msgid "Sort"
+msgstr "排序"
+
+msgid "Default"
+msgstr "默认"
+
+msgid "By name"
+msgstr "按名称"
+
+msgid "Unit price"
+msgstr "单价"
+
+msgid "Stack value"
+msgstr "整组价值"
+
+msgid "Unit weight"
+msgstr "单件重量"
+
+msgid "Stack weight"
+msgstr "整组重量"
+
+msgid "Price / weight"
+msgstr "价格/重量"
