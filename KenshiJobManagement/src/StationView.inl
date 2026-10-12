@@ -2146,7 +2146,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
-                    assignedLeft + detailViewportWidth + S(2),
+                    assignedLeft + detailViewportWidth + S(2) + 3,
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationDetailScroll");
@@ -2176,7 +2176,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
-                    availableLeft + detailViewportWidth + S(2),
+                    availableLeft + detailViewportWidth + S(2) + 3,
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAvailableScroll");
