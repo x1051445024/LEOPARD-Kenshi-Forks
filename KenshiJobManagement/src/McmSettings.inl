@@ -16,10 +16,20 @@
     // lines with 11-16 px fonts, unreadable on larger screens. Base = screen
     // height / 1080, times the MCM size setting. S() - a length at that scale.
     float g_uiScale = 1.0f;
+    // The game itself scales template parts (scroll bar arrows and thumbs)
+    // by screen height / 1080 - 43 px instead of 32 at 1440 lines. Widgets
+    // built on such templates take their size from here, not from S().
+    float g_gameGuiScale = 1.0f;
 
     int S(int value)
     {
         return static_cast<int>(value * g_uiScale + (value >= 0 ? 0.5f : -0.5f));
+    }
+
+    int NativeGui(int value)
+    {
+        // rounded up, as the game rounds its template parts (34 -> 46 at 1440)
+        return static_cast<int>(std::ceil(value * g_gameGuiScale - 0.001f));
     }
 
     void ComputeUiScale()
@@ -30,6 +40,7 @@
         {
             base = render->getViewSize().height / 1080.0f;
         }
+        g_gameGuiScale = base;
         g_uiScale = base * g_settingUiScale / 100.0f;
         if (g_uiScale < 0.75f)
         {

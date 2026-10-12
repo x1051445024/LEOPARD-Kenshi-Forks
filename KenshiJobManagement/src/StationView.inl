@@ -1388,8 +1388,10 @@
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
-                pad + S(2) - 4, (row->getHeight() - size) / 2 - S(2) - 5, size, size),
-            MyGUI::Align::Left | MyGUI::Align::VCenter,
+                pad + S(2) - 4, (row->getHeight() - size) / 2 - 2, size, size),
+            // Top, not VCenter: MyGUI re-centres a VCenter child on every
+            // resize of the row and ignored the offset
+            MyGUI::Align::Left | MyGUI::Align::Top,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
         border->setNeedKeyFocus(false);
@@ -2067,7 +2069,7 @@
         const int detailPaneGap = S(14);
         // native width of Kenshi_SliderVBig: wider, its arrows are drawn
         // past their place and lose the right edge
-        const int detailScrollWidth = 32;
+        const int detailScrollWidth = NativeGui(32);
         // LEOPARD: both outer margins scaled (the right list's scroll bar
         // ran into the window frame), plus the frame's own 10 px.
         const int detailPaneWidth =

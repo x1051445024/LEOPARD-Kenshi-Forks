@@ -16,13 +16,13 @@
         ACTION_HEIGHT = S(82);
         // LEOPARD: the game's large scroll bars (Kenshi_SliderVBig /
         // HBig) - their arrows are drawn at native size, 32 x 27 / 24 x 34.
-        SCROLL_SIZE = 34;
+        SCROLL_SIZE = NativeGui(34);
         SQUAD_SELECTOR_HEIGHT = S(71);
         SQUAD_SELECTOR_LABEL_WIDTH = S(76);
         SQUAD_SELECTOR_BUTTON_WIDTH = S(150);
         SQUAD_SELECTOR_BUTTON_HEIGHT = S(34);
         SQUAD_SELECTOR_BUTTON_GAP = S(4);
-        SQUAD_SELECTOR_SCROLL_HEIGHT = 34;
+        SQUAD_SELECTOR_SCROLL_HEIGHT = NativeGui(34);
         FRAME_X = S(3) + 10 + S(8);
         FRAME_Y = S(3) + 10 + S(5);
         FRAME_FILL = S(3) + 6;
@@ -38,7 +38,7 @@
         CARD_GAP = S(4);
         DRAG_EDGE = S(32);
         STATION_GRID_BANNER_HEIGHT = S(38);
-        STATION_GRID_SCROLL_SIZE = 32;   // Kenshi_SliderVBig native width
+        STATION_GRID_SCROLL_SIZE = NativeGui(32);   // Kenshi_SliderVBig width
         STATION_GRID_GROUP_HEADER_HEIGHT = S(34);
         STATION_GRID_CARD_WIDTH = S(220);
         // name (two lines), area, assignment, status
