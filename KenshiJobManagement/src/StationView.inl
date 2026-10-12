@@ -877,9 +877,11 @@
         {
             return;
         }
-        // LEOPARD: sizes at the base scale; never below 13.
+        // LEOPARD: sizes at the base scale; never below 13 (0 - down to
+        // the smallest game font).
         initialFontHeight = S(initialFontHeight);
-        minimumFontHeight = S(std::max(minimumFontHeight, 13));
+        minimumFontHeight = minimumFontHeight <= 0 ? 0 :
+            S(std::max(minimumFontHeight, 13));
         text->setCaption(caption);
         SetFontPx(text, initialFontHeight);
         while ((text->getTextSize().width > text->getWidth() - S(4) ||
@@ -1600,7 +1602,7 @@
             MyGUI::Align::Stretch,
             addCandidate ? "KJM_StationAvailablePersonText" :
                 "KJM_StationAssignedPersonText");
-        SetFittedStationSingleLine(label, personCaption, 16, 11);
+        SetFittedStationSingleLine(label, personCaption, 16, 0);
         label->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
         TagThemeStandardText(label);
         label->setColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
@@ -1943,12 +1945,14 @@
         const int rootHeight = g_stationView.root->getHeight();
         const MyGUI::IntSize view =
             MyGUI::RenderManager::getInstance().getViewSize();
+        // LEOPARD: the size caps grow with the interface scale (fixed
+        // 1120 x 720 cut long worker lines at larger sizes).
         const int panelWidth = std::min(
-            1120,
+            S(1120),
             std::max(
                 480, std::min(rootWidth - 40, view.width - 24)));
         const int panelHeight = std::min(
-            720,
+            S(720),
             std::max(
                 350, std::min(rootHeight - 50, view.height - 24)));
         const int left = (view.width - panelWidth) / 2;
