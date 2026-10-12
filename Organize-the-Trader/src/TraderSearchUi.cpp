@@ -185,12 +185,19 @@ void PositionInlineControls()
         int width = button.left - origin.left - 20;
         if (width > 360) width = 360;
         const int comboSetting = TraderState().core.g_sortComboWidth;
+        // LEOPARD: the label is at least 52 wide and grows with its text
+        // ("Sort by" in English); the rest of the row moves along
+        MyGUI::Widget* label = FindNamedDescendantRecursive(sort, "OTT_SortLabel", false);
+        MyGUI::TextBox* labelText = label != 0 ? label->castType<MyGUI::TextBox>(false) : 0;
+        int labelWidth = 52;
+        if (labelText != 0 && labelText->getTextSize().width + 8 > labelWidth)
+            labelWidth = labelText->getTextSize().width + 8;
+        const int rowExtra = labelWidth + 46;   // label + gaps + direction button
         if (comboSetting > 0)
         {
-            // label 52 + gaps + direction button 28: the sort row is 98 wider
-            // than its drop-down; ARRANGE goes right after it, inside the
-            // window
-            width = comboSetting + 98;
+            // the sort row is rowExtra wider than its drop-down; ARRANGE goes
+            // right after it, inside the window
+            width = comboSetting + rowExtra;
             const int roomRight = arrange->getParent() != 0 ?
                 arrange->getParent()->getWidth() - arrange->getWidth() - 4 : 100000;
             int arrangeLeft = origin.left + 8 + width + 12 - arrangeParentLeft;
@@ -220,12 +227,11 @@ void PositionInlineControls()
             sort->setCoord(8, button.top - origin.top, width, button.height);
             MyGUI::Widget* combo = FindNamedDescendantRecursive(sort, "OTT_SortModeCombo", false);
             MyGUI::Widget* direction = FindNamedDescendantRecursive(sort, "OTT_SortDirectionButton", false);
-            MyGUI::Widget* label = FindNamedDescendantRecursive(sort, "OTT_SortLabel", false);
             const int height = button.height > 22 ? button.height - 4 : 18;
-            if (label != 0) label->setCoord(6, 2, 52, height);
+            if (label != 0) label->setCoord(6, 2, labelWidth, height);
             if (combo != 0)
             {
-                combo->setCoord(62, 2, width - 98, height);
+                combo->setCoord(labelWidth + 10, 2, width - rowExtra, height);
                 FitSortComboText(combo->castType<MyGUI::ComboBox>(false));
             }
             if (direction != 0) direction->setCoord(width - 30, 2, 28, height);

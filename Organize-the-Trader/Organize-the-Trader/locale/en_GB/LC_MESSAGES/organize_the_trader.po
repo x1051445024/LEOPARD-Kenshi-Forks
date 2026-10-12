@@ -72,13 +72,13 @@ msgid "Search items..."
 msgstr "Search items..."
 
 msgid "Sort"
-msgstr "Sort"
+msgstr "Sort by"
 
 msgid "Default"
 msgstr "Default"
 
 msgid "By name"
-msgstr "By name"
+msgstr "Name"
 
 msgid "Unit price"
 msgstr "Unit price"
