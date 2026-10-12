@@ -1581,17 +1581,7 @@
         // portrait column. Keep the button caption empty and render text in a
         // separate child that begins after the fixed 36-pixel portrait.
         row->setCaption("");
-        TagThemeButtonText(row);
-        MyGUI::Widget* rowSurface = row->createWidget<MyGUI::Widget>(
-            "Kenshi_GenericTextBoxFlatSkin",
-            MyGUI::IntCoord(S(2), S(2),
-                std::max(1, row->getWidth() - S(4)),
-                std::max(1, row->getHeight() - S(4))),
-            MyGUI::Align::Stretch,
-            addCandidate ? "KJM_StationAvailablePersonSurface" :
-                "KJM_StationAssignedPersonSurface");
-        rowSurface->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
-        TagThemeSurface(rowSurface);
+        row->setUserString("KJM_Native", "1");   // LEOPARD: the row is the game frame itself
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
@@ -1813,7 +1803,9 @@
             {
                 MyGUI::Button* row =
                     g_stationView.detailCanvas->createWidget<MyGUI::Button>(
-                        "Kenshi_Button1",
+                        // LEOPARD: one game frame per row (a button around
+                        // the frame drew a double border with gaps)
+                        "Kenshi_GenericTextBoxFlatSkin",
                         MyGUI::IntCoord(S(4), assignedTop,
                             g_stationView.detailCanvas->getWidth() - S(8),
                             STATION_DETAIL_ROW_HEIGHT - S(4)),
@@ -1875,7 +1867,7 @@
             {
                 MyGUI::Button* row =
                     g_stationView.detailAvailableCanvas->createWidget<MyGUI::Button>(
-                        "Kenshi_Button1",
+                        "Kenshi_GenericTextBoxFlatSkin",
                         MyGUI::IntCoord(S(4), availableTop,
                             g_stationView.detailAvailableCanvas->getWidth() - S(8),
                             STATION_DETAIL_ROW_HEIGHT - S(4)),
@@ -1972,7 +1964,9 @@
         g_stationView.modalShade->setNeedMouseFocus(true);
         g_stationView.modalPanel =
             gui->createWidget<MyGUI::Widget>(
-                "Kenshi_SelectionPanel",
+                // LEOPARD: an empty holder - the game frame below is the
+                // only border (the selection panel around it doubled it)
+                "PanelEmpty",
                 MyGUI::IntCoord(left, top, panelWidth, panelHeight),
                 MyGUI::Align::Center, "Popup",
                 "KJM_StationDetailModal");
@@ -1983,7 +1977,7 @@
         MyGUI::Widget* modalBackground =
             g_stationView.modalPanel->createWidget<MyGUI::Widget>(
                 "Kenshi_FloatingPanelSkin",
-                MyGUI::IntCoord(S(4), S(4), panelWidth - S(8), panelHeight - S(8)),
+                MyGUI::IntCoord(0, 0, panelWidth, panelHeight),
                 MyGUI::Align::Stretch,
                 "KJM_StationDetailBackground");
             modalBackground->setUserString("KJM_Native", "1");   // LEOPARD: game skin, no tint
@@ -2072,13 +2066,15 @@
         const int detailHeaderHeight = S(32);
         const int detailPaneGap = S(14);
         const int detailScrollWidth = 34;   // native width of Kenshi_SliderVBig
+        // LEOPARD: both outer margins scaled (the right list's scroll bar
+        // ran into the window frame), plus the frame's own 10 px.
         const int detailPaneWidth =
-            (panelWidth - 24 - detailPaneGap) / 2;
+            (panelWidth - 2 * (S(12) + 10) - detailPaneGap) / 2;
         const int detailViewportWidth =
             detailPaneWidth - detailScrollWidth - 3;
         const int detailListTop = listTop + detailHeaderHeight;
         const int detailViewportHeight = listHeight - detailHeaderHeight;
-        const int assignedLeft = S(12);
+        const int assignedLeft = S(12) + 10;
         const int availableLeft =
             assignedLeft + detailPaneWidth + detailPaneGap;
 
