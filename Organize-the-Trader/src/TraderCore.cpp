@@ -452,15 +452,10 @@ void NormalizeTraderConfigSnapshot(TraderConfigSnapshot* config)
     config->searchInputHeight = ClampSearchInputConfiguredHeight(config->searchInputHeight);
     config->sortPanelWidth = ClampSortPanelConfiguredWidth(config->sortPanelWidth);
     config->sortPanelHeight = ClampSortPanelConfiguredHeight(config->sortPanelHeight);
-    if (config->sortComboWidth <= 0)
-    {
-        config->sortComboWidth = 0;
-    }
-    else
-    {
-        config->sortComboWidth = ClampIntValue(
-            config->sortComboWidth, kSortComboWidthMin, kSortComboWidthMax);
-    }
+    // LEOPARD: any 0..400 as given - MCM sends every step of the slider and
+    // reads the value back, a raised minimum made the slider jump
+    config->sortComboWidth = ClampIntValue(
+        config->sortComboWidth, kSortComboWidthMin, kSortComboWidthMax);
     if (!config->searchInputPositionCustomized)
     {
         config->searchInputLeft = 0;

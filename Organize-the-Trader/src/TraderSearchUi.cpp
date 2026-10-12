@@ -211,8 +211,11 @@ void PositionInlineControls()
         {
             arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
         }
-        sort->setVisible(width >= 180);
-        if (width >= 180)
+        // fitted to the window - hidden when the room is too small; a set
+        // width is always shown
+        const bool showSort = comboSetting > 0 || width >= 180;
+        sort->setVisible(showSort);
+        if (showSort)
         {
             sort->setCoord(8, button.top - origin.top, width, button.height);
             MyGUI::Widget* combo = FindNamedDescendantRecursive(sort, "OTT_SortModeCombo", false);

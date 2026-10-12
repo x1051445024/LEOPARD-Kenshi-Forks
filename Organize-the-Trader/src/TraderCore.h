@@ -46,7 +46,7 @@ static const int kDefaultSortPanelConfiguredHeight = 26;
 // LEOPARD: width of the sort drop-down; 0 - fitted to the window (the room
 // left of the game's ARRANGE button). Set - the drop-down takes it and the
 // direction and ARRANGE buttons move right.
-static const int kSortComboWidthMin = 60;
+static const int kSortComboWidthMin = 0;
 static const int kSortComboWidthMax = 400;
 
 enum TraderSortMode
