@@ -1460,7 +1460,7 @@
         if (shift)
         {
             g_horizontalOffset = ClampInt(
-                g_horizontalOffset - notches * 40,
+                g_horizontalOffset - notches * S(40),
                 0,
                 g_maxHorizontalOffset);
             g_changingScroll = true;
@@ -1481,7 +1481,7 @@
         }
 
         g_verticalOffset = ClampInt(
-            g_verticalOffset - notches * 40,
+            g_verticalOffset - notches * S(40),
             0,
             g_maxVerticalOffset);
         g_changingScroll = true;
@@ -1564,7 +1564,7 @@
             const int currentDistance = ClampInt(
                 -current.top, 0, maxOffset);
             const int nextDistance = ClampInt(
-                currentDistance - NormalizeMouseWheelNotches(relative) * 40,
+                currentDistance - NormalizeMouseWheelNotches(relative) * S(40),
                 0, maxOffset);
             if (nextDistance != currentDistance)
             {
@@ -1696,7 +1696,7 @@
                 -current.top, 0, maximum);
             const int nextDistance = ClampInt(
                 currentDistance -
-                    NormalizeMouseWheelNotches(relative) * 40,
+                    NormalizeMouseWheelNotches(relative) * S(40),
                 0, maximum);
             if (nextDistance != currentDistance)
             {

@@ -542,7 +542,7 @@
         }
         g_squadSelectorOffset = ClampInt(
             g_squadSelectorOffset -
-                NormalizeMouseWheelNotches(relative) * 60,
+                NormalizeMouseWheelNotches(relative) * S(60),
             0,
             g_squadSelectorMaximumOffset);
         g_squadSelectorChangingScroll = true;

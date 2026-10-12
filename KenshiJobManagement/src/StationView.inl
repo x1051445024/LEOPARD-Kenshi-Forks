@@ -2641,7 +2641,9 @@
     void OnStationMouseWheel(MyGUI::Widget*, int relative)
     {
         g_stationView.verticalOffset = ClampInt(
-            g_stationView.verticalOffset - relative * 52,
+            // LEOPARD: the wheel reports 120 per notch - count notches
+            g_stationView.verticalOffset -
+                NormalizeMouseWheelNotches(relative) * S(52),
             0, g_stationView.maxVerticalOffset);
         g_stationView.changingScroll = true;
         if (g_stationView.verticalScroll != NULL)
@@ -2727,7 +2729,9 @@
             0, g_stationView.detailContentHeight -
                 g_stationView.detailViewport->getHeight());
         g_stationView.detailOffset = ClampInt(
-            g_stationView.detailOffset - relative * 46, 0, maximum);
+            g_stationView.detailOffset -
+                NormalizeMouseWheelNotches(relative) * STATION_DETAIL_ROW_HEIGHT,
+            0, maximum);
         g_stationView.detailScrollChanging = true;
         if (g_stationView.detailScroll != NULL)
         {
@@ -2751,7 +2755,8 @@
             0, g_stationView.detailAvailableContentHeight -
                 g_stationView.detailAvailableViewport->getHeight());
         g_stationView.detailAvailableOffset = ClampInt(
-            g_stationView.detailAvailableOffset - relative * 46,
+            g_stationView.detailAvailableOffset -
+                NormalizeMouseWheelNotches(relative) * STATION_DETAIL_ROW_HEIGHT,
             0, maximum);
         g_stationView.detailAvailableScrollChanging = true;
         if (g_stationView.detailAvailableScroll != NULL)
