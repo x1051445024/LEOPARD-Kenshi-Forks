@@ -1388,7 +1388,7 @@
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
-                pad + S(2) - 4, (row->getHeight() - size) / 2 - S(2) - 2, size, size),
+                pad + S(2) - 4, (row->getHeight() - size) / 2 - S(2) - 5, size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
@@ -1585,7 +1585,7 @@
         MyGUI::TextBox* label = row->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText",
             MyGUI::IntCoord(
-                row->getHeight() - S(2) - 10 + S(14), 0,
+                row->getHeight() - S(2) - 10 + S(14), -3,
                 std::max(S(20), row->getWidth() - row->getHeight() + S(2) + 10 -
                     S(14) - (S(2) + 10 + S(6))),
                 row->getHeight()),
@@ -2065,7 +2065,9 @@
         const int listHeight = panelHeight - listTop - statusHeight - S(12);
         const int detailHeaderHeight = S(32);
         const int detailPaneGap = S(14);
-        const int detailScrollWidth = 34;   // native width of Kenshi_SliderVBig
+        // native width of Kenshi_SliderVBig: wider, its arrows are drawn
+        // past their place and lose the right edge
+        const int detailScrollWidth = 32;
         // LEOPARD: both outer margins scaled (the right list's scroll bar
         // ran into the window frame), plus the frame's own 10 px.
         const int detailPaneWidth =

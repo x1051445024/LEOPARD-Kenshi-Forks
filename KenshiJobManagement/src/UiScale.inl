@@ -38,7 +38,7 @@
         CARD_GAP = S(4);
         DRAG_EDGE = S(32);
         STATION_GRID_BANNER_HEIGHT = S(38);
-        STATION_GRID_SCROLL_SIZE = 34;
+        STATION_GRID_SCROLL_SIZE = 32;   // Kenshi_SliderVBig native width
         STATION_GRID_GROUP_HEADER_HEIGHT = S(34);
         STATION_GRID_CARD_WIDTH = S(220);
         // name (two lines), area, assignment, status

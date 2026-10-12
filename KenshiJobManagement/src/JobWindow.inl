@@ -706,7 +706,7 @@
                 MyGUI::IntCoord(
                     jobLeft + g_jobWidth,
                     bodyTop,
-                    SCROLL_SIZE,
+                    32,     // LEOPARD: Kenshi_SliderVBig is exactly 32 wide
                     g_bodyHeight),
                 MyGUI::Align::Right | MyGUI::Align::VStretch,
                 "KJM_VScroll");
