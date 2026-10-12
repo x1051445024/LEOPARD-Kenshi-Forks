@@ -118,6 +118,33 @@ int SortComboItemsWidth(MyGUI::ComboBox* combo)
     return widest;
 }
 
+// A narrow trader window (vanilla - 18 cells) leaves the combo too little
+// room for "Stack value" and the like: step down through the game's fonts
+// until the longest mode fits. Only when the combo width changes.
+void FitSortComboFont(MyGUI::ComboBox* combo)
+{
+    if (combo == 0) return;
+    const std::string width = MyGUI::utility::toString(combo->getWidth());
+    if (combo->isUserString("OTT_FitWidth") && combo->getUserString("OTT_FitWidth") == width)
+        return;
+    combo->setUserString("OTT_FitWidth", width);
+    if (!combo->isUserString("OTT_FontOrig"))
+        combo->setUserString("OTT_FontOrig", combo->getFontName());
+    MyGUI::Widget* client = combo->getClientWidget();
+    const int room = client != 0 ? client->getWidth() : combo->getWidth() - 34;
+    const char* fonts[] = { 0, "Kenshi_StandardFont_MediumSmall", "Kenshi_StandardFont_Small" };
+    MyGUI::FontManager* manager = MyGUI::FontManager::getInstancePtr();
+    for (int i = 0; i < 3; ++i)
+    {
+        const std::string name = fonts[i] != 0 ? std::string(fonts[i]) : combo->getUserString("OTT_FontOrig");
+        MyGUI::IFont* font = manager != 0 ? manager->getByName(name) : 0;
+        if (font == 0) continue;
+        combo->setFontName(name);
+        combo->setFontHeight(font->getDefaultHeight());
+        if (SortComboItemsWidth(combo) <= room) break;
+    }
+}
+
 // The drop-down list is as wide as the combo, and on the vanilla interface
 // the combo is narrow - item names were cut. An open list takes the key
 // focus (ComboBox::showList) and is the combo's own child: widen it to the
@@ -165,11 +192,22 @@ void PositionInlineControls()
             MyGUI::Widget* direction = FindNamedDescendantRecursive(sort, "OTT_SortDirectionButton", false);
             MyGUI::Widget* label = FindNamedDescendantRecursive(sort, "OTT_SortLabel", false);
             const int height = button.height > 22 ? button.height - 4 : 18;
-            if (label != 0) label->setCoord(6, 2, 52, height);
+            // LEOPARD: the label takes only its text width - in a narrow
+            // window every pixel goes to the combo
+            int labelWidth = 52;
+            MyGUI::TextBox* labelText = label != 0 ? label->castType<MyGUI::TextBox>(false) : 0;
+            if (labelText != 0 && labelText->getTextSize().width > 0)
+            {
+                labelWidth = labelText->getTextSize().width + 8;
+                if (labelWidth > 52) labelWidth = 52;
+            }
+            if (label != 0) label->setCoord(6, 2, labelWidth, height);
             if (combo != 0)
             {
-                combo->setCoord(62, 2, width - 98, height);
-                FitSortComboText(combo->castType<MyGUI::ComboBox>(false));
+                combo->setCoord(labelWidth + 10, 2, width - labelWidth - 46, height);
+                MyGUI::ComboBox* comboBox = combo->castType<MyGUI::ComboBox>(false);
+                FitSortComboText(comboBox);
+                FitSortComboFont(comboBox);
             }
             if (direction != 0) direction->setCoord(width - 30, 2, 28, height);
         }
