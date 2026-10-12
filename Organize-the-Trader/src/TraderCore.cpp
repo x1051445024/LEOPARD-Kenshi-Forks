@@ -257,7 +257,8 @@ std::string BuildTraderConfigText(const TraderConfigSnapshot& config)
             << "  \"sortPanelPositionCustomized\": "
             << (config.sortPanelPositionCustomized ? "true" : "false") << ",\n"
             << "  \"sortPanelLeft\": " << config.sortPanelLeft << ",\n"
-            << "  \"sortPanelTop\": " << config.sortPanelTop << "\n"
+            << "  \"sortPanelTop\": " << config.sortPanelTop << ",\n"
+            << "  \"sortComboWidth\": " << config.sortComboWidth << "\n"
             << "}\n";
     return content.str();
 }
@@ -289,6 +290,7 @@ void LogTraderConfigSnapshot(const char* prefix, const TraderConfigSnapshot& con
          << (config.sortPanelPositionCustomized ? "true" : "false")
          << " sortPanelLeft=" << config.sortPanelLeft
          << " sortPanelTop=" << config.sortPanelTop
+         << " sortComboWidth=" << config.sortComboWidth
          << " verboseDiagnosticsCompiled="
          << (ShouldCompileVerboseDiagnostics() ? "true" : "false");
     LogInfoLine(line.str());
@@ -450,6 +452,15 @@ void NormalizeTraderConfigSnapshot(TraderConfigSnapshot* config)
     config->searchInputHeight = ClampSearchInputConfiguredHeight(config->searchInputHeight);
     config->sortPanelWidth = ClampSortPanelConfiguredWidth(config->sortPanelWidth);
     config->sortPanelHeight = ClampSortPanelConfiguredHeight(config->sortPanelHeight);
+    if (config->sortComboWidth <= 0)
+    {
+        config->sortComboWidth = 0;
+    }
+    else
+    {
+        config->sortComboWidth = ClampIntValue(
+            config->sortComboWidth, kSortComboWidthMin, kSortComboWidthMax);
+    }
     if (!config->searchInputPositionCustomized)
     {
         config->searchInputLeft = 0;
@@ -483,6 +494,7 @@ TraderConfigSnapshot CaptureTraderConfigSnapshot()
     config.sortPanelPositionCustomized = TraderState().searchUi.g_sortContainerPositionCustomized;
     config.sortPanelLeft = TraderState().searchUi.g_sortContainerStoredLeft;
     config.sortPanelTop = TraderState().searchUi.g_sortContainerStoredTop;
+    config.sortComboWidth = TraderState().core.g_sortComboWidth;
     NormalizeTraderConfigSnapshot(&config);
     return config;
 }
@@ -504,6 +516,7 @@ void ApplyTraderConfigSnapshot(const TraderConfigSnapshot& config)
     TraderState().core.g_searchInputConfiguredHeight = normalized.searchInputHeight;
     TraderState().core.g_sortPanelConfiguredWidth = normalized.sortPanelWidth;
     TraderState().core.g_sortPanelConfiguredHeight = normalized.sortPanelHeight;
+    TraderState().core.g_sortComboWidth = normalized.sortComboWidth;
     TraderState().searchUi.g_searchContainerPositionCustomized =
         normalized.searchInputPositionCustomized;
     TraderState().searchUi.g_searchContainerStoredLeft = normalized.searchInputLeft;
@@ -627,6 +640,10 @@ void LoadModConfig()
     if (TryParseJsonIntByKey(configText, "sortPanelHeight", &parsedIntValue))
     {
         config.sortPanelHeight = parsedIntValue;
+    }
+    if (TryParseJsonIntByKey(configText, "sortComboWidth", &parsedIntValue))
+    {
+        config.sortComboWidth = parsedIntValue;
     }
     if (TryParseJsonBoolByKey(configText, "sortPanelPositionCustomized", &parsedValue))
     {

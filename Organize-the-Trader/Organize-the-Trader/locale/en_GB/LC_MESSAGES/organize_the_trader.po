@@ -94,3 +94,9 @@ msgstr "Stack weight"
 
 msgid "Price / weight"
 msgstr "Price / weight"
+
+msgid "Sort list width"
+msgstr "Sort list width"
+
+msgid "Width of the sort drop-down at the bottom of the trader window, in pixels. 0 - fitted to the window; a set width moves the direction and Arrange buttons to the right"
+msgstr "Width of the sort drop-down at the bottom of the trader window, in pixels. 0 - fitted to the window; a set width moves the direction and Arrange buttons to the right"

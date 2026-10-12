@@ -118,6 +118,24 @@ int SortComboItemsWidth(MyGUI::ComboBox* combo)
     return widest;
 }
 
+// LEOPARD: the game's ARRANGE button may be moved right to make room for a
+// wider sort drop-down (MCM "Sort list width"). Its own place is kept here
+// and given back when the setting returns to 0 or the panel goes away.
+static WidgetRef& MovedArrangeRef()
+{
+    static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
+    return *ref;
+}
+int g_arrangeHomeLeft = 0;
+
+void RestoreArrangeButton()
+{
+    MyGUI::Widget* arrange = MovedArrangeRef().get();
+    if (arrange != 0 && arrange->getLeft() != g_arrangeHomeLeft)
+        arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
+    MovedArrangeRef().reset();
+}
+
 // The drop-down list is as wide as the combo, and on the vanilla interface
 // the combo is narrow - item names were cut. An open list takes the key
 // focus (ComboBox::showList) and is the combo's own child: widen it to the
@@ -154,9 +172,45 @@ void PositionInlineControls()
     if (sort != 0 && arrange != 0)
     {
         const MyGUI::IntCoord origin = parent->getAbsoluteCoord();
-        const MyGUI::IntCoord button = arrange->getAbsoluteCoord();
+        // ARRANGE at its own place (it may stand moved from the last frame)
+        if (MovedArrangeRef().get() != arrange)
+        {
+            RestoreArrangeButton();
+            g_arrangeHomeLeft = arrange->getLeft();
+            MovedArrangeRef().set(arrange);
+        }
+        const int arrangeParentLeft = arrange->getAbsoluteLeft() - arrange->getLeft();
+        MyGUI::IntCoord button = arrange->getAbsoluteCoord();
+        button.left = arrangeParentLeft + g_arrangeHomeLeft;
         int width = button.left - origin.left - 20;
         if (width > 360) width = 360;
+        const int comboSetting = TraderState().core.g_sortComboWidth;
+        if (comboSetting > 0)
+        {
+            // label 52 + gaps + direction button 28: the sort row is 98 wider
+            // than its drop-down; ARRANGE goes right after it, inside the
+            // window
+            width = comboSetting + 98;
+            const int roomRight = arrange->getParent() != 0 ?
+                arrange->getParent()->getWidth() - arrange->getWidth() - 4 : 100000;
+            int arrangeLeft = origin.left + 8 + width + 12 - arrangeParentLeft;
+            if (arrangeLeft > roomRight)
+            {
+                width -= arrangeLeft - roomRight;
+                arrangeLeft = roomRight;
+            }
+            if (arrangeLeft < g_arrangeHomeLeft)
+            {
+                // the set width fits without moving ARRANGE
+                arrangeLeft = g_arrangeHomeLeft;
+            }
+            if (arrange->getLeft() != arrangeLeft)
+                arrange->setPosition(arrangeLeft, arrange->getTop());
+        }
+        else if (arrange->getLeft() != g_arrangeHomeLeft)
+        {
+            arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
+        }
         sort->setVisible(width >= 180);
         if (width >= 180)
         {
@@ -2335,6 +2389,7 @@ void DestroyControlsIfPresent()
     if (edit != 0) BlurSearchEdit(edit, "dock_destroyed");
     ClearTraderHiddenItems();
     DestroyEmbeddedControlsIfPresent();
+    RestoreArrangeButton();
     MyGUI::Widget* panel = DockPanelRef().get();
     MyGUI::Gui* gui = MyGUI::Gui::getInstancePtr();
     if (panel != 0 && gui != 0) gui->destroyWidget(panel);

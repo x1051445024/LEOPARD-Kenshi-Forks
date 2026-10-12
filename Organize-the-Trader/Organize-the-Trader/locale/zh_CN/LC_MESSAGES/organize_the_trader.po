@@ -94,3 +94,9 @@ msgstr "整组重量"
 
 msgid "Price / weight"
 msgstr "价格/重量"
+
+msgid "Sort list width"
+msgstr "排序列表宽度"
+
+msgid "Width of the sort drop-down at the bottom of the trader window, in pixels. 0 - fitted to the window; a set width moves the direction and Arrange buttons to the right"
+msgstr "交易窗口底部排序下拉列表的宽度(像素)。0 - 适应窗口;设置宽度后,方向按钮和整理按钮会向右移动"

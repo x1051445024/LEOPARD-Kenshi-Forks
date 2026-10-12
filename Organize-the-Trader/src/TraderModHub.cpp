@@ -322,6 +322,25 @@ EMC_Result __cdecl SetSortPanelHeightSetting(
         &TraderConfigSnapshot::sortPanelHeight);
 }
 
+EMC_Result __cdecl GetSortComboWidthSetting(void* user_data, int32_t* out_value)
+{
+    return GetHubIntSetting(user_data, out_value, &TraderConfigSnapshot::sortComboWidth);
+}
+
+EMC_Result __cdecl SetSortComboWidthSetting(
+    void* user_data,
+    int32_t value,
+    char* err_buf,
+    uint32_t err_buf_size)
+{
+    return SetHubIntSetting(
+        user_data,
+        value,
+        err_buf,
+        err_buf_size,
+        &TraderConfigSnapshot::sortComboWidth);
+}
+
 void LogModHubFallback(const char* reason)
 {
     std::stringstream line;
@@ -437,6 +456,17 @@ void EnsureModHubClientConfigured()
         &GetSortPanelHeightSetting,
         &SetSortPanelHeightSetting };
 
+    static const EMC_IntSettingDefV1 kSortComboWidthSetting = {
+        "sort_combo_width",
+        "Sort list width",
+        "Width of the sort drop-down at the bottom of the trader window, in pixels. 0 - fitted to the window; a set width moves the direction and Arrange buttons to the right",
+        &g_modHubClient,
+        0,
+        static_cast<int32_t>(kSortComboWidthMax),
+        10,
+        &GetSortComboWidthSetting,
+        &SetSortComboWidthSetting };
+
     // «Подробный журнал» - во всех модах (08.10.2026, leopard).
     static const EMC_BoolSettingDefV1 kDebugLoggingSetting = {
         "debug_logging",
@@ -452,6 +482,7 @@ void EnsureModHubClientConfigured()
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kShowSearchQuantityCountSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kShowSearchClearButtonSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kAutoFocusSearchInputSetting },
+        { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kSortComboWidthSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kDebugLoggingSetting }
         // Ширина и высота поиска и сортировки убраны со страницы (07.10.2026):
         // панели встроены в окно торговца (InlineSearchCoord /

@@ -43,6 +43,11 @@ static const int kSortPanelConfiguredHeightMin = 22;
 static const int kSortPanelConfiguredHeightMax = 48;
 static const int kDefaultSortPanelConfiguredWidth = 372;
 static const int kDefaultSortPanelConfiguredHeight = 26;
+// LEOPARD: width of the sort drop-down; 0 - fitted to the window (the room
+// left of the game's ARRANGE button). Set - the drop-down takes it and the
+// direction and ARRANGE buttons move right.
+static const int kSortComboWidthMin = 60;
+static const int kSortComboWidthMax = 400;
 
 enum TraderSortMode
 {
@@ -82,6 +87,7 @@ struct TraderConfigSnapshot
         , sortPanelPositionCustomized(false)
         , sortPanelLeft(0)
         , sortPanelTop(0)
+        , sortComboWidth(0)
     {
     }
 
@@ -103,6 +109,7 @@ struct TraderConfigSnapshot
     bool sortPanelPositionCustomized;
     int sortPanelLeft;
     int sortPanelTop;
+    int sortComboWidth;
 };
 
 struct SectionWidgetInventoryLink
@@ -201,6 +208,7 @@ struct CoreState
         , g_searchInputConfiguredHeight(kDefaultSearchInputConfiguredHeight)
         , g_sortPanelConfiguredWidth(kDefaultSortPanelConfiguredWidth)
         , g_sortPanelConfiguredHeight(kDefaultSortPanelConfiguredHeight)
+        , g_sortComboWidth(0)
     {
     }
 
@@ -217,6 +225,7 @@ struct CoreState
     int g_searchInputConfiguredHeight;
     int g_sortPanelConfiguredWidth;
     int g_sortPanelConfiguredHeight;
+    int g_sortComboWidth;
 };
 
 struct WindowDetectionState

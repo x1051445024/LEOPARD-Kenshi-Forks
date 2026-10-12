@@ -16,5 +16,6 @@
   "sortPanelHeight": 26,
   "sortPanelPositionCustomized": false,
   "sortPanelLeft": 0,
-  "sortPanelTop": 0
+  "sortPanelTop": 0,
+  "sortComboWidth": 0
 }
