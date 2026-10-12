@@ -1682,7 +1682,7 @@
         MemberWidgets& widgets = g_memberWidgets[memberIndex];
 
         widgets.name->setCaption(member.name.c_str());
-        ApplyThemeStandardText(widgets.name);
+        ApplyThemeNameText(widgets.name);
         widgets.condition->setCaption(member.condition.c_str());
         widgets.condition->setVisible(!member.condition.empty());
         if (!member.condition.empty())
@@ -1859,7 +1859,7 @@
             "KJM_MemberName");
         SetFontPx(widgets.name, S(21));
         widgets.name->setNeedMouseFocus(false);
-        TagThemeStandardText(widgets.name);
+        ApplyThemeNameText(widgets.name);
         widgets.condition = widgets.memberRoot->createWidget<MyGUI::TextBox>(
             "Kenshi_TextboxStandardText_Small",
             MyGUI::IntCoord(
@@ -1890,6 +1890,32 @@
         widgets.skills->setTextAlign(MyGUI::Align::Left | MyGUI::Align::Top);
         widgets.skills->setNeedMouseFocus(false);
         TagThemeStandardText(widgets.skills);
+
+        // LEOPARD: the three skill lines end level with the bottom of the
+        // portrait, the condition line takes the gap under the name. Line
+        // heights are the real font heights (they differ per game font).
+        {
+            const int textWidth = std::max(1,
+                g_memberWidth - MEMBER_TEXT_LEFT - FRAME_X);
+            const int nameHeight = widgets.name->getFontHeight() + S(2);
+            const int lineHeight = std::max(
+                widgets.highestSkill->getFontHeight(),
+                widgets.skills->getFontHeight());
+            int highestTop = FRAME_Y + MEMBER_PORTRAIT_SIZE - 3 * lineHeight;
+            highestTop = std::max(highestTop, FRAME_Y + nameHeight);
+            widgets.name->setCoord(
+                MEMBER_TEXT_LEFT, FRAME_Y, textWidth, nameHeight);
+            widgets.condition->setCoord(
+                MEMBER_TEXT_LEFT, FRAME_Y + nameHeight, textWidth,
+                std::max(1, highestTop - FRAME_Y - nameHeight));
+            widgets.condition->setTextAlign(
+                MyGUI::Align::Left | MyGUI::Align::VCenter);
+            widgets.highestSkill->setCoord(
+                MEMBER_TEXT_LEFT, highestTop, textWidth, lineHeight);
+            widgets.skills->setCoord(
+                MEMBER_TEXT_LEFT, highestTop + lineHeight, textWidth,
+                2 * lineHeight);
+        }
 
         widgets.jobsToggle = widgets.memberRoot->createWidget<MyGUI::Button>(
             "Kenshi_Button1",

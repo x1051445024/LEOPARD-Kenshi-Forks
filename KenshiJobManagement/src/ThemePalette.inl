@@ -60,6 +60,7 @@
         MyGUI::Colour mutedText;
         MyGUI::Colour buttonText;
         MyGUI::Colour accentText;
+        MyGUI::Colour nameText;      // LEOPARD: character names in the roster
         MyGUI::Colour warningText;
         MyGUI::Colour successText;
 
@@ -102,6 +103,7 @@
             palette.mutedText = Scaled(palette.standardText, 0.85f);
             palette.buttonText = palette.standardText;
             palette.accentText = GameTheme::ReadableColour("Title", "#FFD673");
+            palette.nameText = MyGUI::Colour(1.0f, 0.92f, 0.62f);   // light yellow
             palette.warningText = GameTheme::ReadableColour("BadBright", "#FF6145", 0.3f);
             palette.successText = GameTheme::ReadableColour("GoodBright", "#ADFFB3");
         }
@@ -117,6 +119,7 @@
             // Native button skins stay dark textures: light captions.
             palette.buttonText = MyGUI::Colour(1.0f, 0.96f, 0.84f);
             palette.accentText = GameTheme::Colour("Title", "#492620");
+            palette.nameText = palette.accentText;
             palette.warningText = MyGUI::Colour(0.55f, 0.075f, 0.04f);
             palette.successText = MyGUI::Colour(0.08f, 0.34f, 0.12f);
         }
@@ -590,6 +593,14 @@
             return;
         }
         button->setTextColour(GetThemePalette().buttonText);
+    }
+
+    void ApplyThemeNameText(MyGUI::TextBox* text)
+    {
+        if (text != NULL)
+        {
+            text->setTextColour(GetThemePalette().nameText);
+        }
     }
 
     void ApplyThemeAccentText(MyGUI::TextBox* text)

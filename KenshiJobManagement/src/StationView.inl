@@ -1386,7 +1386,7 @@
         const int inset = S(2);
         MyGUI::Button* border = row->createWidget<MyGUI::Button>(
             "Kenshi_PortraitFrameSkin", MyGUI::IntCoord(
-                pad + S(2), (row->getHeight() - size) / 2 - S(2), size, size),
+                pad + S(2) - 4, (row->getHeight() - size) / 2 - S(2) - 2, size, size),
             MyGUI::Align::Left | MyGUI::Align::VCenter,
             "KJM_StationDetailPortraitFrame");
         border->setNeedMouseFocus(false);
