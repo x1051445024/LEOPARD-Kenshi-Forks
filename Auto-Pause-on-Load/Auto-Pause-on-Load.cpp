@@ -1841,11 +1841,18 @@ static void ResetUiTracking()
     ClearObservedTradeConversation();
 }
 
+// inheritPluginPause: the other UI (trade or inventory) holds a pause this
+// plugin set. Switching the trading character makes the trade window look
+// closed for a moment while the inventory stays open - trade -> inventory ->
+// trade again. Without passing the ownership on, the reopened trade saw an
+// already paused game, took it for the player's pause and never resumed
+// after trading (LEOPARD fork, reported by a player 13.10.2026).
 static void TryPauseOnUiOpen(
     DWORD nowMs,
     const char* reason,
     bool* pausedByPluginOut,
-    bool* wasPausedBeforeStartOut)
+    bool* wasPausedBeforeStartOut,
+    bool inheritPluginPause)
 {
     if (!pausedByPluginOut || !wasPausedBeforeStartOut)
     {
@@ -1858,6 +1865,17 @@ static void TryPauseOnUiOpen(
     bool wasPausedBeforeStart = false;
     if (QueryGamePaused(&wasPausedBeforeStart))
     {
+        if (wasPausedBeforeStart && inheritPluginPause)
+        {
+            *pausedByPluginOut = true;
+            if (g_config.debugLogTransitions)
+            {
+                std::stringstream info;
+                info << "Auto-Pause-on-Load INFO: pause ownership passed to " << reason;
+                DebugLog(info.str().c_str());
+            }
+            return;
+        }
         *wasPausedBeforeStartOut = wasPausedBeforeStart;
         if (wasPausedBeforeStart)
         {
@@ -1979,7 +1997,8 @@ static void TickPauseOnTradeAndInventory()
                 nowMs,
                 "trade",
                 &g_state.tradePausedByPlugin,
-                &g_state.tradeWasPausedBeforeStart);
+                &g_state.tradeWasPausedBeforeStart,
+                g_state.inventoryPausedByPlugin && !g_state.inventoryWasPausedBeforeStart);
         }
     }
 
@@ -1993,7 +2012,8 @@ static void TickPauseOnTradeAndInventory()
                 nowMs,
                 "inventory_open",
                 &g_state.inventoryPausedByPlugin,
-                &g_state.inventoryWasPausedBeforeStart);
+                &g_state.inventoryWasPausedBeforeStart,
+                g_state.tradePausedByPlugin && !g_state.tradeWasPausedBeforeStart);
         }
     }
 
