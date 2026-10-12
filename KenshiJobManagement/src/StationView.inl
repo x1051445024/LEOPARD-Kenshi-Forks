@@ -2067,8 +2067,8 @@
         const int listHeight = panelHeight - listTop - statusHeight - S(12);
         const int detailHeaderHeight = S(32);
         const int detailPaneGap = S(14);
-        // native width of Kenshi_SliderVBig: wider, its arrows are drawn
-        // past their place and lose the right edge
+        // Kenshi_SliderVBig width in game pixels (the game scales its arrows
+        // by screen height; a narrower bar cut their right edge)
         const int detailScrollWidth = NativeGui(32);
         // LEOPARD: both outer margins scaled (the right list's scroll bar
         // ran into the window frame), plus the frame's own 10 px.
@@ -2146,7 +2146,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
-                    assignedLeft + detailViewportWidth + S(2) + 3,
+                    assignedLeft + detailViewportWidth + S(2) + 5,
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationDetailScroll");
@@ -2176,7 +2176,7 @@
             g_stationView.modalPanel->createWidget<MyGUI::ScrollBar>(
                 "Kenshi_SliderVBig",
                 MyGUI::IntCoord(
-                    availableLeft + detailViewportWidth + S(2) + 3,
+                    availableLeft + detailViewportWidth + S(2) + 5,
                     detailListTop, detailScrollWidth, detailViewportHeight),
                 MyGUI::Align::Left | MyGUI::Align::Top,
                 "KJM_StationAvailableScroll");

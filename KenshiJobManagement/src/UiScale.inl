@@ -23,6 +23,9 @@
         SQUAD_SELECTOR_BUTTON_HEIGHT = S(34);
         SQUAD_SELECTOR_BUTTON_GAP = S(4);
         SQUAD_SELECTOR_SCROLL_HEIGHT = NativeGui(34);
+        // the game-scaled scroll bar may be taller than the scaled row
+        SQUAD_SELECTOR_HEIGHT = std::max(SQUAD_SELECTOR_HEIGHT,
+            SQUAD_SELECTOR_BUTTON_HEIGHT + SQUAD_SELECTOR_BUTTON_GAP + SQUAD_SELECTOR_SCROLL_HEIGHT);
         FRAME_X = S(3) + 10 + S(8);
         FRAME_Y = S(3) + 10 + S(5);
         FRAME_FILL = S(3) + 6;
