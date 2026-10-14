@@ -319,6 +319,33 @@ void LayoutBottomSearchRow(MyGUI::Widget* search, int width, int height)
     }
 }
 
+// Диагностика (15.10.2026): устройство строки денег в журнал, раз на окно -
+// чтобы подогнать разметку интерфейса (Dark UI) по данным, а не на глаз.
+void DumpMoneyBoxTree(MyGUI::Widget* widget, int depth)
+{
+    if (widget == 0 || depth > 6)
+        return;
+    const MyGUI::IntCoord c = widget->getCoord();
+    const MyGUI::IntCoord a = widget->getAbsoluteCoord();
+    std::stringstream line;
+    line << "MoneyBox d=" << depth << " name=" << widget->getName()
+         << " vis=" << (widget->getVisible() ? 1 : 0)
+         << " coord=(" << c.left << "," << c.top << "," << c.width << "," << c.height << ")"
+         << " abs=(" << a.left << "," << a.top << "," << a.width << "," << a.height << ")"
+         << " align=" << widget->getAlign().print();
+    MyGUI::TextBox* const text = widget->castType<MyGUI::TextBox>(false);
+    if (text != 0)
+    {
+        const MyGUI::IntCoord r = text->getTextRegion();
+        line << " text=[" << text->getCaption().asUTF8() << "] region=(" << r.left << "," << r.width
+             << ") talign=" << text->getTextAlign().print();
+    }
+    LogInfoLine(line.str());
+    for (size_t i = 0; i < widget->getChildCount(); ++i)
+        DumpMoneyBoxTree(widget->getChildAt(i), depth + 1);
+}
+MyGUI::Widget* g_moneyBoxDumpedFor = 0;
+
 void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
 {
     MyGUI::Widget* const data = FindWidgetInParentByToken(parent, "datapanel");
@@ -356,6 +383,15 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     MyGUI::TextBox* gameLabel = 0;
     MyGUI::TextBox* gameValue = 0;
     FindMoneyTexts(data, 0, &gameLabel, &gameValue);
+    if (g_moneyBoxDumpedFor != owner && gameValue != 0)
+    {
+        g_moneyBoxDumpedFor = owner;
+        std::stringstream head;
+        head << "MoneyBox window abs=(" << parent->getAbsoluteLeft() << "," << parent->getWidth()
+             << ")";
+        LogInfoLine(head.str());
+        DumpMoneyBoxTree(moneyBox, 0);
+    }
     const MyGUI::IntCoord origin = parent->getAbsoluteCoord();
     const MyGUI::IntCoord box = moneyBox->getAbsoluteCoord();
     int anchorRight = box.left + box.width;

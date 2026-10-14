@@ -28,9 +28,9 @@ PluginConfig g_config = {
     18,
     18,
     MyGUI::Colour(1.0f, 0.2f, 0.2f, 1.0f),
+    MyGUI::Colour(0.62f, 0.9f, 0.45f, 1.0f),
+    MyGUI::Colour(1.0f, 0.65f, 0.3f, 1.0f),   // LEOPARD: neutralMarkerColour
     MyGUI::Colour(0.25f, 1.0f, 0.25f, 1.0f),
-    MyGUI::Colour(0.87f, 0.91f, 0.35f, 1.0f),   // LEOPARD: neutralMarkerColour
-    MyGUI::Colour(0.3f, 0.61f, 1.0f, 1.0f),
     "",
     64,
     "",

@@ -162,6 +162,10 @@ HubBoolSettingDescriptor g_tintBoolSettingDescriptors[] = {
     { "character_tint_force_depth_override", "Force depth override", "Force tint to render through depth when supported by the shader", "Keep tint visible through world depth when the active shader path supports it.", &PluginConfig::characterTintForceDepthOverride }
 };
 
+// The relation colours lead g_colorSettingDescriptors and go to the tint section; the
+// bounty colours after them go to the bounty section (LEOPARD: 4 with neutral).
+const size_t kRelationColorSettingCount = 4u;
+
 HubColorSettingDescriptor g_colorSettingDescriptors[] = {
     { "enemy_color_hex", "Enemy color", "Relation color used for enemy markers and tint", &PluginConfig::enemyMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
     { "ally_color_hex", "Ally color", "Relation color used for ally markers and tint", &PluginConfig::allyMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
@@ -694,7 +698,7 @@ void InitializeSettingDefinitions()
     {
         SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_INT, g_bountyIntSettingDefs[i].setting_id, &g_bountyIntSettingDefs[i], emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &g_bountyIntSettingDefs[i], kHubSectionBountyId, kHubSectionBountyLabel);
     }
-    for (size_t i = 3u; i < VS_ARRAY_COUNT(g_colorSettingDefs); ++i)
+    for (size_t i = kRelationColorSettingCount; i < VS_ARRAY_COUNT(g_colorSettingDefs); ++i)
     {
         SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_COLOR, g_colorSettingDefs[i].setting_id, &g_colorSettingDefs[i], emc::MOD_HUB_CLIENT_SETTING_KIND_COLOR, &g_colorSettingDefs[i], kHubSectionBountyId, kHubSectionBountyLabel);
     }
@@ -705,7 +709,7 @@ void InitializeSettingDefinitions()
     {
         SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_tintBoolSettingDefs[i].setting_id, &g_tintBoolSettingDefs[i], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_tintBoolSettingDefsV2[i], kHubSectionTintId, kHubSectionTintLabel);
     }
-    for (size_t i = 0u; i < 3u; ++i)
+    for (size_t i = 0u; i < kRelationColorSettingCount; ++i)
     {
         SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_COLOR, g_colorSettingDefs[i].setting_id, &g_colorSettingDefs[i], emc::MOD_HUB_CLIENT_SETTING_KIND_COLOR, &g_colorSettingDefs[i], kHubSectionTintId, kHubSectionTintLabel);
     }
