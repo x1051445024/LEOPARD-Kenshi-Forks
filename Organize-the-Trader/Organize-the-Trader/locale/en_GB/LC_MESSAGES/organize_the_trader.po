@@ -103,3 +103,15 @@ msgstr "Width of the sort drop-down at the bottom of the trader window, in pixel
 
 msgid "Deal"
 msgstr "Deal"
+
+msgid "Search field width"
+msgstr "Search field width"
+
+msgid "Width of the search field at the bottom of the trader window, in pixels"
+msgstr "Width of the search field at the bottom of the trader window, in pixels"
+
+msgid "Money and deal in the centre"
+msgstr "Money and deal in the centre"
+
+msgid "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"
+msgstr "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"

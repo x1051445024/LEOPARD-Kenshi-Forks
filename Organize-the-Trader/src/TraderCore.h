@@ -48,6 +48,10 @@ static const int kDefaultSortPanelConfiguredHeight = 26;
 // direction and ARRANGE buttons move right.
 static const int kSortComboWidthMin = 0;
 static const int kSortComboWidthMax = 400;
+// LEOPARD: width of the bottom search field (where ARRANGE was)
+static const int kSearchFieldWidthMin = 120;
+static const int kSearchFieldWidthMax = 600;
+static const int kDefaultSearchFieldWidth = 260;
 
 enum TraderSortMode
 {
@@ -88,6 +92,8 @@ struct TraderConfigSnapshot
         , sortPanelLeft(0)
         , sortPanelTop(0)
         , sortComboWidth(0)
+        , searchFieldWidth(kDefaultSearchFieldWidth)
+        , centerMoney(true)
     {
     }
 
@@ -110,6 +116,8 @@ struct TraderConfigSnapshot
     int sortPanelLeft;
     int sortPanelTop;
     int sortComboWidth;
+    int searchFieldWidth;   // LEOPARD: bottom search field width
+    bool centerMoney;       // LEOPARD: money and deal balance centred at the top
 };
 
 struct SectionWidgetInventoryLink
@@ -209,6 +217,8 @@ struct CoreState
         , g_sortPanelConfiguredWidth(kDefaultSortPanelConfiguredWidth)
         , g_sortPanelConfiguredHeight(kDefaultSortPanelConfiguredHeight)
         , g_sortComboWidth(0)
+        , g_searchFieldWidth(kDefaultSearchFieldWidth)
+        , g_centerMoney(true)
     {
     }
 
@@ -226,6 +236,8 @@ struct CoreState
     int g_sortPanelConfiguredWidth;
     int g_sortPanelConfiguredHeight;
     int g_sortComboWidth;
+    int g_searchFieldWidth;
+    bool g_centerMoney;
 };
 
 struct WindowDetectionState

@@ -259,7 +259,9 @@ std::string BuildTraderConfigText(const TraderConfigSnapshot& config)
             << (config.sortPanelPositionCustomized ? "true" : "false") << ",\n"
             << "  \"sortPanelLeft\": " << config.sortPanelLeft << ",\n"
             << "  \"sortPanelTop\": " << config.sortPanelTop << ",\n"
-            << "  \"sortComboWidth\": " << config.sortComboWidth << "\n"
+            << "  \"sortComboWidth\": " << config.sortComboWidth << ",\n"
+            << "  \"searchFieldWidth\": " << config.searchFieldWidth << ",\n"
+            << "  \"centerMoney\": " << (config.centerMoney ? "true" : "false") << "\n"
             << "}\n";
     return content.str();
 }
@@ -457,6 +459,8 @@ void NormalizeTraderConfigSnapshot(TraderConfigSnapshot* config)
     // reads the value back, a raised minimum made the slider jump
     config->sortComboWidth = ClampIntValue(
         config->sortComboWidth, kSortComboWidthMin, kSortComboWidthMax);
+    config->searchFieldWidth = ClampIntValue(
+        config->searchFieldWidth, kSearchFieldWidthMin, kSearchFieldWidthMax);
     if (!config->searchInputPositionCustomized)
     {
         config->searchInputLeft = 0;
@@ -491,6 +495,8 @@ TraderConfigSnapshot CaptureTraderConfigSnapshot()
     config.sortPanelLeft = TraderState().searchUi.g_sortContainerStoredLeft;
     config.sortPanelTop = TraderState().searchUi.g_sortContainerStoredTop;
     config.sortComboWidth = TraderState().core.g_sortComboWidth;
+    config.searchFieldWidth = TraderState().core.g_searchFieldWidth;
+    config.centerMoney = TraderState().core.g_centerMoney;
     NormalizeTraderConfigSnapshot(&config);
     return config;
 }
@@ -513,6 +519,8 @@ void ApplyTraderConfigSnapshot(const TraderConfigSnapshot& config)
     TraderState().core.g_sortPanelConfiguredWidth = normalized.sortPanelWidth;
     TraderState().core.g_sortPanelConfiguredHeight = normalized.sortPanelHeight;
     TraderState().core.g_sortComboWidth = normalized.sortComboWidth;
+    TraderState().core.g_searchFieldWidth = normalized.searchFieldWidth;
+    TraderState().core.g_centerMoney = normalized.centerMoney;
     TraderState().searchUi.g_searchContainerPositionCustomized =
         normalized.searchInputPositionCustomized;
     TraderState().searchUi.g_searchContainerStoredLeft = normalized.searchInputLeft;
@@ -640,6 +648,14 @@ void LoadModConfig()
     if (TryParseJsonIntByKey(configText, "sortComboWidth", &parsedIntValue))
     {
         config.sortComboWidth = parsedIntValue;
+    }
+    if (TryParseJsonIntByKey(configText, "searchFieldWidth", &parsedIntValue))
+    {
+        config.searchFieldWidth = parsedIntValue;
+    }
+    if (TryParseJsonBoolByKey(configText, "centerMoney", &parsedValue))
+    {
+        config.centerMoney = parsedValue;
     }
     if (TryParseJsonBoolByKey(configText, "sortPanelPositionCustomized", &parsedValue))
     {

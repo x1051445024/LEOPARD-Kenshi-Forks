@@ -341,6 +341,26 @@ EMC_Result __cdecl SetSortComboWidthSetting(
         &TraderConfigSnapshot::sortComboWidth);
 }
 
+EMC_Result __cdecl GetSearchFieldWidthSetting(void* user_data, int32_t* out_value)
+{
+    return GetHubIntSetting(user_data, out_value, &TraderConfigSnapshot::searchFieldWidth);
+}
+
+EMC_Result __cdecl SetSearchFieldWidthSetting(void* user_data, int32_t value, char* err_buf, uint32_t err_buf_size)
+{
+    return SetHubIntSetting(user_data, value, err_buf, err_buf_size, &TraderConfigSnapshot::searchFieldWidth);
+}
+
+EMC_Result __cdecl GetCenterMoneySetting(void* user_data, int32_t* out_value)
+{
+    return GetHubBoolSetting(user_data, out_value, &TraderConfigSnapshot::centerMoney);
+}
+
+EMC_Result __cdecl SetCenterMoneySetting(void* user_data, int32_t value, char* err_buf, uint32_t err_buf_size)
+{
+    return SetHubBoolSetting(user_data, value, err_buf, err_buf_size, &TraderConfigSnapshot::centerMoney);
+}
+
 void LogModHubFallback(const char* reason)
 {
     std::stringstream line;
@@ -456,6 +476,25 @@ void EnsureModHubClientConfigured()
         &GetSortPanelHeightSetting,
         &SetSortPanelHeightSetting };
 
+    static const EMC_IntSettingDefV1 kSearchFieldWidthSetting = {
+        "search_field_width",
+        "Search field width",
+        "Width of the search field at the bottom of the trader window, in pixels",
+        &g_modHubClient,
+        static_cast<int32_t>(kSearchFieldWidthMin),
+        static_cast<int32_t>(kSearchFieldWidthMax),
+        10,
+        &GetSearchFieldWidthSetting,
+        &SetSearchFieldWidthSetting };
+
+    static const EMC_BoolSettingDefV1 kCenterMoneySetting = {
+        "center_money",
+        "Money and deal in the centre",
+        "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is",
+        &g_modHubClient,
+        &GetCenterMoneySetting,
+        &SetCenterMoneySetting };
+
     static const EMC_IntSettingDefV1 kSortComboWidthSetting = {
         "sort_combo_width",
         "Sort list width",
@@ -483,6 +522,8 @@ void EnsureModHubClientConfigured()
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kShowSearchClearButtonSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kAutoFocusSearchInputSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kSortComboWidthSetting },
+        { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kSearchFieldWidthSetting },
+        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kCenterMoneySetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kDebugLoggingSetting }
         // Ширина и высота поиска и сортировки убраны со страницы (07.10.2026):
         // панели встроены в окно торговца (InlineSearchCoord /

@@ -103,3 +103,15 @@ msgstr "交易窗口底部排序下拉列表的宽度(像素)。0 - 适应窗口
 
 msgid "Deal"
 msgstr "交易"
+
+msgid "Search field width"
+msgstr "搜索框宽度"
+
+msgid "Width of the search field at the bottom of the trader window, in pixels"
+msgstr "交易窗口底部搜索框的宽度(像素)"
+
+msgid "Money and deal in the centre"
+msgstr "金钱与交易居中"
+
+msgid "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"
+msgstr "商人的金钱和本次交易的盈亏(绿色为盈,红色为亏)显示在窗口顶部中央。关闭 - 保持游戏原本的金钱行"

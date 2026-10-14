@@ -17,5 +17,7 @@
   "sortPanelPositionCustomized": false,
   "sortPanelLeft": 0,
   "sortPanelTop": 0,
-  "sortComboWidth": 0
+  "sortComboWidth": 0,
+  "searchFieldWidth": 260,
+  "centerMoney": true
 }

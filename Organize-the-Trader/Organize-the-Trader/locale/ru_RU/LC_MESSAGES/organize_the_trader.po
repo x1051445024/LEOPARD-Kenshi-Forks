@@ -103,3 +103,15 @@ msgstr "Ширина выпадающего списка сортировки в
 
 msgid "Deal"
 msgstr "Сделка"
+
+msgid "Search field width"
+msgstr "Ширина поля поиска"
+
+msgid "Width of the search field at the bottom of the trader window, in pixels"
+msgstr "Ширина поля поиска внизу окна торговца, в пикселях"
+
+msgid "Money and deal in the centre"
+msgstr "Деньги и сделка по центру"
+
+msgid "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"
+msgstr "Деньги торговца и сколько вы наторговали за это окно (зелёным - в плюс, красным - в минус) - по центру вверху окна. Выключено - строка денег игры как есть"
