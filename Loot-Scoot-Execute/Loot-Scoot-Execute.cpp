@@ -263,6 +263,7 @@ static bool g_customExecutePanelNative = false;   // строки внутри �
 static int g_nativeRowsGrowth = 0;                // на сколько выросли список и меню
 static MyGUI::IntSize g_nativeListOrigSize;      // размеры, которые им дала игра
 static MyGUI::IntSize g_nativeMenuOrigSize;
+static bool g_inNativeRowCallback = false;   // сейчас идёт нажатие на нашу строку
 static int g_nativeRowHeight = 26;                // высота строки меню
 static int g_nativeRowGap = 2;
 static MyGUI::IntCoord g_nativeButtonCoord(0, 0, 0, 0);   // кнопка внутри строки
@@ -4778,6 +4779,12 @@ static void OnCustomExecutePanelButtonPressed(MyGUI::Widget* sender, int left, i
 {
     (void)left;
     (void)top;
+    // внутри нажатия свою кнопку не удаляем (см. HideCustomExecutePanelOverlay)
+    struct CallbackScope
+    {
+        CallbackScope() { g_inNativeRowCallback = true; }
+        ~CallbackScope() { g_inNativeRowCallback = false; }
+    } scope;
 
     if (id != MyGUI::MouseButton::Left)
     {
@@ -4793,6 +4800,11 @@ static void OnCustomExecutePanelButtonPressed(MyGUI::Widget* sender, int left, i
 
 static void OnCustomExecutePanelButtonClick(MyGUI::Widget* sender)
 {
+    struct CallbackScope
+    {
+        CallbackScope() { g_inNativeRowCallback = true; }
+        ~CallbackScope() { g_inNativeRowCallback = false; }
+    } scope;
     const CustomExecutePanelAction action = ResolveCustomExecutePanelActionForSender(sender);
     if (action != CustomExecutePanelAction_NONE)
     {
@@ -5767,10 +5779,32 @@ static void HideCustomExecutePanelOverlay()
     // следующем показе меню (ArmCustomExecutePanelOverlay).
     if (g_customExecutePanelNative)
     {
-        MyGUI::Widget* const rows = NativeRowsRef().get();
-        if (rows)
+        if (!g_inNativeRowCallback)
         {
-            rows->setVisible(false);
+            // строки - вон, меню - его размер (иначе внизу пустое место)
+            DestroyCustomExecutePanelOverlayWidgets();
+        }
+        else
+        {
+            MyGUI::Widget* const rows = NativeRowsRef().get();
+            if (rows)
+            {
+                rows->setVisible(false);
+            }
+            MyGUI::Widget* const list = NativeListRef().get();
+            MyGUI::Widget* const menuRoot = NativeMenuRootRef().get();
+            if (g_nativeRowsGrowth > 0)
+            {
+                if (list)
+                {
+                    list->setSize(g_nativeListOrigSize);
+                }
+                if (menuRoot && menuRoot != list)
+                {
+                    menuRoot->setSize(g_nativeMenuOrigSize);
+                }
+                g_nativeRowsGrowth = 0;
+            }
         }
     }
     else if (g_customExecutePanelRoot)
