@@ -5048,12 +5048,31 @@ static bool TryCreateNativeExecuteRows()
 
     // Размеры - как у пунктов игры: слот последнего пункта и кнопка в нём
     // (наши прежние строки, если игра их не убрала, - не в счёт).
-    size_t count = list->getChildCount();
-    while (count > 0 && list->getChildAt(count - 1) &&
-           list->getChildAt(count - 1)->getName() == "LSE_NativeExecuteRows")
+    // Игра держит запас слотов и лишние прячет: в счёт - только видимые,
+    // иначе строки вставали под спрятанными слотами, за краем меню, а меню
+    // росло под них (пустое место, 14.10.2026).
+    std::vector<MyGUI::Widget*> shown;
+    for (size_t i = 0; i < list->getChildCount(); ++i)
     {
-        --count;
+        MyGUI::Widget* const child = list->getChildAt(i);
+        if (child && child->getVisible() && child->getName() != "LSE_NativeExecuteRows")
+        {
+            shown.push_back(child);
+        }
     }
+    // по месту сверху вниз (порядок детей - не обязательно порядок пунктов)
+    for (size_t i = 1; i < shown.size(); ++i)
+    {
+        MyGUI::Widget* const w = shown[i];
+        size_t j = i;
+        while (j > 0 && shown[j - 1]->getTop() > w->getTop())
+        {
+            shown[j] = shown[j - 1];
+            --j;
+        }
+        shown[j] = w;
+    }
+    const size_t count = shown.size();
     int top = 0;
     int slotLeft = 0;
     int slotWidth = list->getWidth();
@@ -5061,7 +5080,7 @@ static bool TryCreateNativeExecuteRows()
     g_nativeButtonCoord = MyGUI::IntCoord(0, 0, slotWidth, g_nativeRowHeight);
     if (count > 0)
     {
-        MyGUI::Widget* const last = list->getChildAt(count - 1);
+        MyGUI::Widget* const last = shown[count - 1];
         if (last)
         {
             slotLeft = last->getLeft();
@@ -5070,7 +5089,7 @@ static bool TryCreateNativeExecuteRows()
             top = last->getTop() + last->getHeight();
             if (count > 1)
             {
-                MyGUI::Widget* const prev = list->getChildAt(count - 2);
+                MyGUI::Widget* const prev = shown[count - 2];
                 if (prev)
                 {
                     const int gap = last->getTop() - (prev->getTop() + prev->getHeight());
