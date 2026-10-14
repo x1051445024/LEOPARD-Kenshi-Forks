@@ -351,14 +351,14 @@ EMC_Result __cdecl SetSearchFieldWidthSetting(void* user_data, int32_t value, ch
     return SetHubIntSetting(user_data, value, err_buf, err_buf_size, &TraderConfigSnapshot::searchFieldWidth);
 }
 
-EMC_Result __cdecl GetCenterMoneySetting(void* user_data, int32_t* out_value)
+EMC_Result __cdecl GetDealBalanceSetting(void* user_data, int32_t* out_value)
 {
-    return GetHubBoolSetting(user_data, out_value, &TraderConfigSnapshot::centerMoney);
+    return GetHubBoolSetting(user_data, out_value, &TraderConfigSnapshot::showDealBalance);
 }
 
-EMC_Result __cdecl SetCenterMoneySetting(void* user_data, int32_t value, char* err_buf, uint32_t err_buf_size)
+EMC_Result __cdecl SetDealBalanceSetting(void* user_data, int32_t value, char* err_buf, uint32_t err_buf_size)
 {
-    return SetHubBoolSetting(user_data, value, err_buf, err_buf_size, &TraderConfigSnapshot::centerMoney);
+    return SetHubBoolSetting(user_data, value, err_buf, err_buf_size, &TraderConfigSnapshot::showDealBalance);
 }
 
 void LogModHubFallback(const char* reason)
@@ -487,13 +487,13 @@ void EnsureModHubClientConfigured()
         &GetSearchFieldWidthSetting,
         &SetSearchFieldWidthSetting };
 
-    static const EMC_BoolSettingDefV1 kCenterMoneySetting = {
-        "center_money",
-        "Money and deal in the centre",
-        "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is",
+    static const EMC_BoolSettingDefV1 kDealBalanceSetting = {
+        "show_deal_balance",
+        "Deal balance",
+        "How much you made in this trader window (green - plus, red - minus), next to the trader's money",
         &g_modHubClient,
-        &GetCenterMoneySetting,
-        &SetCenterMoneySetting };
+        &GetDealBalanceSetting,
+        &SetDealBalanceSetting };
 
     static const EMC_IntSettingDefV1 kSortComboWidthSetting = {
         "sort_combo_width",
@@ -523,7 +523,7 @@ void EnsureModHubClientConfigured()
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kAutoFocusSearchInputSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kSortComboWidthSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kSearchFieldWidthSetting },
-        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kCenterMoneySetting },
+        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kDealBalanceSetting },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kDebugLoggingSetting }
         // Ширина и высота поиска и сортировки убраны со страницы (07.10.2026):
         // панели встроены в окно торговца (InlineSearchCoord /

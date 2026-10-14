@@ -153,30 +153,6 @@ static WidgetRef& TradeBalanceRef()
     static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
     return *ref;
 }
-// своя строка денег по центру и спрятанная строка игры (вернуть при выходе)
-static WidgetRef& CenterMoneyRef()
-{
-    static WidgetRef* ref = new WidgetRef();
-    return *ref;
-}
-static WidgetRef& HiddenMoneyPanelRef()
-{
-    static WidgetRef* ref = new WidgetRef();
-    return *ref;
-}
-
-void ShowGameMoneyLine()
-{
-    MyGUI::Widget* const hidden = HiddenMoneyPanelRef().get();
-    if (hidden != 0 && !hidden->getVisible())
-        hidden->setVisible(true);
-    HiddenMoneyPanelRef().reset();
-    MyGUI::Widget* const own = CenterMoneyRef().get();
-    MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
-    if (own != 0 && gui != 0)
-        gui->destroyWidget(own);
-    CenterMoneyRef().reset();
-}
 MyGUI::Widget* g_balanceOwner = 0;      // окно торговца, для которого считаем
 int g_balanceStartMoney = -1;
 std::string g_balanceMoneyCaption;      // последняя разобранная подпись
@@ -365,50 +341,37 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     if (g_balanceStartMoney < 0 && g_balanceMoney >= 0)
         g_balanceStartMoney = g_balanceMoney;
 
-    // Выключено в MCM - строка игры как есть, без итога.
-    if (!TraderState().core.g_centerMoney)
+    // Строку денег игры (с её подложкой) не трогаем - итог ставим справа от
+    // неё (14.10.2026, «около ванильный вариант», под любой интерфейс):
+    // подложка узкая (ваниль) - сразу за подложкой; растянута на всё окно
+    // (Russian Dark UI) - сразу за суммой.
+    if (!TraderState().core.g_showDealBalance)
     {
-        ShowGameMoneyLine();
         MyGUI::Widget* const old = TradeBalanceRef().get();
         if (old != 0)
             MyGUI::Gui::getInstance().destroyWidget(old);
         TradeBalanceRef().reset();
         return;
     }
-
-    // Строку игры прячем, рисуем свою по центру окна: «Нал.: к.8 146» и
-    // рядом итог. Подписи - из строки игры (она обновляется и спрятанной).
     MyGUI::TextBox* gameLabel = 0;
     MyGUI::TextBox* gameValue = 0;
     FindMoneyTexts(data, 0, &gameLabel, &gameValue);
-    if (gameValue == 0)
-        return;
-    if (data->getVisible())
-    {
-        data->setVisible(false);
-        HiddenMoneyPanelRef().set(data);
-    }
-    const MyGUI::IntCoord box = moneyBox->getAbsoluteCoord();
     const MyGUI::IntCoord origin = parent->getAbsoluteCoord();
-    const int rowTop = box.top - origin.top;
-    const int rowHeight = box.height;
-
-    MyGUI::Widget* money = CenterMoneyRef().get();
-    if (money == 0)
+    const MyGUI::IntCoord box = moneyBox->getAbsoluteCoord();
+    int anchorRight = box.left + box.width;
+    if (box.width > parent->getWidth() * 6 / 10 && gameValue != 0)
     {
-        money = parent->createWidget<MyGUI::TextBox>(
-            "Kenshi_TextboxStandardText", MyGUI::IntCoord(0, rowTop, 10, rowHeight),
-            MyGUI::Align::Default, "OTT_CenterMoney");
-        if (money == 0)
-            return;
-        money->setNeedMouseFocus(false);
-        CenterMoneyRef().set(money);
+        const MyGUI::IntCoord region = gameValue->getTextRegion();
+        anchorRight = gameValue->getAbsoluteLeft() + region.left + region.width;
     }
+    const int dealLeft = anchorRight - origin.left + 16;
+    const int dealWidth = parent->getWidth() - dealLeft - 16;
+
     MyGUI::Widget* label = TradeBalanceRef().get();
     if (label == 0)
     {
         label = parent->createWidget<MyGUI::TextBox>(
-            "Kenshi_TextboxStandardText", MyGUI::IntCoord(0, rowTop, 10, rowHeight),
+            "Kenshi_TextboxStandardText", MyGUI::IntCoord(0, 0, 10, 10),
             MyGUI::Align::Default, "OTT_TradeBalance");
         if (label == 0)
             return;
@@ -416,34 +379,12 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
         TradeBalanceRef().set(label);
         g_balanceShown = 0x7fffffff;
     }
-    MyGUI::TextBox* const moneyText = money->castType<MyGUI::TextBox>(false);
-    MyGUI::TextBox* const text = label->castType<MyGUI::TextBox>(false);
-    if (moneyText == 0 || text == 0)
-        return;
-    const MyGUI::UString moneyLine = gameLabel != 0
-        ? gameLabel->getCaption() + MyGUI::UString(" ") + gameValue->getCaption()
-        : gameValue->getCaption();
-    // Цвет - основной текст темы интерфейса: у подписи игры его задаёт не
-    // сам TextBox, взятый оттуда выходил чёрным (14.10.2026).
-    static const MyGUI::Colour plain = GameTheme::ReadableColour("Main", "#C8C0AA");
-    if (moneyText->getCaption() != moneyLine)
-    {
-        moneyText->setCaption(moneyLine);
-        moneyText->setTextColour(plain);
-        moneyText->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
-    }
-
-    // по центру окна: деньги, промежуток, итог
-    const int moneyWidth = moneyText->getTextSize().width + 4;
-    const int dealWidth = text->getCaption().empty() ? 0 : text->getTextSize().width + 4;
-    const int gap = dealWidth > 0 ? 28 : 0;
-    const int left = (parent->getWidth() - moneyWidth - gap - dealWidth) / 2;
-    const MyGUI::IntCoord moneyPlace(left, rowTop, moneyWidth, rowHeight);
-    if (money->getCoord() != moneyPlace)
-        money->setCoord(moneyPlace);
-    const MyGUI::IntCoord dealPlace(left + moneyWidth + gap, rowTop, dealWidth > 0 ? dealWidth : 10, rowHeight);
+    const MyGUI::IntCoord dealPlace(dealLeft, box.top - origin.top, dealWidth > 40 ? dealWidth : 40, box.height);
     if (label->getCoord() != dealPlace)
         label->setCoord(dealPlace);
+    MyGUI::TextBox* const text = label->castType<MyGUI::TextBox>(false);
+    if (text == 0)
+        return;
 
     if (g_balanceMoney < 0 || g_balanceStartMoney < 0)
         return;
@@ -458,12 +399,12 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     line += g_moneyPrefix + FormatMoney(balance);
     text->setCaption(MyGUI::UString(line));
     text->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
-    text->setTextColour(GameTheme::ReadableColour("Main", "#C8C0AA"));
+    // серый ваниль - как подпись «Сорт» внизу
+    text->setTextColour(MyGUI::Colour(0.65f, 0.63f, 0.59f, 1.0f));
 }
 
 void DestroyTradeBalance()
 {
-    ShowGameMoneyLine();
     MyGUI::Widget* const label = TradeBalanceRef().get();
     MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
     if (label != 0 && gui != 0)

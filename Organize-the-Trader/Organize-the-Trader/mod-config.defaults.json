@@ -19,5 +19,5 @@
   "sortPanelTop": 0,
   "sortComboWidth": 0,
   "searchFieldWidth": 260,
-  "centerMoney": true
+  "showDealBalance": true
 }

@@ -93,7 +93,7 @@ struct TraderConfigSnapshot
         , sortPanelTop(0)
         , sortComboWidth(0)
         , searchFieldWidth(kDefaultSearchFieldWidth)
-        , centerMoney(true)
+        , showDealBalance(true)
     {
     }
 
@@ -117,7 +117,7 @@ struct TraderConfigSnapshot
     int sortPanelTop;
     int sortComboWidth;
     int searchFieldWidth;   // LEOPARD: bottom search field width
-    bool centerMoney;       // LEOPARD: money and deal balance centred at the top
+    bool showDealBalance;       // LEOPARD: deal balance next to the trader money
 };
 
 struct SectionWidgetInventoryLink
@@ -218,7 +218,7 @@ struct CoreState
         , g_sortPanelConfiguredHeight(kDefaultSortPanelConfiguredHeight)
         , g_sortComboWidth(0)
         , g_searchFieldWidth(kDefaultSearchFieldWidth)
-        , g_centerMoney(true)
+        , g_showDealBalance(true)
     {
     }
 
@@ -237,7 +237,7 @@ struct CoreState
     int g_sortPanelConfiguredHeight;
     int g_sortComboWidth;
     int g_searchFieldWidth;
-    bool g_centerMoney;
+    bool g_showDealBalance;
 };
 
 struct WindowDetectionState

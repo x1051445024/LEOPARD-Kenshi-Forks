@@ -261,7 +261,7 @@ std::string BuildTraderConfigText(const TraderConfigSnapshot& config)
             << "  \"sortPanelTop\": " << config.sortPanelTop << ",\n"
             << "  \"sortComboWidth\": " << config.sortComboWidth << ",\n"
             << "  \"searchFieldWidth\": " << config.searchFieldWidth << ",\n"
-            << "  \"centerMoney\": " << (config.centerMoney ? "true" : "false") << "\n"
+            << "  \"showDealBalance\": " << (config.showDealBalance ? "true" : "false") << "\n"
             << "}\n";
     return content.str();
 }
@@ -496,7 +496,7 @@ TraderConfigSnapshot CaptureTraderConfigSnapshot()
     config.sortPanelTop = TraderState().searchUi.g_sortContainerStoredTop;
     config.sortComboWidth = TraderState().core.g_sortComboWidth;
     config.searchFieldWidth = TraderState().core.g_searchFieldWidth;
-    config.centerMoney = TraderState().core.g_centerMoney;
+    config.showDealBalance = TraderState().core.g_showDealBalance;
     NormalizeTraderConfigSnapshot(&config);
     return config;
 }
@@ -520,7 +520,7 @@ void ApplyTraderConfigSnapshot(const TraderConfigSnapshot& config)
     TraderState().core.g_sortPanelConfiguredHeight = normalized.sortPanelHeight;
     TraderState().core.g_sortComboWidth = normalized.sortComboWidth;
     TraderState().core.g_searchFieldWidth = normalized.searchFieldWidth;
-    TraderState().core.g_centerMoney = normalized.centerMoney;
+    TraderState().core.g_showDealBalance = normalized.showDealBalance;
     TraderState().searchUi.g_searchContainerPositionCustomized =
         normalized.searchInputPositionCustomized;
     TraderState().searchUi.g_searchContainerStoredLeft = normalized.searchInputLeft;
@@ -653,9 +653,9 @@ void LoadModConfig()
     {
         config.searchFieldWidth = parsedIntValue;
     }
-    if (TryParseJsonBoolByKey(configText, "centerMoney", &parsedValue))
+    if (TryParseJsonBoolByKey(configText, "showDealBalance", &parsedValue))
     {
-        config.centerMoney = parsedValue;
+        config.showDealBalance = parsedValue;
     }
     if (TryParseJsonBoolByKey(configText, "sortPanelPositionCustomized", &parsedValue))
     {

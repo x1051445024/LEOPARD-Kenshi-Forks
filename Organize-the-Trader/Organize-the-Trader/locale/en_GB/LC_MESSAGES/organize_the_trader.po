@@ -110,8 +110,8 @@ msgstr "Search field width"
 msgid "Width of the search field at the bottom of the trader window, in pixels"
 msgstr "Width of the search field at the bottom of the trader window, in pixels"
 
-msgid "Money and deal in the centre"
-msgstr "Money and deal in the centre"
+msgid "Deal balance"
+msgstr "Deal balance"
 
-msgid "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"
-msgstr "The trader's money and how much you made in this deal (green - plus, red - minus), centred at the top of the window. Off - the game's money line as it is"
+msgid "How much you made in this trader window (green - plus, red - minus), next to the trader's money"
+msgstr "How much you made in this trader window (green - plus, red - minus), next to the trader's money"
