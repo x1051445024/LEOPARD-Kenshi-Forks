@@ -5664,17 +5664,10 @@ static void ArmCustomExecutePanelOverlay(
         return;
     }
 
-    // новое меню - строки создаём заново под его пункты
-    if (g_customExecutePanelNative)
-    {
-        DestroyCustomExecutePanelOverlayWidgets();
-    }
-
-    if (!EnsureCustomExecutePanelOverlayWidgets())
-    {
-        HideCustomExecutePanelOverlay();
-        return;
-    }
+    // Новое меню. Строки создаёт первый кадр, когда меню уже на экране
+    // (TickCustomExecutePanelOverlay): сразу после showContextMenu оно ещё
+    // не видно и в него не встроиться - так строки уходили в запасную плашку.
+    DestroyCustomExecutePanelOverlayWidgets();
 
     Character* actor = ResolveExecuteActorForPredicateWithTarget(target, false);
     if (!actor)
@@ -5710,9 +5703,7 @@ static void ArmCustomExecutePanelOverlay(
     g_customExecutePanelLastLayoutOffsetXPx = 0;
     g_customExecutePanelLastLayoutOffsetYPx = 0;
 
-    LayoutCustomExecutePanelOverlay(menu);
-    g_customExecutePanelRoot->setVisible(true);
-    g_customExecutePanelVisible = true;
+    g_customExecutePanelVisible = false;
 }
 
 static void TickCustomExecutePanelOverlay(ContextMenu* menu, DWORD nowMs)
