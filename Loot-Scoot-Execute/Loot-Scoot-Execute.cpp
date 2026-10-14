@@ -22,7 +22,6 @@
 #include <mygui/MyGUI_MouseButton.h>
 #include <mygui/MyGUI_TextBox.h>
 #include <mygui/MyGUI_Widget.h>
-#include <WidgetRef.h>
 
 #include <Windows.h>
 #include <intrin.h>
@@ -239,34 +238,6 @@ static void PluginLog(const char* message)
 }
 
 static MyGUI::Widget* g_customExecutePanelRoot = 0;
-// LEOPARD (14.10.2026): «Казнить» и «Казнить всех» - строками самого
-// контекстного меню игры, как его родные пункты (просьба пользователя;
-// образец - HarvestOrgans). Корень строк - ребёнок списка OptionsList: игра
-// пересобирает меню и удаляет его вместе со своими пунктами, поэтому
-// живость корня проверяем через WidgetRef. Не нашли меню - прежняя плашка.
-static WidgetRef& NativeRowsRef()
-{
-    static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
-    return *ref;
-}
-static WidgetRef& NativeListRef()
-{
-    static WidgetRef* ref = new WidgetRef();
-    return *ref;
-}
-static WidgetRef& NativeMenuRootRef()
-{
-    static WidgetRef* ref = new WidgetRef();
-    return *ref;
-}
-static bool g_customExecutePanelNative = false;   // строки внутри меню, не плашка
-static int g_nativeRowsGrowth = 0;                // на сколько выросли список и меню
-static MyGUI::IntSize g_nativeListOrigSize;      // размеры, которые им дала игра
-static MyGUI::IntSize g_nativeMenuOrigSize;
-static bool g_inNativeRowCallback = false;   // сейчас идёт нажатие на нашу строку
-static int g_nativeRowHeight = 26;                // высота строки меню
-static int g_nativeRowGap = 2;
-static MyGUI::IntCoord g_nativeButtonCoord(0, 0, 0, 0);   // кнопка внутри строки
 static MyGUI::Button* g_customExecutePanelButton = 0;
 static MyGUI::Button* g_customExecuteAllPanelButton = 0;
 static MyGUI::TextBox* g_customExecutePanelValue = 0;
@@ -4779,12 +4750,6 @@ static void OnCustomExecutePanelButtonPressed(MyGUI::Widget* sender, int left, i
 {
     (void)left;
     (void)top;
-    // внутри нажатия свою кнопку не удаляем (см. HideCustomExecutePanelOverlay)
-    struct CallbackScope
-    {
-        CallbackScope() { g_inNativeRowCallback = true; }
-        ~CallbackScope() { g_inNativeRowCallback = false; }
-    } scope;
 
     if (id != MyGUI::MouseButton::Left)
     {
@@ -4800,11 +4765,6 @@ static void OnCustomExecutePanelButtonPressed(MyGUI::Widget* sender, int left, i
 
 static void OnCustomExecutePanelButtonClick(MyGUI::Widget* sender)
 {
-    struct CallbackScope
-    {
-        CallbackScope() { g_inNativeRowCallback = true; }
-        ~CallbackScope() { g_inNativeRowCallback = false; }
-    } scope;
     const CustomExecutePanelAction action = ResolveCustomExecutePanelActionForSender(sender);
     if (action != CustomExecutePanelAction_NONE)
     {
@@ -4817,38 +4777,7 @@ static void DestroyCustomExecutePanelOverlayWidgets()
     ClearExecuteAllHoverTint();
 
     MyGUI::Gui* gui = MyGUI::Gui::getInstancePtr();
-    if (g_customExecutePanelNative)
-    {
-        // корень - внутри меню игры: удаляем, только если он ещё жив, и
-        // возвращаем меню прежний размер
-        // Списку и окну меню - ровно те размеры, что дала им игра: следующее
-        // меню она собирает от текущих, и с нашим приростом меню мёртвой
-        // цели выходило пустым (14.10.2026).
-        MyGUI::Widget* const rows = NativeRowsRef().get();
-        if (gui && rows)
-        {
-            gui->destroyWidget(rows);
-        }
-        if (g_nativeRowsGrowth > 0)
-        {
-            MyGUI::Widget* const list = NativeListRef().get();
-            MyGUI::Widget* const menuRoot = NativeMenuRootRef().get();
-            if (list && list->getSize() != g_nativeListOrigSize)
-            {
-                list->setSize(g_nativeListOrigSize);
-            }
-            if (menuRoot && menuRoot != list && menuRoot->getSize() != g_nativeMenuOrigSize)
-            {
-                menuRoot->setSize(g_nativeMenuOrigSize);
-            }
-        }
-        NativeRowsRef().reset();
-        NativeListRef().reset();
-        NativeMenuRootRef().reset();
-        g_nativeRowsGrowth = 0;
-        g_customExecutePanelNative = false;
-    }
-    else if (gui && g_customExecutePanelRoot)
+    if (gui && g_customExecutePanelRoot)
     {
         gui->destroyWidget(g_customExecutePanelRoot);
     }
@@ -4859,324 +4788,8 @@ static void DestroyCustomExecutePanelOverlayWidgets()
     g_customExecutePanelValue = 0;
 }
 
-static bool TryReadUintptrAtOffset(const void* base, size_t offset, uintptr_t* valueOut);
-
-// Виджет - окно меню игры: в нём есть OptionsList и NameText, оно видно.
-static MyGUI::Widget* ContextMenuOptionsListOf(MyGUI::Widget* root)
-{
-    __try
-    {
-        if (!root || !root->getInheritedVisible())
-        {
-            return 0;
-        }
-        MyGUI::Widget* const options = root->findWidget(kContextMenuOptionsListWidgetName);
-        if (!options || !root->findWidget(kContextMenuNameTextWidgetName))
-        {
-            return 0;
-        }
-        return options;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        return 0;
-    }
-}
-
-static ContextMenu* g_nativeRowsMenu = 0;   // меню, для которого ищем (из Tick)
-
-// ContextMenuGUI игры (kenshi/gui/ContextMenu.h; вместе с PlayerInterface.h
-// его заголовок не подключить): окно меню - wraps::BaseLayout::mMainWidget
-// (+0x8), список пунктов optionsList (+0xF8). Имена виджетов макета у меню
-// с приставкой - findWidget("OptionsList") его не находил (журнал 14.10).
-// Указатели проверяем: живой виджет, видим, список внутри окна меню.
-static bool TryContextMenuGuiWidgets(uintptr_t gui, MyGUI::Widget** mainOut, MyGUI::Widget** listOut)
-{
-    uintptr_t main = 0;
-    uintptr_t list = 0;
-    if (!TryReadUintptrAtOffset(reinterpret_cast<const void*>(gui), 0x8, &main) || main == 0 ||
-        !TryReadUintptrAtOffset(reinterpret_cast<const void*>(gui), 0xF8, &list) || list == 0)
-    {
-        return false;
-    }
-    __try
-    {
-        MyGUI::Widget* const mainWidget = reinterpret_cast<MyGUI::Widget*>(main);
-        MyGUI::Widget* const listWidget = reinterpret_cast<MyGUI::Widget*>(list);
-        if (!mainWidget->getVisible() || !listWidget->getInheritedVisible())
-        {
-            return false;
-        }
-        MyGUI::Widget* parent = listWidget->getParent();
-        for (int depth = 0; parent && parent != mainWidget && depth < 16; ++depth)
-        {
-            parent = parent->getParent();
-        }
-        if (parent != mainWidget)
-        {
-            return false;
-        }
-        *mainOut = mainWidget;
-        *listOut = listWidget;
-        return true;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        return false;
-    }
-}
-
-// Видимый список пунктов контекстного меню игры (OptionsList рядом с
-// NameText) и его окно-корень. Сначала - через объект меню игры (menuGUI,
-// как и якорь прежней плашки): окно меню бывает не корнем интерфейса.
-static MyGUI::Widget* FindVisibleContextMenuOptionsList(MyGUI::Widget** rootOut)
-{
-    if (g_nativeRowsMenu)
-    {
-        const uintptr_t layouts[2] = {
-            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI),
-            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI2)
-        };
-        for (size_t i = 0; i < 2; ++i)
-        {
-            MyGUI::Widget* main = 0;
-            MyGUI::Widget* list = 0;
-            if (layouts[i] != 0 && TryContextMenuGuiWidgets(layouts[i], &main, &list))
-            {
-                if (rootOut)
-                {
-                    *rootOut = main;
-                }
-                return list;
-            }
-        }
-    }
-    if (g_nativeRowsMenu)
-    {
-        const uintptr_t guiPtrs[2] = {
-            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI),
-            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI2)
-        };
-        for (size_t i = 0; i < 2; ++i)
-        {
-            if (guiPtrs[i] == 0)
-            {
-                continue;
-            }
-            MyGUI::Widget* root = reinterpret_cast<MyGUI::Widget*>(guiPtrs[i]);
-            MyGUI::Widget* options = ContextMenuOptionsListOf(root);
-            for (size_t offset = 0; !options && offset <= 0x180; offset += sizeof(uintptr_t))
-            {
-                uintptr_t candidate = 0;
-                if (!TryReadUintptrAtOffset(reinterpret_cast<const void*>(guiPtrs[i]), offset, &candidate)
-                    || candidate == 0)
-                {
-                    continue;
-                }
-                root = reinterpret_cast<MyGUI::Widget*>(candidate);
-                options = ContextMenuOptionsListOf(root);
-            }
-            if (options)
-            {
-                if (rootOut)
-                {
-                    *rootOut = root;
-                }
-                return options;
-            }
-        }
-    }
-
-    MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
-    if (!gui)
-    {
-        return 0;
-    }
-    MyGUI::EnumeratorWidgetPtr roots = gui->getEnumerator();
-    while (roots.next())
-    {
-        MyGUI::Widget* const root = roots.current();
-        if (!root || !root->getVisible())
-        {
-            continue;
-        }
-        MyGUI::Widget* const options = root->findWidget(kContextMenuOptionsListWidgetName);
-        if (!options || !root->findWidget(kContextMenuNameTextWidgetName) || !options->getInheritedVisible())
-        {
-            continue;
-        }
-        if (rootOut)
-        {
-            *rootOut = root;
-        }
-        return options;
-    }
-    return 0;
-}
-
-static MyGUI::Button* CreateNativeRowButton(MyGUI::Widget* rows, int top, const char* name)
-{
-    MyGUI::Widget* const slot = rows->createWidget<MyGUI::Widget>(
-        "PanelEmpty",
-        MyGUI::IntCoord(0, top, rows->getWidth(), g_nativeRowHeight),
-        MyGUI::Align::Default);
-    if (!slot)
-    {
-        return 0;
-    }
-    slot->setInheritsPick(true);
-    return slot->createWidget<MyGUI::Button>(
-        "Kenshi_Button1", g_nativeButtonCoord, MyGUI::Align::Default, name);
-}
-
-// Строки «Казнить» / «Казнить всех» в самом меню. false - меню не нашли
-// (тогда - прежняя плашка).
-static bool TryCreateNativeExecuteRows()
-{
-    MyGUI::Widget* menuRoot = 0;
-    MyGUI::Widget* const list = FindVisibleContextMenuOptionsList(&menuRoot);
-    if (!list)
-    {
-        static int told = 0;
-        if (told < 3)
-        {
-            ++told;
-            PluginLog("Loot-Scoot-Execute INFO: native rows - the context menu list was not found, using the floating panel");
-        }
-        return false;
-    }
-
-    // Размеры - как у пунктов игры: слот последнего пункта и кнопка в нём
-    // (наши прежние строки, если игра их не убрала, - не в счёт).
-    // Игра держит запас слотов и лишние прячет: в счёт - только видимые,
-    // иначе строки вставали под спрятанными слотами, за краем меню, а меню
-    // росло под них (пустое место, 14.10.2026).
-    std::vector<MyGUI::Widget*> shown;
-    for (size_t i = 0; i < list->getChildCount(); ++i)
-    {
-        MyGUI::Widget* const child = list->getChildAt(i);
-        if (child && child->getVisible() && child->getName() != "LSE_NativeExecuteRows")
-        {
-            shown.push_back(child);
-        }
-    }
-    // по месту сверху вниз (порядок детей - не обязательно порядок пунктов)
-    for (size_t i = 1; i < shown.size(); ++i)
-    {
-        MyGUI::Widget* const w = shown[i];
-        size_t j = i;
-        while (j > 0 && shown[j - 1]->getTop() > w->getTop())
-        {
-            shown[j] = shown[j - 1];
-            --j;
-        }
-        shown[j] = w;
-    }
-    const size_t count = shown.size();
-    int top = 0;
-    int slotLeft = 0;
-    int slotWidth = list->getWidth();
-    g_nativeRowHeight = 26;
-    g_nativeButtonCoord = MyGUI::IntCoord(0, 0, slotWidth, g_nativeRowHeight);
-    if (count > 0)
-    {
-        MyGUI::Widget* const last = shown[count - 1];
-        if (last)
-        {
-            slotLeft = last->getLeft();
-            slotWidth = last->getWidth();
-            g_nativeRowHeight = last->getHeight();
-            top = last->getTop() + last->getHeight();
-            if (count > 1)
-            {
-                MyGUI::Widget* const prev = shown[count - 2];
-                if (prev)
-                {
-                    const int gap = last->getTop() - (prev->getTop() + prev->getHeight());
-                    g_nativeRowGap = gap >= 0 && gap <= 20 ? gap : 2;
-                }
-            }
-            top += g_nativeRowGap;
-            // кнопка пункта (в слоте бывает и надпись значения, «100%»)
-            g_nativeButtonCoord = MyGUI::IntCoord(0, 0, slotWidth, g_nativeRowHeight);
-            for (size_t c = 0; c < last->getChildCount(); ++c)
-            {
-                MyGUI::Widget* const child = last->getChildAt(c);
-                if (child && child->castType<MyGUI::Button>(false))
-                {
-                    g_nativeButtonCoord = child->getCoord();
-                    break;
-                }
-            }
-        }
-    }
-    if (g_nativeRowHeight < 12 || g_nativeRowHeight > 80)
-    {
-        g_nativeRowHeight = 26;
-    }
-
-    const int rowsCount = IsExecuteAllEnabled() ? 2 : 1;
-    const int height = g_nativeRowHeight * rowsCount + g_nativeRowGap * (rowsCount - 1);
-    MyGUI::Widget* const rows = list->createWidget<MyGUI::Widget>(
-        "PanelEmpty",
-        MyGUI::IntCoord(slotLeft, top, slotWidth, height),
-        MyGUI::Align::Default,
-        "LSE_NativeExecuteRows");
-    if (!rows)
-    {
-        return false;
-    }
-    rows->setInheritsPick(true);
-
-    g_customExecutePanelButton = CreateNativeRowButton(rows, 0, "LSE_NativeExecuteButton");
-    g_customExecuteAllPanelButton = CreateNativeRowButton(
-        rows, g_nativeRowHeight + g_nativeRowGap, "LSE_NativeExecuteAllButton");
-    if (!g_customExecutePanelButton || !g_customExecuteAllPanelButton)
-    {
-        MyGUI::Gui::getInstance().destroyWidget(rows);
-        g_customExecutePanelButton = 0;
-        g_customExecuteAllPanelButton = 0;
-        return false;
-    }
-    g_customExecuteAllPanelButton->getParent()->setVisible(IsExecuteAllEnabled());
-
-    // Список и окно меню вырастают на эти строки (если ещё не выросли).
-    const int need = top + height + 4 - list->getHeight();
-    g_nativeRowsGrowth = need > 0 ? need : 0;
-    g_nativeListOrigSize = list->getSize();
-    g_nativeMenuOrigSize = menuRoot ? menuRoot->getSize() : MyGUI::IntSize();
-    if (g_nativeRowsGrowth > 0)
-    {
-        list->setSize(list->getWidth(), list->getHeight() + g_nativeRowsGrowth);
-        if (menuRoot && menuRoot != list)
-        {
-            menuRoot->setSize(menuRoot->getWidth(), menuRoot->getHeight() + g_nativeRowsGrowth);
-        }
-    }
-
-    g_customExecutePanelRoot = rows;
-    g_customExecutePanelNative = true;
-    NativeRowsRef().set(rows);
-    NativeListRef().set(list);
-    NativeMenuRootRef().set(menuRoot);
-    return true;
-}
-
 static bool EnsureCustomExecutePanelOverlayWidgets()
 {
-    // строки в меню игры могли уйти вместе с его пунктами (меню пересобрано)
-    if (g_customExecutePanelNative && NativeRowsRef().get() == 0)
-    {
-        g_customExecutePanelRoot = 0;
-        g_customExecutePanelButton = 0;
-        g_customExecuteAllPanelButton = 0;
-        g_customExecutePanelValue = 0;
-        NativeListRef().reset();
-        NativeMenuRootRef().reset();
-        g_nativeRowsGrowth = 0;
-        g_customExecutePanelNative = false;
-    }
-
     if (g_customExecutePanelRoot && g_customExecutePanelButton && g_customExecuteAllPanelButton)
     {
         return true;
@@ -5189,29 +4802,6 @@ static bool EnsureCustomExecutePanelOverlayWidgets()
     }
 
     DestroyCustomExecutePanelOverlayWidgets();
-
-    try
-    {
-        if (TryCreateNativeExecuteRows())
-        {
-            g_customExecutePanelButton->setCaption(Tr("Execute"));
-            g_customExecutePanelButton->eventMouseButtonPressed += MyGUI::newDelegate(&OnCustomExecutePanelButtonPressed);
-            g_customExecutePanelButton->eventMouseButtonClick += MyGUI::newDelegate(&OnCustomExecutePanelButtonClick);
-            g_customExecuteAllPanelButton->setCaption(Tr("Execute All"));
-            g_customExecuteAllPanelButton->eventMouseButtonPressed += MyGUI::newDelegate(&OnCustomExecutePanelButtonPressed);
-            g_customExecuteAllPanelButton->eventMouseButtonClick += MyGUI::newDelegate(&OnCustomExecutePanelButtonClick);
-            g_customExecutePanelValue = 0;
-            // Строки могли пересоздаться посреди показа (игра пересобрала
-            // пункты меню): тогда сразу видимые, иначе Tick их не покажет -
-            // флаг «видно» уже стоит (пустое место в меню, 14.10.2026).
-            g_customExecutePanelRoot->setVisible(g_customExecutePanelVisible);
-            return true;
-        }
-    }
-    catch (...)
-    {
-        DestroyCustomExecutePanelOverlayWidgets();
-    }
 
     try
     {
@@ -5682,20 +5272,6 @@ static void LayoutCustomExecutePanelOverlay(ContextMenu* menu)
     {
         return;
     }
-    if (g_customExecutePanelNative)
-    {
-        // строки стоят в меню на месте его пунктов; двигать нечего
-        g_customExecutePanelHasLayoutState = true;
-        g_customExecutePanelAnchorRectCached = true;
-        g_customExecutePanelLastLayoutOrdersCount = g_customExecutePanelOrdersCount;
-        g_customExecutePanelLastLayoutExecuteAllEnabled = IsExecuteAllEnabled();
-        g_customExecutePanelLastLayoutWidthPx = g_config.executeButtonWidthPx;
-        g_customExecutePanelLastLayoutHeightPx = g_config.executeButtonHeightPx;
-        g_customExecutePanelLastLayoutGapPx = g_config.executeButtonGapPx;
-        g_customExecutePanelLastLayoutOffsetXPx = g_config.executeButtonOffsetXPx;
-        g_customExecutePanelLastLayoutOffsetYPx = g_config.executeButtonOffsetYPx;
-        return;
-    }
 
     MyGUI::IntCoord anchor;
     if (!TryGetStableCustomExecutePanelAnchorRect(menu, &anchor))
@@ -5796,40 +5372,7 @@ static void HideCustomExecutePanelOverlay()
 {
     ClearExecuteAllHoverTint();
 
-    // Строки в меню только прячем: Hide зовётся и из нажатия на саму
-    // кнопку, удалять её в её же обработчике нельзя. Удаляются они при
-    // следующем показе меню (ArmCustomExecutePanelOverlay).
-    if (g_customExecutePanelNative)
-    {
-        if (!g_inNativeRowCallback)
-        {
-            // строки - вон, меню - его размер (иначе внизу пустое место)
-            DestroyCustomExecutePanelOverlayWidgets();
-        }
-        else
-        {
-            MyGUI::Widget* const rows = NativeRowsRef().get();
-            if (rows)
-            {
-                rows->setVisible(false);
-            }
-            MyGUI::Widget* const list = NativeListRef().get();
-            MyGUI::Widget* const menuRoot = NativeMenuRootRef().get();
-            if (g_nativeRowsGrowth > 0)
-            {
-                if (list)
-                {
-                    list->setSize(g_nativeListOrigSize);
-                }
-                if (menuRoot && menuRoot != list)
-                {
-                    menuRoot->setSize(g_nativeMenuOrigSize);
-                }
-                g_nativeRowsGrowth = 0;
-            }
-        }
-    }
-    else if (g_customExecutePanelRoot)
+    if (g_customExecutePanelRoot)
     {
         g_customExecutePanelRoot->setVisible(false);
     }
@@ -5876,10 +5419,11 @@ static void ArmCustomExecutePanelOverlay(
         return;
     }
 
-    // Новое меню. Строки создаёт первый кадр, когда меню уже на экране
-    // (TickCustomExecutePanelOverlay): сразу после showContextMenu оно ещё
-    // не видно и в него не встроиться - так строки уходили в запасную плашку.
-    DestroyCustomExecutePanelOverlayWidgets();
+    if (!EnsureCustomExecutePanelOverlayWidgets())
+    {
+        HideCustomExecutePanelOverlay();
+        return;
+    }
 
     Character* actor = ResolveExecuteActorForPredicateWithTarget(target, false);
     if (!actor)
@@ -5915,7 +5459,9 @@ static void ArmCustomExecutePanelOverlay(
     g_customExecutePanelLastLayoutOffsetXPx = 0;
     g_customExecutePanelLastLayoutOffsetYPx = 0;
 
-    g_customExecutePanelVisible = false;
+    LayoutCustomExecutePanelOverlay(menu);
+    g_customExecutePanelRoot->setVisible(true);
+    g_customExecutePanelVisible = true;
 }
 
 static void TickCustomExecutePanelOverlay(ContextMenu* menu, DWORD nowMs)
@@ -5964,7 +5510,6 @@ static void TickCustomExecutePanelOverlay(ContextMenu* menu, DWORD nowMs)
         return;
     }
 
-    g_nativeRowsMenu = menu;
     if (!EnsureCustomExecutePanelOverlayWidgets())
     {
         HideCustomExecutePanelOverlay();
