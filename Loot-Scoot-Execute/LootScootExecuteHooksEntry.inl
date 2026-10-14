@@ -81,6 +81,15 @@ static void ContextMenu_showContextMenu_hook(ContextMenu* thisptr, bool on, Root
         }
     }
 
+    // LEOPARD: наши строки - вон из списка пунктов до того, как игра его
+    // заново соберёт: оставшись (спрятанными), они сбивали раскладку, и меню
+    // мёртвой цели выходило пустым (14.10.2026). Только при открытии: при
+    // закрытии мы можем быть внутри нажатия на свою же кнопку.
+    if (on && g_customExecutePanelNative)
+    {
+        DestroyCustomExecutePanelOverlayWidgets();
+    }
+
     if (ContextMenu_showContextMenu_orig)
     {
         ContextMenu_showContextMenu_orig(thisptr, on, what);
