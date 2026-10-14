@@ -261,6 +261,8 @@ static WidgetRef& NativeMenuRootRef()
 }
 static bool g_customExecutePanelNative = false;   // строки внутри меню, не плашка
 static int g_nativeRowsGrowth = 0;                // на сколько выросли список и меню
+static MyGUI::IntSize g_nativeListOrigSize;      // размеры, которые им дала игра
+static MyGUI::IntSize g_nativeMenuOrigSize;
 static int g_nativeRowHeight = 26;                // высота строки меню
 static int g_nativeRowGap = 2;
 static MyGUI::IntCoord g_nativeButtonCoord(0, 0, 0, 0);   // кнопка внутри строки
@@ -4807,12 +4809,26 @@ static void DestroyCustomExecutePanelOverlayWidgets()
     {
         // корень - внутри меню игры: удаляем, только если он ещё жив, и
         // возвращаем меню прежний размер
-        // Размер меню не трогаем: его выставляет игра при каждом показе, а
-        // наши строки заново меряются по её последнему пункту.
+        // Списку и окну меню - ровно те размеры, что дала им игра: следующее
+        // меню она собирает от текущих, и с нашим приростом меню мёртвой
+        // цели выходило пустым (14.10.2026).
         MyGUI::Widget* const rows = NativeRowsRef().get();
         if (gui && rows)
         {
             gui->destroyWidget(rows);
+        }
+        if (g_nativeRowsGrowth > 0)
+        {
+            MyGUI::Widget* const list = NativeListRef().get();
+            MyGUI::Widget* const menuRoot = NativeMenuRootRef().get();
+            if (list && list->getSize() != g_nativeListOrigSize)
+            {
+                list->setSize(g_nativeListOrigSize);
+            }
+            if (menuRoot && menuRoot != list && menuRoot->getSize() != g_nativeMenuOrigSize)
+            {
+                menuRoot->setSize(g_nativeMenuOrigSize);
+            }
         }
         NativeRowsRef().reset();
         NativeListRef().reset();
@@ -5096,6 +5112,8 @@ static bool TryCreateNativeExecuteRows()
     // Список и окно меню вырастают на эти строки (если ещё не выросли).
     const int need = top + height + 4 - list->getHeight();
     g_nativeRowsGrowth = need > 0 ? need : 0;
+    g_nativeListOrigSize = list->getSize();
+    g_nativeMenuOrigSize = menuRoot ? menuRoot->getSize() : MyGUI::IntSize();
     if (g_nativeRowsGrowth > 0)
     {
         list->setSize(list->getWidth(), list->getHeight() + g_nativeRowsGrowth);
