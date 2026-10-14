@@ -1,5 +1,6 @@
 // ModConfigMenu: подписи настроек идут через Tr - перевод в locale/<язык>.
 #define KLOC_DOMAIN "vital_read"
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include <Localization.h>
 
 #include <Debug.h>
@@ -4412,7 +4413,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             const std::string::size_type sep = fullPath.find_last_of("\\/");
             if (sep != std::string::npos)
             {
-                g_configPath = fullPath.substr(0, sep) + "\\mod-config.json";
+                g_configPath = IniDefaults::PrepareJson(fullPath.substr(0, sep) + "\\mod-config.json");
             }
         }
     }

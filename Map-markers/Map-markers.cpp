@@ -1,4 +1,5 @@
 #define KLOC_DOMAIN "map_markers"   // подписи - через перевод (locale/<язык>)
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include <Localization.h>
 #include <Debug.h>
 
@@ -429,7 +430,7 @@ std::string GetPluginDirectory()
 
 std::string GetModConfigPath()
 {
-    return JoinWindowsPath(GetPluginDirectory(), kModConfigFileName);
+    return IniDefaults::PrepareJson(JoinWindowsPath(GetPluginDirectory(), kModConfigFileName));
 }
 
 void ResetMarkersForActiveSave()

@@ -1,5 +1,6 @@
 // ModConfigMenu: подписи настроек идут через Tr - перевод в locale/<язык>.
 #define KLOC_DOMAIN "wall_b_gone"
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include <Localization.h>
 
 #include <Debug.h>
@@ -487,7 +488,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             if (sep != std::string::npos)
             {
                 const std::string myDirectory = fullPath.substr(0, sep);
-                g_settingsPath = myDirectory + "\\mod-config.json";
+                g_settingsPath = IniDefaults::PrepareJson(myDirectory + "\\mod-config.json");
             }
         }
     }

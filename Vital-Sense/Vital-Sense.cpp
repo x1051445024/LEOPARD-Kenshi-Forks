@@ -1,3 +1,4 @@
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include <Debug.h>
 
 #include <core/Functions.h>
@@ -267,7 +268,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             {
                 const std::string pluginDir = fullPath.substr(0, sep);
                 RuntimeStateView state = vs_runtime_state::GetRuntimeStateView();
-                state.settingsPath = pluginDir + "\\" + kConfigFileName;
+                state.settingsPath = IniDefaults::PrepareJson(pluginDir + "\\" + kConfigFileName);
             }
         }
     }

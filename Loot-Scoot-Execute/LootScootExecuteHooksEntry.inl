@@ -1,3 +1,4 @@
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 static void RefreshEffectiveContextMenuFeatureFlags(const char* source)
 {
     (void)source;
@@ -336,7 +337,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             if (sep != std::string::npos)
             {
                 const std::string myDirectory = fullPath.substr(0, sep);
-                g_settingsPath = myDirectory + "\\" + kConfigFileName;
+                g_settingsPath = IniDefaults::PrepareJson(myDirectory + "\\" + kConfigFileName);
             }
         }
     }

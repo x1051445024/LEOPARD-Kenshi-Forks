@@ -1,3 +1,4 @@
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include "src/HiddenFactionRelations.h"
 #include "src/HiddenFactionRelationsConfig.h"
 #include "src/HiddenFactionRelationsModHub.h"
@@ -151,7 +152,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             const std::string::size_type sep = fullPath.find_last_of("\\/");
             if (sep != std::string::npos)
             {
-                HiddenFactionRelationsConfig_SetConfigPath(fullPath.substr(0, sep) + "\\mod-config.json");
+                HiddenFactionRelationsConfig_SetConfigPath(IniDefaults::PrepareJson(fullPath.substr(0, sep) + "\\mod-config.json"));
             }
         }
     }

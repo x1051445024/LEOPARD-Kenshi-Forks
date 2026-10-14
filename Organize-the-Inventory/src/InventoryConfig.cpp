@@ -1,3 +1,4 @@
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include "InventoryConfig.h"
 
 #include <Windows.h>
@@ -50,7 +51,7 @@ bool TryResolveModConfigPath(std::string* outPath)
         return false;
     }
 
-    *outPath = pluginDirectory + "\\mod-config.json";
+    *outPath = IniDefaults::PrepareJson(pluginDirectory + "\\mod-config.json");
     return true;
 }
 

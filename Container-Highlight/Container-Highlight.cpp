@@ -1,5 +1,6 @@
 // ModConfigMenu: подписи настроек идут через Tr - перевод в locale/<язык>.
 #define KLOC_DOMAIN "container_highlight"
+#include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
 #include <Localization.h>
 
 #include <Debug.h>
@@ -8507,7 +8508,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
             const std::string::size_type separator = fullPath.find_last_of("\\/");
             if (separator != std::string::npos)
             {
-                g_state.settingsPath = fullPath.substr(0, separator) + "\\" + kConfigFileName;
+                g_state.settingsPath = IniDefaults::PrepareJson(fullPath.substr(0, separator) + "\\" + kConfigFileName);
             }
         }
     }
