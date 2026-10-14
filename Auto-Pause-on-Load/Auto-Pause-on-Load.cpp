@@ -84,6 +84,7 @@ static int g_lastObservedSaveManagerSignal = 0;
 
 static void (*PlayerInterface_updateUT_orig)(PlayerInterface*) = 0;
 static PlayerInterface* g_lastPlayerInterface = 0;
+static volatile bool g_importGameDone = false;   // LEOPARD: SaveManager::importGame отработала
 static bool g_hooksInstalled = false;
 static bool g_updateUTHookVerified = false;
 static DWORD g_updateUTHookVerifyTimeMs = 0;
@@ -2142,13 +2143,22 @@ static void TickPauseOnLoad()
 
     // LEOPARD (14.10.2026): перенос сохранения (Import). Флаг «идёт загрузка
     // сохранения» игра при нём не поднимает - путь загрузки не срабатывал.
-    // Видели сигнал переноса - ждём, пока игра его снимет и мир покрутится
-    // 1,5 с без загрузки, и ставим паузу.
+    // Перенос отработал (хук SaveManager::importGame) или видели его сигнал -
+    // ждём, пока мир покрутится 1,5 с без загрузки, и ставим паузу.
     {
         static bool importSeen = false;
         static DWORD importSeenMs = 0;
         static DWORD importQuietSinceMs = 0;
-        if (saveManagerSignal == SaveManager::IMPORTGAME)
+        if (g_importGameDone)
+        {
+            g_importGameDone = false;
+            if (g_config.debugLogTransitions)
+                DebugLog("Auto-Pause-on-Load DEBUG: SaveManager::importGame finished");
+            importSeen = true;
+            importSeenMs = nowMs;
+            importQuietSinceMs = 0;
+        }
+        else if (saveManagerSignal == SaveManager::IMPORTGAME)
         {
             if (!importSeen && g_config.debugLogTransitions)
                 DebugLog("Auto-Pause-on-Load DEBUG: save import seen");
@@ -2527,6 +2537,39 @@ static void TickPauseOnSquadAttack()
     }
 }
 
+// Перенос сохранения: SaveManager::importGame в заголовке закрыта, но
+// KenshiLib её экспортирует - адрес берём по имени экспорта.
+static int (*SaveManager_importGame_orig)(SaveManager*, const std::string&, const std::string&, int) = 0;
+
+static int SaveManager_importGame_hook(SaveManager* self, const std::string& location,
+                                       const std::string& name, int flags)
+{
+    const int result = SaveManager_importGame_orig(self, location, name, flags);
+    g_importGameDone = true;
+    return result;
+}
+
+static bool TryInstallImportGameHook()
+{
+    if (SaveManager_importGame_orig != 0)
+        return true;
+    HMODULE const lib = GetModuleHandleA("KenshiLib.dll");
+    void* const stub = lib != 0 ? reinterpret_cast<void*>(GetProcAddress(lib,
+        "?importGame@SaveManager@@QEAAHAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@0H@Z")) : 0;
+    if (stub == 0)
+    {
+        ErrorLog("Auto-Pause-on-Load WARN: SaveManager::importGame not exported - no pause after a save import");
+        return false;
+    }
+    if (KenshiLib::SUCCESS == KenshiLib::AddHook(
+            KenshiLib::GetRealAddress(stub),
+            reinterpret_cast<void*>(&SaveManager_importGame_hook),
+            reinterpret_cast<void**>(&SaveManager_importGame_orig)))
+        return true;
+    ErrorLog("Auto-Pause-on-Load WARN: failed to hook SaveManager::importGame - no pause after a save import");
+    return false;
+}
+
 static bool TryInstallAddWoundHook()
 {
     if (MedicalSystem_addWound_orig != 0)
@@ -2646,6 +2689,7 @@ __declspec(dllexport) void startPlugin()
     }
     TryInstallDialogueStartPlayerConversationHook();
     TryInstallAddWoundHook();
+    TryInstallImportGameHook();
 
     g_hasObservedLoadSignal = false;
     g_lastObservedLoadSignal = false;

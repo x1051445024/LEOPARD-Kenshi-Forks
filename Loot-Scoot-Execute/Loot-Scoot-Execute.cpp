@@ -4831,10 +4831,73 @@ static void DestroyCustomExecutePanelOverlayWidgets()
     g_customExecutePanelValue = 0;
 }
 
+static bool TryReadUintptrAtOffset(const void* base, size_t offset, uintptr_t* valueOut);
+
+// Виджет - окно меню игры: в нём есть OptionsList и NameText, оно видно.
+static MyGUI::Widget* ContextMenuOptionsListOf(MyGUI::Widget* root)
+{
+    __try
+    {
+        if (!root || !root->getInheritedVisible())
+        {
+            return 0;
+        }
+        MyGUI::Widget* const options = root->findWidget(kContextMenuOptionsListWidgetName);
+        if (!options || !root->findWidget(kContextMenuNameTextWidgetName))
+        {
+            return 0;
+        }
+        return options;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return 0;
+    }
+}
+
+static ContextMenu* g_nativeRowsMenu = 0;   // меню, для которого ищем (из Tick)
+
 // Видимый список пунктов контекстного меню игры (OptionsList рядом с
-// NameText) и его окно-корень.
+// NameText) и его окно-корень. Сначала - через объект меню игры (menuGUI,
+// как и якорь прежней плашки): окно меню бывает не корнем интерфейса.
 static MyGUI::Widget* FindVisibleContextMenuOptionsList(MyGUI::Widget** rootOut)
 {
+    if (g_nativeRowsMenu)
+    {
+        const uintptr_t guiPtrs[2] = {
+            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI),
+            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI2)
+        };
+        for (size_t i = 0; i < 2; ++i)
+        {
+            if (guiPtrs[i] == 0)
+            {
+                continue;
+            }
+            MyGUI::Widget* root = reinterpret_cast<MyGUI::Widget*>(guiPtrs[i]);
+            MyGUI::Widget* options = ContextMenuOptionsListOf(root);
+            for (size_t offset = 0; !options && offset <= 0x180; offset += sizeof(uintptr_t))
+            {
+                uintptr_t candidate = 0;
+                if (!TryReadUintptrAtOffset(reinterpret_cast<const void*>(guiPtrs[i]), offset, &candidate)
+                    || candidate == 0)
+                {
+                    continue;
+                }
+                root = reinterpret_cast<MyGUI::Widget*>(candidate);
+                options = ContextMenuOptionsListOf(root);
+            }
+            if (options)
+            {
+                if (rootOut)
+                {
+                    *rootOut = root;
+                }
+                return options;
+            }
+        }
+    }
+
     MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
     if (!gui)
     {
@@ -4885,6 +4948,12 @@ static bool TryCreateNativeExecuteRows()
     MyGUI::Widget* const list = FindVisibleContextMenuOptionsList(&menuRoot);
     if (!list)
     {
+        static int told = 0;
+        if (told < 3)
+        {
+            ++told;
+            PluginLog("Loot-Scoot-Execute INFO: native rows - the context menu list was not found, using the floating panel");
+        }
         return false;
     }
 
@@ -5752,6 +5821,7 @@ static void TickCustomExecutePanelOverlay(ContextMenu* menu, DWORD nowMs)
         return;
     }
 
+    g_nativeRowsMenu = menu;
     if (!EnsureCustomExecutePanelOverlayWidgets())
     {
         HideCustomExecutePanelOverlay();
