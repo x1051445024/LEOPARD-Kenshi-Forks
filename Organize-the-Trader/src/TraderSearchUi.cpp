@@ -201,6 +201,36 @@ const MyGUI::UString* FindMoneyCaption(MyGUI::Widget* widget, int depth)
     return found;
 }
 
+// Знак валюты и разделитель тысяч - как в подписи денег самой игры
+// («к.8 146» в русской, «c.8,146» в английской): язык игры, не свой.
+std::string g_moneyPrefix = "c.";
+std::string g_moneySeparator = ",";
+
+void LearnMoneyFormat(const std::string& caption)
+{
+    size_t first = 0;
+    while (first < caption.size() && !(caption[first] >= '0' && caption[first] <= '9'))
+        ++first;
+    if (first >= caption.size())
+        return;
+    // приставка - последнее «слово» перед числом («Нал.: к.» -> «к.»)
+    size_t start = first;
+    while (start > 0 && caption[start - 1] != ' ' && caption[start - 1] != ':')
+        --start;
+    g_moneyPrefix = caption.substr(start, first - start);
+    // разделитель - то, что стоит между группами цифр
+    size_t i = first;
+    while (i < caption.size() && caption[i] >= '0' && caption[i] <= '9')
+        ++i;
+    size_t j = i;
+    while (j < caption.size() && !(caption[j] >= '0' && caption[j] <= '9'))
+        ++j;
+    if (j < caption.size() && j > i && j - i <= 3)
+        g_moneySeparator = caption.substr(i, j - i);
+    else
+        g_moneySeparator = (i - first) > 3 ? "" : g_moneySeparator;
+}
+
 std::string FormatMoney(int value)
 {
     char digits[32];
@@ -210,10 +240,55 @@ std::string FormatMoney(int value)
     for (int i = 0; i < n; ++i)
     {
         if (i > 0 && (n - i) % 3 == 0)
-            out += ',';
+            out += g_moneySeparator;
         out += digits[i];
     }
     return out;
+}
+
+// Поиск в нижнем ряду - как сортировка слева: та же высота строки (на 4
+// меньше ряда, сверху 2), текст по центру по высоте; справа кнопка
+// очистки, за ней счётчик. Строка текста шаблона Kenshi_EditBox прибита к
+// верху, как у списка (FitSortComboText) - растягиваем её на всю высоту.
+void LayoutBottomSearchRow(MyGUI::Widget* search, int width, int height)
+{
+    MyGUI::Widget* const edit = FindNamedDescendantRecursive(search, "OTT_SearchEdit", false);
+    MyGUI::Widget* const placeholder = FindNamedDescendantRecursive(search, "OTT_SearchPlaceholder", false);
+    MyGUI::Widget* const clear = FindNamedDescendantRecursive(search, "OTT_SearchClearButton", false);
+    MyGUI::Widget* const count = FindNamedDescendantRecursive(search, "OTT_SearchCountText", false);
+    if (edit == 0)
+        return;
+    const int rowHeight = height > 22 ? height - 4 : 18;
+    const int top = (height - rowHeight) / 2;
+    const int countWidth = count != 0 && count->getVisible() ? count->getWidth() : 0;
+    const int clearSize = clear != 0 && clear->getVisible() ? (rowHeight > 28 ? 28 : rowHeight) : 0;
+    int editWidth = width - countWidth - (countWidth > 0 ? 6 : 0) - (clearSize > 0 ? clearSize + 4 : 0);
+    if (editWidth < 80) editWidth = 80;
+    const MyGUI::IntCoord editCoord(0, top, editWidth, rowHeight);
+    if (edit->getCoord() != editCoord) edit->setCoord(editCoord);
+    MyGUI::EditBox* const box = edit->castType<MyGUI::EditBox>(false);
+    if (box != 0)
+    {
+        MyGUI::Widget* const client = box->getClientWidget();
+        const MyGUI::IntCoord want(8, 0, editWidth - 16, rowHeight);
+        if (client != 0 && want.width > 10 && client->getCoord() != want) client->setCoord(want);
+        box->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
+    }
+    if (placeholder != 0)
+    {
+        const MyGUI::IntCoord want(8, top, editWidth - 16, rowHeight);
+        if (placeholder->getCoord() != want) placeholder->setCoord(want);
+    }
+    if (clear != 0 && clearSize > 0)
+    {
+        const MyGUI::IntCoord want(editWidth + 4, top + (rowHeight - clearSize) / 2, clearSize, clearSize);
+        if (clear->getCoord() != want) clear->setCoord(want);
+    }
+    if (count != 0 && countWidth > 0)
+    {
+        const MyGUI::IntCoord want(width - countWidth, top, countWidth, rowHeight);
+        if (count->getCoord() != want) count->setCoord(want);
+    }
 }
 
 void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
@@ -227,6 +302,7 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     {
         g_balanceMoneyCaption = caption->asUTF8();
         g_balanceMoney = ParseMoneyCaption(g_balanceMoneyCaption);
+        LearnMoneyFormat(g_balanceMoneyCaption);
     }
     if (owner != g_balanceOwner)
     {
@@ -261,7 +337,7 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     std::string line = std::string(Tr("Deal")) + ": ";
     if (balance > 0) line += "+";
     if (balance < 0) line += "-";
-    line += "c." + FormatMoney(balance);
+    line += g_moneyPrefix + FormatMoney(balance);
     text->setCaption(MyGUI::UString(line));
     text->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
     if (balance > 0)
@@ -369,6 +445,8 @@ void PositionInlineControls()
             if (panel->getCoord() != place) panel->setCoord(place);
             if (search != 0 && search->getSize() != place.size())
                 search->setSize(place.width, place.height);
+            if (search != 0)
+                LayoutBottomSearchRow(search, place.width, place.height);
         }
         const bool showSort = true;
         sort->setVisible(showSort);
