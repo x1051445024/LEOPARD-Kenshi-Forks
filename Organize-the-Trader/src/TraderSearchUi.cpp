@@ -76,6 +76,14 @@ MyGUI::IntCoord InlineSearchCoord(MyGUI::Widget* parent)
     const MyGUI::IntCoord box = money->getAbsoluteCoord();
     const TraderInlinePlacement::Rect coord = TraderInlinePlacement::Place(parent->getWidth(),
         TraderInlinePlacement::Rect(box.left - origin.left, box.top - origin.top, box.width, box.height));
+    // LEOPARD (15.10.2026): плашка денег во всю ширину окна (Dark UI) -
+    // справа от неё места нет, и окно оставалось без поиска. Тогда - правая
+    // половина её строки (с ARRANGE поиск всё равно сразу уходит вниз).
+    if (coord.width < 160)
+    {
+        const int half = parent->getWidth() / 2;
+        return MyGUI::IntCoord(half, box.top - origin.top, parent->getWidth() - half - 16, box.height);
+    }
     return MyGUI::IntCoord(coord.left, coord.top, coord.width, coord.height);
 }
 
