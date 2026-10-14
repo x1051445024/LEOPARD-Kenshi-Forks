@@ -5182,7 +5182,10 @@ static bool EnsureCustomExecutePanelOverlayWidgets()
             g_customExecuteAllPanelButton->eventMouseButtonPressed += MyGUI::newDelegate(&OnCustomExecutePanelButtonPressed);
             g_customExecuteAllPanelButton->eventMouseButtonClick += MyGUI::newDelegate(&OnCustomExecutePanelButtonClick);
             g_customExecutePanelValue = 0;
-            g_customExecutePanelRoot->setVisible(false);
+            // Строки могли пересоздаться посреди показа (игра пересобрала
+            // пункты меню): тогда сразу видимые, иначе Tick их не покажет -
+            // флаг «видно» уже стоит (пустое место в меню, 14.10.2026).
+            g_customExecutePanelRoot->setVisible(g_customExecutePanelVisible);
             return true;
         }
     }
