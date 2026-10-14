@@ -223,6 +223,25 @@ static EMC_Result __cdecl SetResumeAfterInventoryCloseSetting(
         &PluginConfig::resumeAfterInventoryClose);
 }
 
+static EMC_Result __cdecl GetPauseOnSquadAttackSetting(void* user_data, int32_t* out_value)
+{
+    return GetBoolHubSettingValue(user_data, out_value, &PluginConfig::pauseOnSquadAttack);
+}
+
+static EMC_Result __cdecl SetPauseOnSquadAttackSetting(
+    void* user_data,
+    int32_t value,
+    char* err_buf,
+    uint32_t err_buf_size)
+{
+    return SetBoolHubSettingValue(
+        user_data,
+        value,
+        err_buf,
+        err_buf_size,
+        &PluginConfig::pauseOnSquadAttack);
+}
+
 static void LogModHubFallback(const char* reason)
 {
     std::stringstream line;
@@ -301,6 +320,14 @@ static const EMC_BoolSettingDefV1 kHubResumeAfterInventoryCloseSetting = {
     &GetResumeAfterInventoryCloseSetting,
     &SetResumeAfterInventoryCloseSetting };
 
+static const EMC_BoolSettingDefV1 kHubPauseOnSquadAttackSetting = {
+    "pause_on_squad_attack",
+    "Pause when another squad is attacked",
+    "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). Once per squad in 30 seconds",
+    &g_config,
+    &GetPauseOnSquadAttackSetting,
+    &SetPauseOnSquadAttackSetting };
+
 static const emc::ModHubClientSettingRowV1 kModHubSettingRows[] = {
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubEnabledSetting },
     { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kHubPauseDebounceMsSetting },
@@ -308,7 +335,8 @@ static const emc::ModHubClientSettingRowV1 kModHubSettingRows[] = {
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnTradeSetting },
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubResumeAfterTradeSetting },
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnInventoryOpenSetting },
-    { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubResumeAfterInventoryCloseSetting }
+    { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubResumeAfterInventoryCloseSetting },
+    { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnSquadAttackSetting }
 };
 
 static const emc::ModHubClientTableRegistrationV1 kModHubTableRegistration = {

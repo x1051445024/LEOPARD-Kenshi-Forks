@@ -49,3 +49,9 @@ msgstr "Снять паузу после инвентаря"
 
 msgid "Resume when inventory closes if this mod paused the game"
 msgstr "Снимает паузу при закрытии инвентаря, если её поставил этот мод"
+
+msgid "Pause when another squad is attacked"
+msgstr "Пауза при нападении на другой отряд"
+
+msgid "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). Once per squad in 30 seconds"
+msgstr "Пауза, когда персонажа из невыбранного отряда ударили (не просто враги рядом). Для одного отряда - не чаще раза в 30 секунд"

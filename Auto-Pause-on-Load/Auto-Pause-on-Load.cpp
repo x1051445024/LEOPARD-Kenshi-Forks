@@ -15,6 +15,8 @@
 #include <kenshi/Inventory.h>
 #include <kenshi/PlayerInterface.h>
 #include <kenshi/SaveManager.h>
+#include <kenshi/MedicalSystem.h>
+#include <kenshi/Platoon.h>
 #include <Windows.h>
 
 #include <cctype>
@@ -32,6 +34,7 @@ struct PluginConfig
     bool resumeAfterTrade;
     bool pauseOnInventoryOpen;
     bool resumeAfterInventoryClose;
+    bool pauseOnSquadAttack;   // LEOPARD: a squad that is not selected is hit
 };
 
 struct RuntimeState
@@ -824,6 +827,20 @@ static bool ParseConfigJson(const std::string& body, PluginConfig* configOut, Co
                 }
             }
         }
+        else if (key == "pause_on_squad_attack")
+        {
+            bool parsedBool = false;
+            size_t valuePos = pos;
+            if (ParseJsonBoolValue(body, &valuePos, &parsedBool))
+            {
+                configOut->pauseOnSquadAttack = parsedBool;
+                pos = valuePos;
+            }
+            else if (!SkipJsonValue(body, &pos))
+            {
+                return RecordConfigSyntaxError(diagnostics, pos);
+            }
+        }
         else if (key == "resume_after_inventory_close")
         {
             bool parsedBool = false;
@@ -1095,7 +1112,8 @@ static bool SaveConfigToFile(const std::string& configPath, const PluginConfig& 
     out << "  \"pause_on_trade\": " << (config.pauseOnTrade ? "true" : "false") << ",\n";
     out << "  \"resume_after_trade\": " << (config.resumeAfterTrade ? "true" : "false") << ",\n";
     out << "  \"pause_on_inventory_open\": " << (config.pauseOnInventoryOpen ? "true" : "false") << ",\n";
-    out << "  \"resume_after_inventory_close\": " << (config.resumeAfterInventoryClose ? "true" : "false") << "\n";
+    out << "  \"resume_after_inventory_close\": " << (config.resumeAfterInventoryClose ? "true" : "false") << ",\n";
+    out << "  \"pause_on_squad_attack\": " << (config.pauseOnSquadAttack ? "true" : "false") << "\n";
     out << "}\n";
 
     return true;
@@ -1111,6 +1129,7 @@ static void LoadConfigState()
     g_config.resumeAfterTrade = true;
     g_config.pauseOnInventoryOpen = true;
     g_config.resumeAfterInventoryClose = true;
+    g_config.pauseOnSquadAttack = true;
 
     if (g_settingsPath.empty())
     {
@@ -2316,7 +2335,10 @@ static bool QuerySaveManagerState(
 
         *signalOut = saveManager->signal;
         *delayOut = saveManager->delay;
-        *loadRequestedOut = (saveManager->signal == SaveManager::LOADGAME);
+        // LEOPARD: перенос сохранения (Import) - тоже загрузка мира, пауза
+        // после него нужна так же (просьба пользователя, 14.10.2026).
+        *loadRequestedOut = (saveManager->signal == SaveManager::LOADGAME ||
+                             saveManager->signal == SaveManager::IMPORTGAME);
         if (currentGameOut)
         {
             *currentGameOut = saveManager->currentGame;
@@ -2391,6 +2413,90 @@ static bool TryInstallUpdateUTHook()
     return false;
 }
 
+// LEOPARD (14.10.2026, просьба пользователя): пауза, когда бьют персонажа
+// из отряда, который сейчас не выбран - именно удар (рана), а не просто
+// враждебность. Рану ловим в MedicalSystem::addWound (как RangedDamageXp),
+// паузу ставим в кадре игры (updateUT), не внутри расчёта удара. Один отряд
+// - не чаще раза в 30 с: пока он дерётся, пауза не сыплется на каждый удар.
+static GameData* (*MedicalSystem_addWound_orig)(MedicalSystem*, bool, CutDirection, Damages&, int&,
+                                                 RootObject*, AttackDirection::Enum&, Harpoon*) = 0;
+static Platoon* volatile g_attackedSquad = 0;      // кого ударили (ждёт кадра)
+static Platoon* g_lastPausedSquad = 0;
+static DWORD g_lastSquadPauseMs = 0;
+static const DWORD kSquadAttackRepeatMs = 30000;
+
+static void NoteSquadHit(MedicalSystem* self, RootObject* attacker)
+{
+    if (self == 0 || self->me == 0 || attacker == 0 || g_lastPlayerInterface == 0)
+        return;
+    Character* const victim = self->me;
+    if (!victim->isPlayerCharacter() || self->dead)
+        return;
+    if (attacker->getDataType() != CHARACTER)
+        return;                                 // падение, ловушка - не нападение
+    ActivePlatoon* const active = victim->getPlatoon();
+    Platoon* const squad = active != 0 ? active->me : 0;
+    if (squad == 0 || squad == g_lastPlayerInterface->currentPlatoon)
+        return;                                 // выбранный отряд игрок и так видит
+    g_attackedSquad = squad;
+}
+
+static GameData* MedicalSystem_addWound_hook(MedicalSystem* self, bool lowBlow, CutDirection area,
+                                             Damages& damage, int& material, RootObject* attacker,
+                                             AttackDirection::Enum& direction, Harpoon* harpoon)
+{
+    GameData* const result = MedicalSystem_addWound_orig(self, lowBlow, area, damage, material,
+                                                         attacker, direction, harpoon);
+    if (g_config.enabled && g_config.pauseOnSquadAttack)
+    {
+        __try
+        {
+            NoteSquadHit(self, attacker);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+        }
+    }
+    return result;
+}
+
+static void TickPauseOnSquadAttack()
+{
+    Platoon* const squad = g_attackedSquad;
+    if (squad == 0)
+        return;
+    g_attackedSquad = 0;
+    if (!g_config.enabled || !g_config.pauseOnSquadAttack)
+        return;
+    const DWORD nowMs = GetTickCount();
+    if (squad == g_lastPausedSquad && g_lastSquadPauseMs != 0 &&
+        !DebounceWindowElapsed(nowMs, g_lastSquadPauseMs, kSquadAttackRepeatMs))
+        return;
+    bool paused = false;
+    if (QueryGamePaused(&paused) && paused)
+        return;
+    if (ForcePauseTrue())
+    {
+        g_lastPausedSquad = squad;
+        g_lastSquadPauseMs = nowMs;
+        if (g_config.debugLogTransitions)
+            DebugLog("Auto-Pause-on-Load INFO: paused=true source=inactive_squad_attacked");
+    }
+}
+
+static bool TryInstallAddWoundHook()
+{
+    if (MedicalSystem_addWound_orig != 0)
+        return true;
+    if (KenshiLib::SUCCESS == KenshiLib::AddHook(
+            KenshiLib::GetRealAddress(&MedicalSystem::addWound),
+            MedicalSystem_addWound_hook,
+            &MedicalSystem_addWound_orig))
+        return true;
+    ErrorLog("Auto-Pause-on-Load WARN: failed to install MedicalSystem::addWound hook (no pause on squad attack)");
+    return false;
+}
+
 static bool TryInstallDialogueStartPlayerConversationHook()
 {
     if (Dialogue_startPlayerConversation_orig != 0)
@@ -2439,6 +2545,7 @@ static void PlayerInterface_updateUT_hook(PlayerInterface* thisptr)
     if (g_updateUTHookVerified)
     {
         TickPauseOnTradeAndInventory();
+        TickPauseOnSquadAttack();
     }
     else
     {
@@ -2495,6 +2602,7 @@ __declspec(dllexport) void startPlugin()
         ErrorLog("Auto-Pause-on-Load WARN: failed to install updateUT host at startup; pause runtime will remain inactive");
     }
     TryInstallDialogueStartPlayerConversationHook();
+    TryInstallAddWoundHook();
 
     g_hasObservedLoadSignal = false;
     g_lastObservedLoadSignal = false;

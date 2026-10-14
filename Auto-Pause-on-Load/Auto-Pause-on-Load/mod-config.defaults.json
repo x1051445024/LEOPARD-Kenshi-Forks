@@ -5,5 +5,6 @@
   "pause_on_trade": true,
   "resume_after_trade": true,
   "pause_on_inventory_open": true,
-  "resume_after_inventory_close": true
+  "resume_after_inventory_close": true,
+  "pause_on_squad_attack": true
 }
