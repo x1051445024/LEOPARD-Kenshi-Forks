@@ -576,6 +576,19 @@ GetBetterLootingLootableCharacterSource(
     }
 
 
+    // LEOPARD (14.10.2026): taking things is theft only from a living,
+    // unconscious person - the game itself shows a steal chance there.
+    // Animals and animal robots (spiders) and the dead have no owner to
+    // steal from: the hunt and the battlefield were all marked stolen.
+    if (
+        sourceCharacter->isDead() ||
+        sourceCharacter->isAnimal() != NULL
+    )
+    {
+        return NULL;
+    }
+
+
     return sourceCharacter;
 }
 

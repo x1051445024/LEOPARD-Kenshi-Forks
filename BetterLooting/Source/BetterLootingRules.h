@@ -55,6 +55,9 @@ inline bool IsAllowedLootCategory(
 {
     switch (itemFunctionValue)
     {
+        case ITEM_MONEY:
+            return true;   // LEOPARD: money - always (see EvaluateLootDecision)
+
         case ITEM_WEAPON:
             return g_betterLootingRules.lootWeapons;
 
@@ -152,6 +155,14 @@ inline BetterLootingDecision EvaluateLootDecision(
     )
     {
         return BetterLootingDecision::SKIP_STOLEN;
+    }
+
+    // LEOPARD: money (cats, String of Cats - Pocket Change and the like)
+    // is always worth taking: one coin is worth 1-10, so the price and
+    // price-per-kg thresholds threw it away (14.10.2026).
+    if (itemFunctionValue == ITEM_MONEY)
+    {
+        return BetterLootingDecision::LOOT;
     }
 
     if (
