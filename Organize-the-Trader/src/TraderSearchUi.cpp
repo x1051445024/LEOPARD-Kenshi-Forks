@@ -1,5 +1,6 @@
 #include "TraderSearchUi.h"
 #include <WidgetRef.h>
+#include <GameTheme.h>
 
 #include "TraderCore.h"
 #include "TraderDiagnostics.h"
@@ -422,10 +423,13 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     const MyGUI::UString moneyLine = gameLabel != 0
         ? gameLabel->getCaption() + MyGUI::UString(" ") + gameValue->getCaption()
         : gameValue->getCaption();
+    // Цвет - основной текст темы интерфейса: у подписи игры его задаёт не
+    // сам TextBox, взятый оттуда выходил чёрным (14.10.2026).
+    static const MyGUI::Colour plain = GameTheme::ReadableColour("Main", "#C8C0AA");
     if (moneyText->getCaption() != moneyLine)
     {
         moneyText->setCaption(moneyLine);
-        moneyText->setTextColour(gameValue->getTextColour());
+        moneyText->setTextColour(plain);
         moneyText->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
     }
 
@@ -447,18 +451,14 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     if (balance == g_balanceShown)
         return;
     g_balanceShown = balance;
+    // «Сделка:» - цветом текста, цветная только сумма (тег цвета MyGUI)
     std::string line = std::string(Tr("Deal")) + ": ";
-    if (balance > 0) line += "+";
-    if (balance < 0) line += "-";
+    if (balance > 0) line += "#73D966+";
+    else if (balance < 0) line += "#EB6152-";
     line += g_moneyPrefix + FormatMoney(balance);
     text->setCaption(MyGUI::UString(line));
     text->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
-    if (balance > 0)
-        text->setTextColour(MyGUI::Colour(0.45f, 0.85f, 0.40f));
-    else if (balance < 0)
-        text->setTextColour(MyGUI::Colour(0.92f, 0.38f, 0.32f));
-    else
-        text->setTextColour(MyGUI::Colour(0.80f, 0.78f, 0.72f));
+    text->setTextColour(GameTheme::ReadableColour("Main", "#C8C0AA"));
 }
 
 void DestroyTradeBalance()
