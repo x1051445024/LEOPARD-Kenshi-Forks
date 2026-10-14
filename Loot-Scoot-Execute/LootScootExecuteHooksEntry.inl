@@ -142,7 +142,15 @@ static void ContextMenu_showContextMenu_hook(ContextMenu* thisptr, bool on, Root
 
     if (IsCustomExecutePanelOverlayEnabled() && on && visible && canExecuteTarget && whatPtr != 0)
     {
-        ArmCustomExecutePanelOverlay(thisptr, what, ordersCount, g_currentShowSeq, nowMs);
+        // LEOPARD: сначала - пунктами самого меню, как HarvestOrgans
+        if (TryAddNativeExecuteOptions(thisptr, what, executeActor))
+        {
+            HideCustomExecutePanelOverlay();
+        }
+        else
+        {
+            ArmCustomExecutePanelOverlay(thisptr, what, ordersCount, g_currentShowSeq, nowMs);
+        }
     }
     else
     {

@@ -5548,6 +5548,186 @@ static void TickCustomExecutePanelOverlay(ContextMenu* menu, DWORD nowMs)
     }
 }
 
+// ---------------------------------------------------------------------------
+// LEOPARD (14.10.2026): «Добить» / «Добить всех» - пунктами самого
+// контекстного меню игры. Так же, как HarvestOrgans: сразу после
+// showContextMenu (меню собрано) - слот PanelEmpty в списке пунктов и в нём
+// Kenshi_Button1 с размерами пунктов игры (ContextMenuGUI::optionCoords /
+// buttonCoords), окно меню подрастает; пункты игры и сам список не трогаем.
+// Меню при каждом показе собирается заново - наши слоты уходят вместе с ним.
+// Не получилось - прежняя плашка под меню.
+// ContextMenuGUI (kenshi/gui/ContextMenu.h; вместе с PlayerInterface.h не
+// подключить): +0x8 окно (BaseLayout::mMainWidget), +0xF8 optionsList,
+// +0x100 optionCoords, +0x110 buttonCoords.
+// ---------------------------------------------------------------------------
+static hand g_nativeExecTarget;
+static hand g_nativeExecActor;
+static const char* const kNativeExecuteTag = "LSE_NativeOption";
+
+struct NativeMenuParts
+{
+    MyGUI::Widget* main;
+    MyGUI::Widget* list;
+    MyGUI::IntCoord option;
+    MyGUI::IntCoord button;
+};
+
+static bool TryReadNativeMenuParts(ContextMenu* menu, NativeMenuParts* out)
+{
+    __try
+    {
+        const unsigned char* const gui = reinterpret_cast<const unsigned char*>(menu->menuGUI);
+        if (!gui)
+        {
+            return false;
+        }
+        out->main = *reinterpret_cast<MyGUI::Widget* const*>(gui + 0x8);
+        out->list = *reinterpret_cast<MyGUI::Widget* const*>(gui + 0xF8);
+        out->option = *reinterpret_cast<const MyGUI::IntCoord*>(gui + 0x100);
+        out->button = *reinterpret_cast<const MyGUI::IntCoord*>(gui + 0x110);
+        return out->main != 0 && out->list != 0;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
+
+static void OnNativeExecuteReleased(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
+{
+    (void)left;
+    (void)top;
+    (void)id;
+    const bool all = sender != 0 && sender->getUserString(kNativeExecuteTag) == "all";
+    RootObject* const target = g_nativeExecTarget.getRootObject();
+    if (target)
+    {
+        Character* actor = g_nativeExecActor.getCharacter();
+        if (!actor)
+        {
+            actor = ResolveExecuteActorForPredicateWithTarget(target, false);
+        }
+        if (all)
+        {
+            (void)QueueExecuteAllFromNativeMenuSelection(actor, target, ShouldLogExecuteDebug());
+        }
+        else
+        {
+            (void)QueueExecuteFromNativeMenuSelection(actor, target, ShouldLogExecuteDebug());
+        }
+    }
+    // закрыть меню, как обычный выбор пункта
+    if (ou != 0 && ou->player != 0)
+    {
+        ou->player->contextMenu.showContextMenu(false, 0);
+    }
+}
+
+static MyGUI::Button* AddNativeExecuteOption(const NativeMenuParts& parts, int y, int height,
+                                              const char* caption, const char* tag)
+{
+    MyGUI::Widget* const slot = parts.list->createWidget<MyGUI::Widget>(
+        "PanelEmpty",
+        MyGUI::IntCoord(parts.option.left, y, parts.option.width > 0 ? parts.option.width : parts.list->getWidth(), height),
+        MyGUI::Align::Default, "");
+    if (!slot)
+    {
+        return 0;
+    }
+    MyGUI::Button* const button = slot->createWidget<MyGUI::Button>(
+        "Kenshi_Button1", parts.button, MyGUI::Align::Default, "");
+    if (!button)
+    {
+        return 0;
+    }
+    button->setCaption(caption);
+    button->setTextAlign(MyGUI::Align::Center);
+    button->setUserString(kNativeExecuteTag, tag);
+    button->eventMouseButtonReleased += MyGUI::newDelegate(&OnNativeExecuteReleased);
+    button->setEnabled(true);
+    return button;
+}
+
+// true - пункты в меню есть (добавили сейчас или уже были)
+static bool TryAddNativeExecuteOptions(ContextMenu* menu, RootObject* target, Character* actor)
+{
+    NativeMenuParts parts;
+    if (!menu || !target || !TryReadNativeMenuParts(menu, &parts))
+    {
+        return false;
+    }
+    g_nativeExecTarget = hand(target);
+    if (actor)
+    {
+        g_nativeExecActor = hand(actor);
+    }
+    else
+    {
+        g_nativeExecActor.setNull();
+    }
+
+    try
+    {
+        // один раз на показ меню
+        const size_t n = parts.list->getChildCount();
+        for (size_t i = 0; i < n; ++i)
+        {
+            MyGUI::Widget* const slot = parts.list->getChildAt(i);
+            for (size_t j = 0; slot && j < slot->getChildCount(); ++j)
+            {
+                if (slot->getChildAt(j)->isUserString(kNativeExecuteTag))
+                {
+                    return true;
+                }
+            }
+        }
+
+        int height = parts.option.height;
+        if (height < 5 || height > 80)
+        {
+            height = 26;
+        }
+        const int gap = 2;
+        int y = 0;
+        if (n > 0)
+        {
+            MyGUI::Widget* const last = parts.list->getChildAt(n - 1);
+            if (last)
+            {
+                y = last->getTop() + last->getHeight() + gap;
+            }
+        }
+
+        if (!AddNativeExecuteOption(parts, y, height, Tr("Execute"), "one"))
+        {
+            return false;
+        }
+        int bottomY = y + height;
+        if (IsExecuteAllEnabled())
+        {
+            const int y2 = bottomY + gap;
+            if (AddNativeExecuteOption(parts, y2, height, Tr("Execute All"), "all"))
+            {
+                bottomY = y2 + height;
+            }
+        }
+
+        // окно меню подрастает, чтобы пункты были внутри
+        const int bottom = parts.list->getAbsoluteRect().top + bottomY;
+        const int grow = bottom - parts.main->getAbsoluteRect().bottom + 4;
+        if (grow > 0)
+        {
+            parts.main->setSize(parts.main->getWidth(), parts.main->getHeight() + grow);
+        }
+        return true;
+    }
+    catch (...)
+    {
+        ErrorLog("Loot-Scoot-Execute WARN: could not add Execute to the context menu, using the panel");
+        return false;
+    }
+}
+
 #include "LootScootExecuteModHubClient.inl"
 #include "LootScootExecuteModHubBridge.inl"
 #include "LootScootExecuteHooksEntry.inl"
