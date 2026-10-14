@@ -27,6 +27,8 @@
 
 #include <Windows.h>
 
+#include <cstdio>
+#include <cstring>
 #include <sstream>
 
 // Подсказка в пустом поле - через перевод мода (08.10.2026; раньше была
@@ -133,7 +135,154 @@ void RestoreArrangeButton()
     MyGUI::Widget* arrange = MovedArrangeRef().get();
     if (arrange != 0 && arrange->getLeft() != g_arrangeHomeLeft)
         arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
+    if (arrange != 0 && !arrange->getVisible())
+        arrange->setVisible(true);
     MovedArrangeRef().reset();
+}
+
+// ---------------------------------------------------------------------------
+// LEOPARD (14.10.2026, просьба пользователя): итог торговли. Наверху, где
+// раньше стоял поиск, рядом с деньгами торговца - сколько наторговали за
+// это окно: деньги торговца при открытии минус деньги сейчас (продали нам
+// заплатили - у него меньше, у нас плюс). Деньги читаем из подписи самого
+// окна («Money: c.6,301»): мимо GameData и без лишних хуков.
+// ---------------------------------------------------------------------------
+static WidgetRef& TradeBalanceRef()
+{
+    static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
+    return *ref;
+}
+MyGUI::Widget* g_balanceOwner = 0;      // окно торговца, для которого считаем
+int g_balanceStartMoney = -1;
+std::string g_balanceMoneyCaption;      // последняя разобранная подпись
+int g_balanceMoney = -1;
+int g_balanceShown = 0x7fffffff;
+
+int ParseMoneyCaption(const std::string& caption)
+{
+    int value = 0;
+    bool digits = false;
+    for (size_t i = 0; i < caption.size(); ++i)
+    {
+        const char ch = caption[i];
+        if (ch >= '0' && ch <= '9')
+        {
+            digits = true;
+            if (value < 200000000)
+                value = value * 10 + (ch - '0');
+        }
+    }
+    return digits ? value : -1;
+}
+
+// подпись с цифрами в блоке денег окна торговца (последняя - значение)
+const MyGUI::UString* FindMoneyCaption(MyGUI::Widget* widget, int depth)
+{
+    if (widget == 0 || depth > 6)
+        return 0;
+    const MyGUI::UString* found = 0;
+    MyGUI::TextBox* const text = widget->castType<MyGUI::TextBox>(false);
+    if (text != 0)
+    {
+        const MyGUI::UString& caption = text->getCaption();
+        for (size_t i = 0; i < caption.size(); ++i)
+            if (caption[i] >= '0' && caption[i] <= '9')
+            {
+                found = &caption;
+                break;
+            }
+    }
+    for (size_t i = 0; i < widget->getChildCount(); ++i)
+    {
+        const MyGUI::UString* inner = FindMoneyCaption(widget->getChildAt(i), depth + 1);
+        if (inner != 0)
+            found = inner;
+    }
+    return found;
+}
+
+std::string FormatMoney(int value)
+{
+    char digits[32];
+    sprintf_s(digits, "%d", value < 0 ? -value : value);
+    std::string out;
+    const int n = static_cast<int>(strlen(digits));
+    for (int i = 0; i < n; ++i)
+    {
+        if (i > 0 && (n - i) % 3 == 0)
+            out += ',';
+        out += digits[i];
+    }
+    return out;
+}
+
+void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
+{
+    MyGUI::Widget* const data = FindWidgetInParentByToken(parent, "datapanel");
+    MyGUI::Widget* const moneyBox = data != 0 ? data->getParent() : 0;
+    if (moneyBox == 0)
+        return;
+    const MyGUI::UString* caption = FindMoneyCaption(moneyBox, 0);
+    if (caption != 0 && caption->asUTF8() != g_balanceMoneyCaption)
+    {
+        g_balanceMoneyCaption = caption->asUTF8();
+        g_balanceMoney = ParseMoneyCaption(g_balanceMoneyCaption);
+    }
+    if (owner != g_balanceOwner)
+    {
+        g_balanceOwner = owner;
+        g_balanceStartMoney = g_balanceMoney;   // новое окно - счёт с нуля
+        g_balanceShown = 0x7fffffff;
+    }
+    if (g_balanceStartMoney < 0 && g_balanceMoney >= 0)
+        g_balanceStartMoney = g_balanceMoney;
+
+    MyGUI::Widget* label = TradeBalanceRef().get();
+    const MyGUI::IntCoord place = InlineSearchCoord(parent);
+    if (label == 0)
+    {
+        label = parent->createWidget<MyGUI::TextBox>(
+            "Kenshi_TextboxStandardText", place, MyGUI::Align::Default, "OTT_TradeBalance");
+        if (label == 0)
+            return;
+        label->setNeedMouseFocus(false);
+        TradeBalanceRef().set(label);
+        g_balanceShown = 0x7fffffff;
+    }
+    if (label->getCoord() != place)
+        label->setCoord(place);
+    MyGUI::TextBox* const text = label->castType<MyGUI::TextBox>(false);
+    if (text == 0 || g_balanceMoney < 0 || g_balanceStartMoney < 0)
+        return;
+    const int balance = g_balanceStartMoney - g_balanceMoney;
+    if (balance == g_balanceShown)
+        return;
+    g_balanceShown = balance;
+    std::string line = std::string(Tr("Deal")) + ": ";
+    if (balance > 0) line += "+";
+    if (balance < 0) line += "-";
+    line += "c." + FormatMoney(balance);
+    text->setCaption(MyGUI::UString(line));
+    text->setTextAlign(MyGUI::Align::Left | MyGUI::Align::VCenter);
+    if (balance > 0)
+        text->setTextColour(MyGUI::Colour(0.45f, 0.85f, 0.40f));
+    else if (balance < 0)
+        text->setTextColour(MyGUI::Colour(0.92f, 0.38f, 0.32f));
+    else
+        text->setTextColour(MyGUI::Colour(0.80f, 0.78f, 0.72f));
+}
+
+void DestroyTradeBalance()
+{
+    MyGUI::Widget* const label = TradeBalanceRef().get();
+    MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
+    if (label != 0 && gui != 0)
+        gui->destroyWidget(label);
+    TradeBalanceRef().reset();
+    g_balanceOwner = 0;
+    g_balanceStartMoney = -1;
+    g_balanceMoneyCaption.clear();
+    g_balanceMoney = -1;
 }
 
 // The drop-down list is as wide as the combo, and on the vanilla interface
@@ -163,12 +312,19 @@ void PositionInlineControls()
     if (panel == 0) return;
     MyGUI::Widget* parent = ResolveInjectionParent(owner);
     if (parent == 0) return;
-    const MyGUI::IntCoord coord = InlineSearchCoord(parent);
-    if (panel->getCoord() != coord) panel->setCoord(coord);
+    // LEOPARD (14.10.2026): наверху - итог торговли, поиск - внизу, на
+    // месте кнопки ARRANGE (она не нужна: поиск и сортировка раскладывают
+    // сетку сами). Нет ARRANGE (чужое окно) - поиск остаётся наверху.
+    UpdateTradeBalance(owner, parent);
     MyGUI::Widget* search = FindControlsContainer();
-    if (search != 0) search->setSize(coord.width, coord.height);
     MyGUI::Widget* sort = FindSortControlsContainer();
     MyGUI::Widget* arrange = FindWidgetInParentByToken(parent, "ArrangeButton");
+    if (arrange == 0)
+    {
+        const MyGUI::IntCoord coord = InlineSearchCoord(parent);
+        if (panel->getCoord() != coord) panel->setCoord(coord);
+        if (search != 0) search->setSize(coord.width, coord.height);
+    }
     if (sort != 0 && arrange != 0)
     {
         const MyGUI::IntCoord origin = parent->getAbsoluteCoord();
@@ -182,8 +338,13 @@ void PositionInlineControls()
         const int arrangeParentLeft = arrange->getAbsoluteLeft() - arrange->getLeft();
         MyGUI::IntCoord button = arrange->getAbsoluteCoord();
         button.left = arrangeParentLeft + g_arrangeHomeLeft;
-        int width = button.left - origin.left - 20;
+        if (arrange->getVisible())
+            arrange->setVisible(false);
+        // нижний ряд целиком: сортировка слева, поиск справа
+        const int rowWidth = parent->getWidth() - 8 - 16;
+        int width = rowWidth / 2;
         if (width > 360) width = 360;
+        if (width < 180) width = 180;
         const int comboSetting = TraderState().core.g_sortComboWidth;
         // LEOPARD: the label is at least 52 wide and grows with its text
         // ("Sort by" in English); the rest of the row moves along
@@ -195,32 +356,21 @@ void PositionInlineControls()
         const int rowExtra = labelWidth + 46;   // label + gaps + direction button
         if (comboSetting > 0)
         {
-            // the sort row is rowExtra wider than its drop-down; ARRANGE goes
-            // right after it, inside the window
+            // заданная в MCM ширина списка: ряд сортировки шире на rowExtra,
+            // поиску - остаток (не меньше 160)
             width = comboSetting + rowExtra;
-            const int roomRight = arrange->getParent() != 0 ?
-                arrange->getParent()->getWidth() - arrange->getWidth() - 4 : 100000;
-            int arrangeLeft = origin.left + 8 + width + 12 - arrangeParentLeft;
-            if (arrangeLeft > roomRight)
-            {
-                width -= arrangeLeft - roomRight;
-                arrangeLeft = roomRight;
-            }
-            if (arrangeLeft < g_arrangeHomeLeft)
-            {
-                // the set width fits without moving ARRANGE
-                arrangeLeft = g_arrangeHomeLeft;
-            }
-            if (arrange->getLeft() != arrangeLeft)
-                arrange->setPosition(arrangeLeft, arrange->getTop());
+            if (width > rowWidth - 160)
+                width = rowWidth - 160;
         }
-        else if (arrange->getLeft() != g_arrangeHomeLeft)
+        // поиск - справа от сортировки до края окна, по высоте ARRANGE
         {
-            arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
+            const MyGUI::IntCoord place(8 + width + 8, button.top - origin.top,
+                                        rowWidth - width - 8, button.height);
+            if (panel->getCoord() != place) panel->setCoord(place);
+            if (search != 0 && search->getSize() != place.size())
+                search->setSize(place.width, place.height);
         }
-        // fitted to the window - hidden when the room is too small; a set
-        // width is always shown
-        const bool showSort = comboSetting > 0 || width >= 180;
+        const bool showSort = true;
         sort->setVisible(showSort);
         if (showSort)
         {
@@ -2399,6 +2549,7 @@ void DestroyControlsIfPresent()
     ClearTraderHiddenItems();
     DestroyEmbeddedControlsIfPresent();
     RestoreArrangeButton();
+    DestroyTradeBalance();
     MyGUI::Widget* panel = DockPanelRef().get();
     MyGUI::Gui* gui = MyGUI::Gui::getInstancePtr();
     if (panel != 0 && gui != 0) gui->destroyWidget(panel);

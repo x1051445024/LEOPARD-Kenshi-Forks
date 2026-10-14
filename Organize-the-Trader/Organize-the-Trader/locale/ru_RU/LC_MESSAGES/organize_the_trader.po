@@ -100,3 +100,6 @@ msgstr "Ширина списка сортировки"
 
 msgid "Width of the sort drop-down at the bottom of the trader window, in pixels. 0 - fitted to the window; a set width moves the direction and Arrange buttons to the right"
 msgstr "Ширина выпадающего списка сортировки внизу окна торговца, в пикселях. 0 - по месту в окне; с заданной шириной кнопки направления и \"Разложить\" сдвигаются вправо"
+
+msgid "Deal"
+msgstr "Сделка"
