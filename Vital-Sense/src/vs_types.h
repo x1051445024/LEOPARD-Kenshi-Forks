@@ -46,6 +46,7 @@ struct PluginConfig
     DWORD deadTextSizePx;
     MyGUI::Colour enemyMarkerColour;
     MyGUI::Colour allyMarkerColour;
+    MyGUI::Colour neutralMarkerColour;   // LEOPARD
     MyGUI::Colour squadMarkerColour;
     std::string customUnconsciousIconTexture;
     DWORD customUnconsciousIconSizePx;
@@ -103,7 +104,9 @@ struct CachedKoTarget
     {
         RELATION_SQUAD = 0,
         RELATION_ALLY = 1,
-        RELATION_ENEMY = 2
+        RELATION_ENEMY = 2,
+        // LEOPARD: neither hostile nor allied (CharacterHighlight's yellow)
+        RELATION_NEUTRAL = 3
     };
 
     hand targetHandle;

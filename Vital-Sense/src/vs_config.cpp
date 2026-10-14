@@ -185,8 +185,10 @@ void ApplyDefaultConfig(PluginConfig& config)
     config.playingDeadTextSizePx = kDefaultMarkerTextSizePx;
     config.deadTextSizePx = kDefaultMarkerTextSizePx;
     config.enemyMarkerColour = MyGUI::Colour(1.0f, 0.2f, 0.2f, 1.0f);
-    config.allyMarkerColour = MyGUI::Colour(0.87f, 0.91f, 0.35f, 1.0f);
-    config.squadMarkerColour = MyGUI::Colour(0.25f, 1.0f, 0.25f, 1.0f);
+    // LEOPARD (15.10.2026): red enemies, yellow neutrals, green allies, blue squad
+    config.allyMarkerColour = MyGUI::Colour(0.25f, 1.0f, 0.25f, 1.0f);
+    config.neutralMarkerColour = MyGUI::Colour(0.87f, 0.91f, 0.35f, 1.0f);
+    config.squadMarkerColour = MyGUI::Colour(0.3f, 0.61f, 1.0f, 1.0f);
     config.customUnconsciousIconTexture.clear();
     config.customUnconsciousIconSizePx = 64;
     config.customRecoveryComaIconTexture.clear();
@@ -292,6 +294,7 @@ bool SaveConfigToFile(const std::string& configPath, const PluginConfig& config)
     WriteJsonUnsigned(out, "dead_text_size_px", config.deadTextSizePx, true);
     WriteJsonColour(out, "enemy_color_hex", config.enemyMarkerColour, true);
     WriteJsonColour(out, "ally_color_hex", config.allyMarkerColour, true);
+    WriteJsonColour(out, "neutral_color_hex", config.neutralMarkerColour, true);
     WriteJsonColour(out, "squad_color_hex", config.squadMarkerColour, true);
     WriteJsonString(out, "unconscious_icon_texture", config.customUnconsciousIconTexture, true);
     WriteJsonUnsigned(out, "unconscious_icon_size_px", config.customUnconsciousIconSizePx, true);
@@ -797,6 +800,20 @@ bool LoadConfigState(RuntimeStateView& state, const char* pluginName)
         else
         {
             vs_log::LogWarn(pluginName, "ally_color_hex invalid; expected #RRGGBB or #RRGGBBAA; using default");
+        }
+    }
+
+    std::string parsedNeutralColorHex;
+    if (vs_parse::ParseStringFromJson(body, "neutral_color_hex", &parsedNeutralColorHex))
+    {
+        MyGUI::Colour parsed = state.config.neutralMarkerColour;
+        if (vs_parse::TryParseColourHex(parsedNeutralColorHex, &parsed))
+        {
+            state.config.neutralMarkerColour = parsed;
+        }
+        else
+        {
+            vs_log::LogWarn(pluginName, "neutral_color_hex invalid; expected #RRGGBB or #RRGGBBAA; using default");
         }
     }
 

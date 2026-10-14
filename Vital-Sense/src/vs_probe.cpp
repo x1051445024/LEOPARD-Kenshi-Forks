@@ -801,10 +801,11 @@ int ResolveMarkerRelation(Character* candidate)
 
         if (candidateIsAnimal)
         {
-            // Keep non-squad fauna from being misclassified as ally; hostile animals must render as enemies.
+            // Keep non-squad fauna from being misclassified as ally; hostile animals are enemies
+            // already (above). LEOPARD: the rest are neutral, not enemies.
             return IsSameFactionAsPlayer(candidate)
                 ? CachedKoTarget::RELATION_ALLY
-                : CachedKoTarget::RELATION_ENEMY;
+                : CachedKoTarget::RELATION_NEUTRAL;
         }
 
         if (IsAllyToAllPlayerCharacters(candidate, playerCharacters))
@@ -818,6 +819,12 @@ int ResolveMarkerRelation(Character* candidate)
         return CachedKoTarget::RELATION_ALLY;
     }
 
+    // LEOPARD (15.10.2026): neither hostile to any of the player's characters nor allied
+    // with all of them - neutral, as CharacterHighlight (KenshiLib_Examples) has it.
+    if (playerCharacters.valid())
+    {
+        return CachedKoTarget::RELATION_NEUTRAL;
+    }
     return CachedKoTarget::RELATION_ENEMY;
 }
 

@@ -207,6 +207,7 @@ __declspec(dllexport) void startPlugin()
          << ", debug_log_texture_info=" << (config.debugLogTextureInfo ? "true" : "false")
          << ", enemy_color_hex=" << ColourToLogToken(config.enemyMarkerColour)
          << ", ally_color_hex=" << ColourToLogToken(config.allyMarkerColour)
+         << ", neutral_color_hex=" << ColourToLogToken(config.neutralMarkerColour)
          << ", squad_color_hex=" << ColourToLogToken(config.squadMarkerColour)
          << ", max_highlight_distance_m=" << config.maxHighlightDistanceMeters
          << ")";

@@ -380,6 +380,12 @@ msgstr "Цвет союзников"
 msgid "Relation color used for ally markers and tint"
 msgstr "Цвет меток и окраски союзников, #RRGGBB"
 
+msgid "Neutral color"
+msgstr "Цвет нейтралов"
+
+msgid "Relation color used for neutral markers and tint"
+msgstr "Цвет меток и окраски нейтралов, #RRGGBB"
+
 msgid "Squad color"
 msgstr "Цвет отряда"
 

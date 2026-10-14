@@ -836,6 +836,11 @@ MyGUI::Colour ResolveMarkerColour(RuntimeStateView& state, int markerState, int 
         return state.config.squadMarkerColour;
     }
 
+    if (markerRelation == CachedKoTarget::RELATION_NEUTRAL)
+    {
+        return state.config.neutralMarkerColour;
+    }
+
     return state.config.allyMarkerColour;
 }
 

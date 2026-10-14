@@ -165,6 +165,7 @@ HubBoolSettingDescriptor g_tintBoolSettingDescriptors[] = {
 HubColorSettingDescriptor g_colorSettingDescriptors[] = {
     { "enemy_color_hex", "Enemy color", "Relation color used for enemy markers and tint", &PluginConfig::enemyMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
     { "ally_color_hex", "Ally color", "Relation color used for ally markers and tint", &PluginConfig::allyMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
+    { "neutral_color_hex", "Neutral color", "Relation color used for neutral markers and tint", &PluginConfig::neutralMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
     { "squad_color_hex", "Squad color", "Relation color used for squad markers and tint", &PluginConfig::squadMarkerColour, EMC_COLOR_PREVIEW_KIND_TEXT, false },
     { "bounty_color_trivial_hex", "Bounty trivial color", "Bounty symbol text color for the trivial tier; Mod Hub edits RGB only", &PluginConfig::bountyTierTrivialColour, EMC_COLOR_PREVIEW_KIND_TEXT, true },
     { "bounty_color_low_hex", "Bounty low color", "Bounty symbol text color for the low tier; Mod Hub edits RGB only", &PluginConfig::bountyTierLowColour, EMC_COLOR_PREVIEW_KIND_TEXT, true },

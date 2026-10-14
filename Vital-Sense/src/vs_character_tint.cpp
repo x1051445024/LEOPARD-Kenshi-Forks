@@ -1867,7 +1867,8 @@ int ResolveEffectiveTintRelationSafe(Character* candidate, int cachedRelation)
     {
         if (cachedRelation == CachedKoTarget::RELATION_SQUAD
             || cachedRelation == CachedKoTarget::RELATION_ALLY
-            || cachedRelation == CachedKoTarget::RELATION_ENEMY)
+            || cachedRelation == CachedKoTarget::RELATION_ENEMY
+            || cachedRelation == CachedKoTarget::RELATION_NEUTRAL)
         {
             return cachedRelation;
         }
@@ -1881,7 +1882,8 @@ int ResolveEffectiveTintRelationSafe(Character* candidate, int cachedRelation)
 
     // Keep tint relation aligned with probe/marker classification first.
     if (cachedRelation == CachedKoTarget::RELATION_ENEMY
-        || cachedRelation == CachedKoTarget::RELATION_ALLY)
+        || cachedRelation == CachedKoTarget::RELATION_ALLY
+        || cachedRelation == CachedKoTarget::RELATION_NEUTRAL)
     {
         return cachedRelation;
     }
@@ -1910,7 +1912,11 @@ int ResolveTintApplyPriority(int markerRelation)
     {
         return 1;
     }
-    return 2;
+    if (markerRelation == CachedKoTarget::RELATION_NEUTRAL)
+    {
+        return 2;
+    }
+    return 3;
 }
 
 bool ApplyTintToCharacter(Character* candidate, const Ogre::ColourValue& colour, bool depthOverride, const char* pluginName)
@@ -2044,6 +2050,15 @@ Ogre::ColourValue ResolveTintColour(RuntimeStateView& state, int markerRelation)
             state.config.squadMarkerColour.red,
             state.config.squadMarkerColour.green,
             state.config.squadMarkerColour.blue,
+            1.0f);
+    }
+
+    if (markerRelation == CachedKoTarget::RELATION_NEUTRAL)
+    {
+        return Ogre::ColourValue(
+            state.config.neutralMarkerColour.red,
+            state.config.neutralMarkerColour.green,
+            state.config.neutralMarkerColour.blue,
             1.0f);
     }
 

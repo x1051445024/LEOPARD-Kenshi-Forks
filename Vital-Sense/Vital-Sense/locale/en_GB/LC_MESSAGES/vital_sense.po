@@ -380,6 +380,12 @@ msgstr "Ally color"
 msgid "Relation color used for ally markers and tint"
 msgstr "Colour of ally markers and tint, #RRGGBB"
 
+msgid "Neutral color"
+msgstr "Neutral color"
+
+msgid "Relation color used for neutral markers and tint"
+msgstr "Colour of neutral markers and tint, #RRGGBB"
+
 msgid "Squad color"
 msgstr "Squad color"
 
