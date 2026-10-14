@@ -3,6 +3,7 @@
   "sleepingBagDismantleEnabled": true,
   "dismantleAnyOwnBuilding": false,
   "dismantleDropItems": false,
+  "dismantleConfirm": false,
   "debugLogging": false,
   "hotkeyRequireCtrl": false,
   "hotkeyRequireShift": false,

@@ -83,6 +83,16 @@ static EMC_Result __cdecl HubSetAnyOwnBuildingSetting(void* user_data, int32_t v
     return HubSetBoolSetting(user_data, value, &g_dismantleAnyOwnBuilding, err_buf, err_buf_size);
 }
 
+static EMC_Result __cdecl HubGetConfirmSetting(void* user_data, int32_t* out_value)
+{
+    return HubGetBoolSetting(user_data, g_confirmDismantle, out_value);
+}
+
+static EMC_Result __cdecl HubSetConfirmSetting(void* user_data, int32_t value, char* err_buf, uint32_t err_buf_size)
+{
+    return HubSetBoolSetting(user_data, value, &g_confirmDismantle, err_buf, err_buf_size);
+}
+
 static EMC_Result __cdecl HubGetDropItemsSetting(void* user_data, int32_t* out_value)
 {
     return HubGetBoolSetting(user_data, g_dismantleDropItems, out_value);
@@ -318,6 +328,14 @@ static const emc::ModHubClientTableRegistrationV1* GetModHubTableRegistration()
         &HubGetDropItemsSetting,
         &HubSetDropItemsSetting };
 
+    static const EMC_BoolSettingDefV1 kConfirmSettingDef = {
+        kHubSettingConfirmId,
+        "Ask before dismantling",
+        "The hotkey first asks for confirmation, as the game's own dismantling does",
+        &g_modHubClient,
+        &HubGetConfirmSetting,
+        &HubSetConfirmSetting };
+
     static const EMC_BoolSettingDefV1 kDebugLoggingSettingDef = {
         "debug_logging",
         "Debug logging",
@@ -349,6 +367,7 @@ static const emc::ModHubClientTableRegistrationV1* GetModHubTableRegistration()
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingSleepingBagEnabledId, &kSleepingBagEnabledSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingAnyOwnBuildingId, &kAnyOwnBuildingSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingDropItemsId, &kDropItemsSettingDef, 0, 0 },
+        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingConfirmId, &kConfirmSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_KEYBIND_V2, kHubSettingHotkeyId, &kHotkeySettingDef, 0, 0 },
         // «Клавиша по умолчанию» убрана (08.10.2026): в MCM есть «Сбросить по
         // умолчанию» на всю страницу.

@@ -28,6 +28,9 @@
 #include <mygui/MyGUI_Button.h>
 #include <mygui/MyGUI_TextBox.h>
 #include <mygui/MyGUI_ScrollView.h>
+#include <mygui/MyGUI_Gui.h>
+#include <mygui/MyGUI_InputManager.h>
+#include <mygui/MyGUI_RenderManager.h>
 #include <string>
 #include <sstream>
 #include <cstring>
@@ -81,6 +84,8 @@ static bool g_sleepingBagDismantleEnabled = true;
 static bool g_dismantleAnyOwnBuilding = false;
 // К ней: постройку с вещами не пропускать, а сперва выложить вещи на землю.
 static bool g_dismantleDropItems = false;
+// LEOPARD: ask before the quick dismantle, as the game does (14.10.2026)
+static bool g_confirmDismantle = false;
 static bool g_debugLogging = false;
 static std::string g_settingsPath;
 static const char* kWallBGoneTabName = "Wall-B-Gone";
@@ -94,6 +99,7 @@ static const char* kHubSettingEnabledId = "enabled";
 static const char* kHubSettingSleepingBagEnabledId = "sleeping_bag_dismantle_enabled";
 static const char* kHubSettingAnyOwnBuildingId = "dismantle_any_own_building";
 static const char* kHubSettingDropItemsId = "dismantle_drop_items";
+static const char* kHubSettingConfirmId = "dismantle_confirm";
 static const char* kHubSettingHotkeyId = "dismantle_hotkey";
 static const char* kHubSettingHotkeyRequireCtrlId = "dismantle_hotkey_require_ctrl";
 static const char* kHubSettingHotkeyRequireShiftId = "dismantle_hotkey_require_shift";

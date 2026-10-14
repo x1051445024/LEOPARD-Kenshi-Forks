@@ -52,3 +52,18 @@ msgstr "拆除时卸下物品"
 
 msgid "With \"Dismantle any own building\": a storage or workbench that holds items is dismantled too - its items are put on the ground first"
 msgstr "配合\"拆除自己的任何建筑\"：装有物品的储物箱或工作台也会被拆除--物品会先放到地上"
+
+msgid "Ask before dismantling"
+msgstr "拆除前确认"
+
+msgid "The hotkey first asks for confirmation, as the game's own dismantling does"
+msgstr "热键会先请求确认,就像游戏自带的拆除一样"
+
+msgid "Dismantle this building?"
+msgstr "拆除这座建筑?"
+
+msgid "Dismantle"
+msgstr "拆除"
+
+msgid "Cancel"
+msgstr "取消"

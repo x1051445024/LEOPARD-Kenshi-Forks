@@ -776,6 +776,122 @@ static void TryDismantleSelectedBuilding(Building* b, const hand& sel, bool isWa
     }
 }
 
+// LEOPARD (14.10.2026, просьба игрока): «Спрашивать перед разборкой» -
+// своё окошко на скинах игры: вопрос с названием постройки, «Разобрать» и
+// «Отмена»; Enter - разобрать, Esc - отмена. Ответ разбирается в кадре
+// игры (не в обработчике кнопки): постройку берём заново по hand - за
+// время вопроса её могли снести или выделение могло смениться.
+static MyGUI::Widget* g_confirmPanel = 0;
+static hand g_confirmTarget;
+static int g_confirmAnswer = 0;     // 1 - разобрать, -1 - отмена
+
+static void CloseDismantleConfirm()
+{
+    if (g_confirmPanel == 0)
+        return;
+    MyGUI::InputManager* const input = MyGUI::InputManager::getInstancePtr();
+    if (input != 0)
+        input->removeWidgetModal(g_confirmPanel);
+    MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
+    if (gui != 0)
+        gui->destroyWidget(g_confirmPanel);
+    g_confirmPanel = 0;
+}
+
+static void OnConfirmYes(MyGUI::Widget*) { g_confirmAnswer = 1; }
+static void OnConfirmNo(MyGUI::Widget*) { g_confirmAnswer = -1; }
+
+static void CopyBuildingName(Building* b, std::string* out)
+{
+    *out = b->getName();
+}
+
+static bool SafeBuildingName(Building* b, std::string* out)
+{
+    __try
+    {
+        CopyBuildingName(b, out);
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
+
+static void OpenDismantleConfirm(Building* b, const hand& sel)
+{
+    CloseDismantleConfirm();
+    MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
+    MyGUI::RenderManager* const render = MyGUI::RenderManager::getInstancePtr();
+    if (gui == 0 || render == 0)
+        return;
+    const MyGUI::IntSize view = render->getViewSize();
+    const float k = view.height > 0 ? view.height / 1080.0f : 1.0f;
+    const int w = static_cast<int>(460 * k), h = static_cast<int>(170 * k);
+    const int pad = static_cast<int>(22 * k), bh = static_cast<int>(40 * k), bw = static_cast<int>(170 * k);
+    MyGUI::Widget* const panel = gui->createWidget<MyGUI::Widget>("Kenshi_FloatingPanelSkin",
+        MyGUI::IntCoord((view.width - w) / 2, (view.height - h) / 2, w, h),
+        MyGUI::Align::Default, "Popup", "WBG_DismantleConfirm");
+    if (panel == 0)
+        return;
+    std::string name;
+    if (!SafeBuildingName(b, &name))
+        name.clear();
+    MyGUI::TextBox* const text = panel->createWidget<MyGUI::TextBox>("Kenshi_TextboxStandardText",
+        MyGUI::IntCoord(pad, pad, w - 2 * pad, h - 3 * pad - bh), MyGUI::Align::Default);
+    if (text != 0)
+    {
+        text->setTextAlign(MyGUI::Align::Center);
+        text->setCaption(MyGUI::UString(std::string(Tr("Dismantle this building?")) +
+                                        (name.empty() ? std::string() : "\n" + name)));
+        text->setNeedMouseFocus(false);
+    }
+    MyGUI::Button* const yes = panel->createWidget<MyGUI::Button>("Kenshi_Button1",
+        MyGUI::IntCoord(w / 2 - bw - pad / 2, h - pad - bh, bw, bh), MyGUI::Align::Default);
+    MyGUI::Button* const no = panel->createWidget<MyGUI::Button>("Kenshi_Button1",
+        MyGUI::IntCoord(w / 2 + pad / 2, h - pad - bh, bw, bh), MyGUI::Align::Default);
+    if (yes != 0)
+    {
+        yes->setCaption(MyGUI::UString(Tr("Dismantle")));
+        yes->eventMouseButtonClick += MyGUI::newDelegate(&OnConfirmYes);
+    }
+    if (no != 0)
+    {
+        no->setCaption(MyGUI::UString(Tr("Cancel")));
+        no->eventMouseButtonClick += MyGUI::newDelegate(&OnConfirmNo);
+    }
+    MyGUI::InputManager* const input = MyGUI::InputManager::getInstancePtr();
+    if (input != 0)
+        input->addWidgetModal(panel);
+    g_confirmPanel = panel;
+    g_confirmTarget = sel;
+    g_confirmAnswer = 0;
+}
+
+// true - окно вопроса открыто (горячая клавиша в этом кадре больше ничего
+// не делает).
+static bool TickDismantleConfirm()
+{
+    if (g_confirmPanel == 0)
+        return false;
+    if (g_confirmAnswer == 0)
+        return true;
+    const int answer = g_confirmAnswer;
+    g_confirmAnswer = 0;
+    CloseDismantleConfirm();
+    if (answer > 0)
+    {
+        Building* b = 0;
+        bool isWallTarget = false;
+        if (TryGetSelectedDismantleTarget(g_confirmTarget, &b, &isWallTarget))
+            TryDismantleSelectedBuilding(b, g_confirmTarget, isWallTarget);
+        else
+            WallBGoneDebugLog("Hotkey action: skipped - the building is gone after the question");
+    }
+    return true;
+}
+
 static void HandleHotkeyAction()
 {
     if (g_hotkeyCaptureState == HotkeyCapture_AwaitKey)
@@ -784,6 +900,12 @@ static void HandleHotkeyAction()
     }
 
     if (!g_modEnabled)
+    {
+        CloseDismantleConfirm();
+        return;
+    }
+
+    if (TickDismantleConfirm())
         return;
 
     EnsureRuntimeHotkeyValid();
@@ -829,6 +951,11 @@ static void HandleHotkeyAction()
     bool isWallTarget = false;
     if (TryGetSelectedDismantleTarget(sel, &b, &isWallTarget))
     {
+        if (g_confirmDismantle && b->canDismantle() && GetDismantleBlockReason(b, isWallTarget) == 0)
+        {
+            OpenDismantleConfirm(b, sel);
+            return;
+        }
         TryDismantleSelectedBuilding(b, sel, isWallTarget);
         return;
     }
@@ -853,6 +980,15 @@ static void PlayerInterface_updateUT_hook(PlayerInterface* thisptr)
 static void (*InputHandler_keyDownEvent_orig)(InputHandler*, OIS::KeyCode) = 0;
 static void InputHandler_keyDownEvent_hook(InputHandler* thisptr, OIS::KeyCode keyCode)
 {
+    // окно вопроса: Enter - разобрать, Esc - отмена; игре эти нажатия не
+    // отдаём (Esc иначе открыл бы меню игры)
+    if (g_confirmPanel != 0 &&
+        (keyCode == OIS::KC_RETURN || keyCode == OIS::KC_NUMPADENTER || keyCode == OIS::KC_ESCAPE))
+    {
+        g_confirmAnswer = keyCode == OIS::KC_ESCAPE ? -1 : 1;
+        return;
+    }
+
     if (g_hotkeyCaptureState == HotkeyCapture_AwaitKey)
     {
         if (keyCode == OIS::KC_ESCAPE)

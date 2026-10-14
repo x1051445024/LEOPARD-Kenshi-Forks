@@ -52,3 +52,18 @@ msgstr "Unload items when dismantling"
 
 msgid "With \"Dismantle any own building\": a storage or workbench that holds items is dismantled too - its items are put on the ground first"
 msgstr "With \"Dismantle any own building\": a storage or workbench that holds items is dismantled too - its items are put on the ground first"
+
+msgid "Ask before dismantling"
+msgstr "Ask before dismantling"
+
+msgid "The hotkey first asks for confirmation, as the game's own dismantling does"
+msgstr "The hotkey first asks for confirmation, as the game's own dismantling does"
+
+msgid "Dismantle this building?"
+msgstr "Dismantle this building?"
+
+msgid "Dismantle"
+msgstr "Dismantle"
+
+msgid "Cancel"
+msgstr "Cancel"

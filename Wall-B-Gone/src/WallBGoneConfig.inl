@@ -627,6 +627,7 @@ static bool SaveConfigToFile(
     out << "  \"sleepingBagDismantleEnabled\": " << (sleepingBagDismantleEnabled ? "true" : "false") << ",\n";
     out << "  \"dismantleAnyOwnBuilding\": " << (anyOwnBuilding ? "true" : "false") << ",\n";
     out << "  \"dismantleDropItems\": " << (g_dismantleDropItems ? "true" : "false") << ",\n";
+    out << "  \"dismantleConfirm\": " << (g_confirmDismantle ? "true" : "false") << ",\n";
     out << "  \"debugLogging\": " << (debugLogging ? "true" : "false") << ",\n";
     out << "  \"hotkeyRequireCtrl\": " << (hotkeyRequireCtrl ? "true" : "false") << ",\n";
     out << "  \"hotkeyRequireShift\": " << (hotkeyRequireShift ? "true" : "false") << ",\n";
@@ -643,6 +644,7 @@ static void LoadConfigState()
     g_sleepingBagDismantleEnabled = true;
     g_dismantleAnyOwnBuilding = false;
     g_dismantleDropItems = false;
+    g_confirmDismantle = false;
     g_debugLogging = false;
     g_hotkeyPrimary = kDefaultHotkey;
     g_pendingHotkeyPrimary = kDefaultHotkey;
@@ -688,6 +690,7 @@ static void LoadConfigState()
         {
             const std::string body((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
             g_dismantleDropItems = ReadBoolKeyFromBody(body, "dismantleDropItems", false);
+            g_confirmDismantle = ReadBoolKeyFromBody(body, "dismantleConfirm", false);
         }
     }
     g_debugLogging = loadedDebugLogging;

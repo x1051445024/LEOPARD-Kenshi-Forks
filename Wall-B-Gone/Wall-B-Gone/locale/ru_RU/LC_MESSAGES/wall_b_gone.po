@@ -52,3 +52,18 @@ msgstr "Выгружать вещи при разборке"
 
 msgid "With \"Dismantle any own building\": a storage or workbench that holds items is dismantled too - its items are put on the ground first"
 msgstr "Вместе с \"Разбирать любые свои постройки\": хранилище или станок с вещами тоже разбирается - вещи сначала выкладываются на землю"
+
+msgid "Ask before dismantling"
+msgstr "Спрашивать перед разборкой"
+
+msgid "The hotkey first asks for confirmation, as the game's own dismantling does"
+msgstr "Клавиша сначала спрашивает подтверждение, как обычная разборка в игре"
+
+msgid "Dismantle this building?"
+msgstr "Разобрать эту постройку?"
+
+msgid "Dismantle"
+msgstr "Разобрать"
+
+msgid "Cancel"
+msgstr "Отмена"
