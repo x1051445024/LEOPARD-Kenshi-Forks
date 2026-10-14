@@ -4857,11 +4857,72 @@ static MyGUI::Widget* ContextMenuOptionsListOf(MyGUI::Widget* root)
 
 static ContextMenu* g_nativeRowsMenu = 0;   // меню, для которого ищем (из Tick)
 
+// ContextMenuGUI игры (kenshi/gui/ContextMenu.h; вместе с PlayerInterface.h
+// его заголовок не подключить): окно меню - wraps::BaseLayout::mMainWidget
+// (+0x8), список пунктов optionsList (+0xF8). Имена виджетов макета у меню
+// с приставкой - findWidget("OptionsList") его не находил (журнал 14.10).
+// Указатели проверяем: живой виджет, видим, список внутри окна меню.
+static bool TryContextMenuGuiWidgets(uintptr_t gui, MyGUI::Widget** mainOut, MyGUI::Widget** listOut)
+{
+    uintptr_t main = 0;
+    uintptr_t list = 0;
+    if (!TryReadUintptrAtOffset(reinterpret_cast<const void*>(gui), 0x8, &main) || main == 0 ||
+        !TryReadUintptrAtOffset(reinterpret_cast<const void*>(gui), 0xF8, &list) || list == 0)
+    {
+        return false;
+    }
+    __try
+    {
+        MyGUI::Widget* const mainWidget = reinterpret_cast<MyGUI::Widget*>(main);
+        MyGUI::Widget* const listWidget = reinterpret_cast<MyGUI::Widget*>(list);
+        if (!mainWidget->getVisible() || !listWidget->getInheritedVisible())
+        {
+            return false;
+        }
+        MyGUI::Widget* parent = listWidget->getParent();
+        for (int depth = 0; parent && parent != mainWidget && depth < 16; ++depth)
+        {
+            parent = parent->getParent();
+        }
+        if (parent != mainWidget)
+        {
+            return false;
+        }
+        *mainOut = mainWidget;
+        *listOut = listWidget;
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+}
+
 // Видимый список пунктов контекстного меню игры (OptionsList рядом с
 // NameText) и его окно-корень. Сначала - через объект меню игры (menuGUI,
 // как и якорь прежней плашки): окно меню бывает не корнем интерфейса.
 static MyGUI::Widget* FindVisibleContextMenuOptionsList(MyGUI::Widget** rootOut)
 {
+    if (g_nativeRowsMenu)
+    {
+        const uintptr_t layouts[2] = {
+            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI),
+            reinterpret_cast<uintptr_t>(g_nativeRowsMenu->menuGUI2)
+        };
+        for (size_t i = 0; i < 2; ++i)
+        {
+            MyGUI::Widget* main = 0;
+            MyGUI::Widget* list = 0;
+            if (layouts[i] != 0 && TryContextMenuGuiWidgets(layouts[i], &main, &list))
+            {
+                if (rootOut)
+                {
+                    *rootOut = main;
+                }
+                return list;
+            }
+        }
+    }
     if (g_nativeRowsMenu)
     {
         const uintptr_t guiPtrs[2] = {
@@ -4989,9 +5050,17 @@ static bool TryCreateNativeExecuteRows()
                 }
             }
             top += g_nativeRowGap;
-            g_nativeButtonCoord = last->getChildCount() > 0
-                ? last->getChildAt(0)->getCoord()
-                : MyGUI::IntCoord(0, 0, slotWidth, g_nativeRowHeight);
+            // кнопка пункта (в слоте бывает и надпись значения, «100%»)
+            g_nativeButtonCoord = MyGUI::IntCoord(0, 0, slotWidth, g_nativeRowHeight);
+            for (size_t c = 0; c < last->getChildCount(); ++c)
+            {
+                MyGUI::Widget* const child = last->getChildAt(c);
+                if (child && child->castType<MyGUI::Button>(false))
+                {
+                    g_nativeButtonCoord = child->getCoord();
+                    break;
+                }
+            }
         }
     }
     if (g_nativeRowHeight < 12 || g_nativeRowHeight > 80)
