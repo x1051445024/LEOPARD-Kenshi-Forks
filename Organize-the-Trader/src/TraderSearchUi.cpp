@@ -153,6 +153,23 @@ static WidgetRef& TradeBalanceRef()
     static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
     return *ref;
 }
+// Сумма игры, сдвинутая к центру окна (подложка на всю ширину, Dark UI),
+// и где она стояла - вернуть при выключении и выходе.
+static WidgetRef& MovedMoneyValueRef()
+{
+    static WidgetRef* ref = new WidgetRef();
+    return *ref;
+}
+int g_movedMoneyValueLeft = 0;
+
+void RestoreMoneyValue()
+{
+    MyGUI::Widget* const value = MovedMoneyValueRef().get();
+    if (value != 0 && value->getLeft() != g_movedMoneyValueLeft)
+        value->setPosition(g_movedMoneyValueLeft, value->getTop());
+    MovedMoneyValueRef().reset();
+}
+
 MyGUI::Widget* g_balanceOwner = 0;      // окно торговца, для которого считаем
 int g_balanceStartMoney = -1;
 std::string g_balanceMoneyCaption;      // последняя разобранная подпись
@@ -347,6 +364,7 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     // (Russian Dark UI) - сразу за суммой.
     if (!TraderState().core.g_showDealBalance)
     {
+        RestoreMoneyValue();
         MyGUI::Widget* const old = TradeBalanceRef().get();
         if (old != 0)
             MyGUI::Gui::getInstance().destroyWidget(old);
@@ -361,9 +379,23 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
     int anchorRight = box.left + box.width;
     if (box.width > parent->getWidth() * 6 / 10 && gameValue != 0)
     {
+        // подложка на всё окно (Dark UI): сумму игры - к центру окна, как
+        // в ванили (просьба пользователя, 15.10.2026), итог - за ней
+        if (MovedMoneyValueRef().get() != gameValue)
+        {
+            RestoreMoneyValue();
+            MovedMoneyValueRef().set(gameValue);
+            g_movedMoneyValueLeft = gameValue->getLeft();
+        }
         const MyGUI::IntCoord region = gameValue->getTextRegion();
-        anchorRight = gameValue->getAbsoluteLeft() + region.left + region.width;
+        const int wantLeft = origin.left + parent->getWidth() / 2 - region.width / 2;
+        const int shift = wantLeft - (gameValue->getAbsoluteLeft() + region.left);
+        if (shift != 0)
+            gameValue->setPosition(gameValue->getLeft() + shift, gameValue->getTop());
+        anchorRight = wantLeft + region.width;
     }
+    else
+        RestoreMoneyValue();
     const int dealLeft = anchorRight - origin.left + 16;
     const int dealWidth = parent->getWidth() - dealLeft - 16;
 
@@ -405,6 +437,7 @@ void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
 
 void DestroyTradeBalance()
 {
+    RestoreMoneyValue();
     MyGUI::Widget* const label = TradeBalanceRef().get();
     MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
     if (label != 0 && gui != 0)
