@@ -2140,6 +2140,49 @@ static void TickPauseOnLoad()
         g_lastObservedSaveManagerSignal = saveManagerSignal;
     }
 
+    // LEOPARD (14.10.2026): перенос сохранения (Import). Флаг «идёт загрузка
+    // сохранения» игра при нём не поднимает - путь загрузки не срабатывал.
+    // Видели сигнал переноса - ждём, пока игра его снимет и мир покрутится
+    // 1,5 с без загрузки, и ставим паузу.
+    {
+        static bool importSeen = false;
+        static DWORD importSeenMs = 0;
+        static DWORD importQuietSinceMs = 0;
+        if (saveManagerSignal == SaveManager::IMPORTGAME)
+        {
+            if (!importSeen && g_config.debugLogTransitions)
+                DebugLog("Auto-Pause-on-Load DEBUG: save import seen");
+            importSeen = true;
+            importSeenMs = nowMs;
+            importQuietSinceMs = 0;
+        }
+        else if (importSeen)
+        {
+            if (isLoadingSave)
+            {
+                importQuietSinceMs = 0;
+            }
+            else if (importQuietSinceMs == 0)
+            {
+                importQuietSinceMs = nowMs;
+            }
+            else if (DebounceWindowElapsed(nowMs, importQuietSinceMs, 1500))
+            {
+                importSeen = false;
+                importQuietSinceMs = 0;
+                bool paused = false;
+                if (!(QueryGamePaused(&paused) && paused) && ForcePauseTrue())
+                {
+                    g_state.lastPauseMs = nowMs;
+                    if (g_config.debugLogTransitions)
+                        DebugLog("Auto-Pause-on-Load INFO: paused_after_load=true source=save_import");
+                }
+            }
+            if (importSeen && DebounceWindowElapsed(nowMs, importSeenMs, 300000))
+                importSeen = false;           // 5 минут без конца переноса - забыть
+        }
+    }
+
     if (loadRequested)
     {
         const bool wasPending = g_state.saveLoadIntentPending;
