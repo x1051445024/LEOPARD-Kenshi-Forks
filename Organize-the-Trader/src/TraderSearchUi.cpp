@@ -263,6 +263,9 @@ void LayoutBottomSearchRow(MyGUI::Widget* search, int width, int height)
     const int countWidth = count != 0 && count->getVisible() ? count->getWidth() : 0;
     const int clearSize = clear != 0 && clear->getVisible() ? (rowHeight > 28 ? 28 : rowHeight) : 0;
     int editWidth = width - countWidth - (countWidth > 0 ? 6 : 0) - (clearSize > 0 ? clearSize + 4 : 0);
+    // короче всего ряда (просьба пользователя): поле - не шире 260, кнопка
+    // очистки и счётчик - сразу за ним
+    if (editWidth > 260) editWidth = 260;
     if (editWidth < 80) editWidth = 80;
     const MyGUI::IntCoord editCoord(0, top, editWidth, rowHeight);
     if (edit->getCoord() != editCoord) edit->setCoord(editCoord);
@@ -286,7 +289,8 @@ void LayoutBottomSearchRow(MyGUI::Widget* search, int width, int height)
     }
     if (count != 0 && countWidth > 0)
     {
-        const MyGUI::IntCoord want(width - countWidth, top, countWidth, rowHeight);
+        const int countLeft = editWidth + 4 + (clearSize > 0 ? clearSize + 6 : 0);
+        const MyGUI::IntCoord want(countLeft, top, countWidth, rowHeight);
         if (count->getCoord() != want) count->setCoord(want);
     }
 }
