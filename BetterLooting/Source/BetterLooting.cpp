@@ -580,6 +580,25 @@ GetBetterLootingLootableCharacterSource(
 }
 
 
+// LEOPARD (15.10.2026): taking things is theft only from a living,
+// unconscious person - the game itself shows a steal chance there. From the
+// dead, animals and animal robots the items come without an owner (the hunt
+// and the battlefield were all marked stolen). This decides only the theft
+// marking and the AllowStolen rule. The corpse/KO source flag above stays
+// as it is: the transfer's exact-removal checks depend on it (an earlier
+// attempt changed that flag, the check failed and one item ended up in two
+// inventories - the next inventory window crashed).
+static bool IsBetterLootingTheftVictim(
+    Character* sourceCharacter
+)
+{
+    return
+        sourceCharacter != NULL &&
+        !sourceCharacter->isDead() &&
+        sourceCharacter->isAnimal() == NULL;
+}
+
+
 static int CountBetterLootingStolenQuantity(
     Inventory* inventory,
     GameData* itemData
@@ -2592,8 +2611,21 @@ static void ExecuteLootCandidate(
         stolenSourceCharacter != NULL;
 
 
-    if (
+    // LEOPARD: marked stolen only when taken from a living unconscious
+    // person; from the dead and animals - no owner, not stolen
+    const bool markStolenFromCharacter =
         forceStolenFromCharacter &&
+        IsBetterLootingTheftVictim(
+            stolenSourceCharacter
+        );
+
+    const bool clearOwnerFromCharacter =
+        forceStolenFromCharacter &&
+        !markStolenFromCharacter;
+
+
+    if (
+        markStolenFromCharacter &&
         !g_betterLootingRules.allowStolen
     )
     {
@@ -2814,8 +2846,19 @@ static void ExecuteLootCandidate(
             false;
 
 
+        // LEOPARD: from the dead and animals the item leaves without an owner
+        if (clearOwnerFromCharacter)
+        {
+            detachedItem->
+                setProperOwner(
+                    hand()
+                );
+            expectedOwner =
+                hand();
+        }
+
         if (
-            forceStolenFromCharacter &&
+            markStolenFromCharacter &&
             !detachedWasStolenBeforePolicy
         )
         {
@@ -2893,8 +2936,11 @@ static void ExecuteLootCandidate(
 
 
         const bool detachedMustBeStolen =
-            forceStolenFromCharacter ||
-            detachedWasStolenBeforePolicy;
+            markStolenFromCharacter ||
+            (
+                detachedWasStolenBeforePolicy &&
+                !clearOwnerFromCharacter
+            );
 
 
         int destinationStolenBefore =
@@ -3339,7 +3385,7 @@ static void ExecuteLootCandidate(
                 )
                 {
                     if (
-                        forceStolenFromCharacter &&
+                        markStolenFromCharacter &&
                         !detachedItem->
                             isStolen(true)
                     )
@@ -3728,8 +3774,11 @@ static void EvaluateTargetInventory(
         );
 
 
+    // LEOPARD: counts as theft only from a living unconscious person
     const bool bodyTheftSource =
-        stolenSourceCharacter != NULL;
+        IsBetterLootingTheftVictim(
+            stolenSourceCharacter
+        );
 
 
     char header[384];
