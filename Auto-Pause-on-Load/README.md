@@ -87,3 +87,4 @@ It uses KenshiLib, which is released under GPLv3.
 - Пауза после переноса (импорта) сохранения: хук `SaveManager::importGame` (по имени экспорта KenshiLib) и сигнал импорта; пауза через 1.5 с после того, как импорт затих.
 - Настройка `pauseOnSquadAttack`: пауза, когда бьют персонажа из невыбранного отряда (хук `MedicalSystem::addWound`, не чаще раза в 30 с на отряд).
 - `mod-config.json` при первом запуске создаётся копией `mod-config.defaults.json` (`IniDefaults::PrepareJson`) - больше нет «could not read mod-config.json» в журнале на чистой установке.
+- Интервал паузы при нападении на отряд настраивается: `squad_attack_cooldown_s` (0-300 с, по умолчанию 30), ползунок в MCM; 0 - на каждый удар.
