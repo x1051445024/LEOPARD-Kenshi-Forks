@@ -161,6 +161,33 @@ static WidgetRef& TradeBalanceRef()
     static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
     return *ref;
 }
+// Блок денег и ARRANGE нужны каждый кадр, а поиск по имени обходит всё окно
+// с сотнями иконок вещей. Ищем один раз, дальше - из запомненного, пока
+// виджет жив и лежит в этом же окне (ревью 15.10.2026).
+static WidgetRef& DataPanelRef()
+{
+    static WidgetRef* ref = new WidgetRef();
+    return *ref;
+}
+static WidgetRef& ArrangeRef()
+{
+    static WidgetRef* ref = new WidgetRef();
+    return *ref;
+}
+
+MyGUI::Widget* CachedInParent(WidgetRef& ref, MyGUI::Widget* parent, const char* token)
+{
+    MyGUI::Widget* widget = ref.get();
+    for (MyGUI::Widget* up = widget != 0 ? widget->getParent() : 0; up != 0; up = up->getParent())
+        if (up == parent)
+            return widget;
+    widget = FindWidgetInParentByToken(parent, token);
+    ref.reset();
+    if (widget != 0)
+        ref.set(widget);
+    return widget;
+}
+
 MyGUI::Widget* g_balanceOwner = 0;      // окно торговца, для которого считаем
 int g_balanceStartMoney = -1;
 std::string g_balanceMoneyCaption;      // последняя разобранная подпись
@@ -329,7 +356,7 @@ void LayoutBottomSearchRow(MyGUI::Widget* search, int width, int height)
 
 void UpdateTradeBalance(MyGUI::Widget* owner, MyGUI::Widget* parent)
 {
-    MyGUI::Widget* const data = FindWidgetInParentByToken(parent, "datapanel");
+    MyGUI::Widget* const data = CachedInParent(DataPanelRef(), parent, "datapanel");
     MyGUI::Widget* const moneyBox = data != 0 ? data->getParent() : 0;
     if (moneyBox == 0)
         return;
@@ -457,7 +484,7 @@ void PositionInlineControls()
     UpdateTradeBalance(owner, parent);
     MyGUI::Widget* search = FindControlsContainer();
     MyGUI::Widget* sort = FindSortControlsContainer();
-    MyGUI::Widget* arrange = FindWidgetInParentByToken(parent, "ArrangeButton");
+    MyGUI::Widget* arrange = CachedInParent(ArrangeRef(), parent, "ArrangeButton");
     if (arrange == 0)
     {
         const MyGUI::IntCoord coord = InlineSearchCoord(parent);
