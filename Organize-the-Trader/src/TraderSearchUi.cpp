@@ -129,26 +129,6 @@ int SortComboItemsWidth(MyGUI::ComboBox* combo)
     return widest;
 }
 
-// LEOPARD: the game's ARRANGE button may be moved right to make room for a
-// wider sort drop-down (MCM "Sort list width"). Its own place is kept here
-// and given back when the setting returns to 0 or the panel goes away.
-static WidgetRef& MovedArrangeRef()
-{
-    static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
-    return *ref;
-}
-int g_arrangeHomeLeft = 0;
-
-void RestoreArrangeButton()
-{
-    MyGUI::Widget* arrange = MovedArrangeRef().get();
-    if (arrange != 0 && arrange->getLeft() != g_arrangeHomeLeft)
-        arrange->setPosition(g_arrangeHomeLeft, arrange->getTop());
-    if (arrange != 0 && !arrange->getVisible())
-        arrange->setVisible(true);
-    MovedArrangeRef().reset();
-}
-
 // ---------------------------------------------------------------------------
 // LEOPARD (14.10.2026, просьба пользователя): итог торговли. Наверху, где
 // раньше стоял поиск, рядом с деньгами торговца - сколько наторговали за
@@ -479,8 +459,10 @@ void PositionInlineControls()
     MyGUI::Widget* parent = ResolveInjectionParent(owner);
     if (parent == 0) return;
     // LEOPARD (14.10.2026): наверху - итог торговли, поиск - внизу, на
-    // месте кнопки ARRANGE (она не нужна: поиск и сортировка раскладывают
-    // сетку сами). Нет ARRANGE (чужое окно) - поиск остаётся наверху.
+    // месте кнопки ARRANGE. Сама кнопка не нужна (поиск и сортировка
+    // раскладывают сетку сами) - спрятана насовсем, от неё берём только
+    // место нижнего ряда. Удалять её нельзя: на неё ссылается окно игры.
+    // Нет ARRANGE (чужое окно) - поиск остаётся наверху.
     UpdateTradeBalance(owner, parent);
     MyGUI::Widget* search = FindControlsContainer();
     MyGUI::Widget* sort = FindSortControlsContainer();
@@ -494,16 +476,7 @@ void PositionInlineControls()
     if (sort != 0 && arrange != 0)
     {
         const MyGUI::IntCoord origin = parent->getAbsoluteCoord();
-        // ARRANGE at its own place (it may stand moved from the last frame)
-        if (MovedArrangeRef().get() != arrange)
-        {
-            RestoreArrangeButton();
-            g_arrangeHomeLeft = arrange->getLeft();
-            MovedArrangeRef().set(arrange);
-        }
-        const int arrangeParentLeft = arrange->getAbsoluteLeft() - arrange->getLeft();
-        MyGUI::IntCoord button = arrange->getAbsoluteCoord();
-        button.left = arrangeParentLeft + g_arrangeHomeLeft;
+        const MyGUI::IntCoord button = arrange->getAbsoluteCoord();
         if (arrange->getVisible())
             arrange->setVisible(false);
         // нижний ряд целиком: сортировка слева, поиск справа
@@ -2716,7 +2689,6 @@ void DestroyControlsIfPresent()
     if (edit != 0) BlurSearchEdit(edit, "dock_destroyed");
     ClearTraderHiddenItems();
     DestroyEmbeddedControlsIfPresent();
-    RestoreArrangeButton();
     DestroyTradeBalance();
     MyGUI::Widget* panel = DockPanelRef().get();
     MyGUI::Gui* gui = MyGUI::Gui::getInstancePtr();
