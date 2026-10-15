@@ -113,7 +113,6 @@ BetterLootingRules g_betterLootingRules =
 #include <unordered_set>
 #include <kenshi/Building/Building.h>
 #include <kenshi/Faction.h>
-#include <kenshi/Platoon.h>
 
 // В библиотеке VC10 нет strtof из C99. strtod есть, и его точности здесь
 // с запасом: значение всё равно кладётся во float. См. fix_bl_vc10.py.
@@ -3707,280 +3706,6 @@ static int GetBetterLootingEffectiveItemFunctionValue(
     return rawFunctionValue;
 }
 
-
-// LEOPARD (15.10.2026): money items (Cats, String of Cats, Rope of Cats from
-// mods - item function ITEM_MONEY) are taken as cash, never as items. The
-// item transfer above misjudged them once (see IsAllowedLootCategory) and
-// left one Item in two inventories. Here nothing is ever added to a player
-// inventory: the looter's purse (Ownerships, the same money the game shows
-// and trades with) gets the value, checked by reading the money back, and
-// the stack leaves the body through the game's own removeItemAutoDestroy.
-// Any mismatch takes the credit back and turns money off for the session.
-static bool g_betterLootingMoneyFault = false;
-
-
-static void TakeBetterLootingMoney(
-    Inventory* sourceInventory,
-    InventoryGUI* destinationWindow,
-    Item* item,
-    unsigned int candidateIndex
-)
-{
-    char message[512];
-
-    if (
-        !g_betterLootingRules.takeMoney ||
-        g_betterLootingMoneyFault ||
-        !sourceInventory ||
-        !item
-    )
-    {
-        return;
-    }
-
-
-    // People only, dead or unconscious, never our own. Containers stay
-    // out: cash taken from a shop chest or a town stash would be theft
-    // nobody could ever see.
-    Character* sourceCharacter =
-        sourceInventory->getCallbackCharacter();
-
-    if (
-        !sourceCharacter ||
-        sourceCharacter->isPlayerCharacter() ||
-        (
-            !sourceCharacter->isDead() &&
-            !sourceCharacter->isUnconcious()
-        )
-    )
-    {
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY_SKIP index=%u not a body inventory=%p",
-            candidateIndex,
-            sourceInventory
-        );
-
-        BlTrace(message);
-
-        return;
-    }
-
-
-    // An unconscious living person: taking is theft, same AllowStolen rule
-    // as for goods. Money already marked stolen likewise.
-    const bool theft =
-        GetBetterLootingLootableCharacterSource(
-            sourceInventory
-        ) != NULL ||
-        item->isStolen(true);
-
-    if (
-        theft &&
-        !g_betterLootingRules.allowStolen
-    )
-    {
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY_SKIP index=%u stolen, AllowStolen=0",
-            candidateIndex
-        );
-
-        BlTrace(message);
-
-        return;
-    }
-
-
-    Character* looter =
-        destinationWindow
-            ? destinationWindow->getCallbackCharacter()
-            : NULL;
-
-    if (
-        (
-            !looter ||
-            !looter->isPlayerCharacter()
-        ) &&
-        g_playerMainWindow
-    )
-    {
-        looter =
-            g_playerMainWindow->getCallbackCharacter();
-    }
-
-    if (
-        !looter ||
-        !looter->isPlayerCharacter()
-    )
-    {
-        BlTrace(
-            "BetterLooting: MONEY_SKIP no player character to pay"
-        );
-
-        return;
-    }
-
-
-    Ownerships* purse =
-        looter->getOwnerships();
-
-    GameData* itemData =
-        item->getGameData();
-
-    const int quantity =
-        GetBetterLootingItemQuantity(
-            item
-        );
-
-    const int valueSingle =
-        item->getValueSingle(true);
-
-    const long long totalWide =
-        static_cast<long long>(quantity) *
-        static_cast<long long>(valueSingle);
-
-    if (
-        !purse ||
-        !itemData ||
-        quantity <= 0 ||
-        quantity > 100000 ||
-        valueSingle <= 0 ||
-        totalWide > 100000000LL
-    )
-    {
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY_SKIP index=%u purse=%p gameData=%p quantity=%d valueSingle=%d",
-            candidateIndex,
-            purse,
-            itemData,
-            quantity,
-            valueSingle
-        );
-
-        BlTrace(message);
-
-        return;
-    }
-
-    const int total =
-        static_cast<int>(totalWide);
-
-
-    // 1. Pay, and see the money actually arrive.
-    const int moneyBefore =
-        looter->getMoney();
-
-    purse->addMoney(total);
-
-    const int moneyAfter =
-        looter->getMoney();
-
-    if (moneyAfter - moneyBefore != total)
-    {
-        purse->addMoney(-total);
-
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY_FAIL index=%u credit not seen money=%d->%d expected=+%d, taken back, money looting off for this session",
-            candidateIndex,
-            moneyBefore,
-            moneyAfter,
-            total
-        );
-
-        BlTrace(message);
-
-        g_betterLootingMoneyFault = true;
-
-        return;
-    }
-
-
-    // 2. Take the whole stack off the body. The item may be destroyed
-    // by this call: from here on only its address is compared, never
-    // dereferenced, unless it is still found in the source grid.
-    const int countBefore =
-        sourceInventory->countItems(itemData);
-
-    const bool removeReturned =
-        sourceInventory->removeItemAutoDestroy(
-            item,
-            quantity
-        );
-
-    sourceInventory->notifyModified();
-
-    const bool stillThere =
-        FindItemLocation(
-            sourceInventory,
-            item
-        ).found;
-
-    int remaining =
-        stillThere
-            ? GetBetterLootingItemQuantity(item)
-            : 0;
-
-    if (remaining < 0)
-    {
-        remaining = 0;
-    }
-
-    if (remaining > quantity)
-    {
-        remaining = quantity;
-    }
-
-    const int countAfter =
-        sourceInventory->countItems(itemData);
-
-
-    if (remaining != 0)
-    {
-        // Pay only for what really left the body.
-        purse->addMoney(
-            -(remaining * valueSingle)
-        );
-
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY_FAIL index=%u removal incomplete returned=%d quantity=%d remaining=%d count=%d->%d, unpaid part taken back, money looting off for this session",
-            candidateIndex,
-            removeReturned ? 1 : 0,
-            quantity,
-            remaining,
-            countBefore,
-            countAfter
-        );
-
-        BlTrace(message);
-
-        g_betterLootingMoneyFault = true;
-
-        return;
-    }
-
-
-    sprintf_s(
-        message,
-        "BetterLooting: MONEY_TAKEN index=%u quantity=%d valueSingle=%d total=%d money=%d->%d returned=%d count=%d->%d",
-        candidateIndex,
-        quantity,
-        valueSingle,
-        total,
-        moneyBefore,
-        looter->getMoney(),
-        removeReturned ? 1 : 0,
-        countBefore,
-        countAfter
-    );
-
-    BlTrace(message);
-}
-
-
 static void EvaluateTargetInventory(
     InventoryGUI* sourceWindow,
     Inventory* inventory,
@@ -4081,24 +3806,6 @@ static void EvaluateTargetInventory(
             GetBetterLootingItemFunctionValue(
                 item
             );
-
-
-        // LEOPARD (15.10.2026): money has its own road and never reaches
-        // the item transfer below.
-        if (
-            itemFunctionValue ==
-                static_cast<int>(ITEM_MONEY)
-        )
-        {
-            TakeBetterLootingMoney(
-                inventory,
-                destinationWindow,
-                item,
-                static_cast<unsigned int>(candidateIndex)
-            );
-
-            continue;
-        }
 
         const bool isResearchArtifact =
             item->isResearchArtifact();
@@ -4318,14 +4025,6 @@ static bool LoadBetterLootingRules()
             "Rules",
             "AllowStolen",
             0,
-            configPath.c_str()
-        ) != 0;
-
-    g_betterLootingRules.takeMoney =
-        GetPrivateProfileIntA(
-            "Rules",
-            "TakeMoney",
-            1,
             configPath.c_str()
         ) != 0;
 
@@ -4553,11 +4252,10 @@ if (g_betterLootingRules.minValue < 0)
 
     sprintf_s(
         message,
-        "BetterLooting: CONFIG minValue=%d minValuePerKg=%.2f allowStolen=%d takeMoney=%d path=%s",
+        "BetterLooting: CONFIG minValue=%d minValuePerKg=%.2f allowStolen=%d path=%s",
         g_betterLootingRules.minValue,
         g_betterLootingRules.minValuePerKg,
         g_betterLootingRules.allowStolen ? 1 : 0,
-        g_betterLootingRules.takeMoney ? 1 : 0,
         configPath.c_str()
     );
 
@@ -8339,7 +8037,6 @@ void BetterLootingSaveRules()
     );
 
     BetterLootingWriteBool(path, "Rules", "AllowStolen", g_betterLootingRules.allowStolen);
-    BetterLootingWriteBool(path, "Rules", "TakeMoney", g_betterLootingRules.takeMoney);
 
     BetterLootingWriteBool(path, "Categories", "Weapons", g_betterLootingRules.lootWeapons);
     BetterLootingWriteBool(path, "Categories", "Armour", g_betterLootingRules.lootArmour);
@@ -8450,9 +8147,6 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
                 0.0f, 0.0f, 2000.0f, 1, 0);
     api->toggle(api, "Rules", "AllowStolen", Tr("Allow stolen items"),
                 Tr("Pick up goods that still belong to someone else."), 1, 0);
-    api->toggle(api, "Rules", "TakeMoney", Tr("Take money"),
-                Tr("Cats found on the dead and the unconscious go straight into your money. From an unconscious person only with stolen items allowed."),
-                1, 0);
 
     struct Category { const char* key; const char* label; int def; };
     static const Category categories[] = {

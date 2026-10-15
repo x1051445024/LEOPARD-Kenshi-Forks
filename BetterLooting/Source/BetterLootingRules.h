@@ -25,10 +25,6 @@ struct BetterLootingRules
     bool preferBackpack;
     int activationVirtualKey;
     bool lootMaterials;
-
-    // LEOPARD (15.10.2026): cats from the dead and the unconscious go to
-    // the looter's purse, see TakeBetterLootingMoney.
-    bool takeMoney;
 };
 
 
@@ -59,16 +55,12 @@ inline bool IsAllowedLootCategory(
 {
     switch (itemFunctionValue)
     {
-        // LEOPARD (15.10.2026): money items never go through the item
-        // transfer. Its check counted them differently, saw "not moved" and
-        // put the same item into the second player inventory too: one Item
-        // in two places, and the next inventory window crashed in
-        // recalculateTotalWeight. Before 14.10 money fell through to
-        // "Other" below and took the same road. Now it is refused here for
-        // looting and for "store all", and TakeBetterLootingMoney turns it
-        // into cash instead.
-        case ITEM_MONEY:
-            return false;
+        // LEOPARD (15.10.2026): no ITEM_MONEY here. The transfer check counts
+        // money items differently, saw "not moved" and put the same item
+        // into the second player inventory too: the money landed with the
+        // player as items and stayed on the corpse, one Item in two places,
+        // and the next inventory window crashed in recalculateTotalWeight.
+        // Money stays out until it is taken the game's own way.
 
         case ITEM_WEAPON:
             return g_betterLootingRules.lootWeapons;
