@@ -55,13 +55,6 @@ inline bool IsAllowedLootCategory(
 {
     switch (itemFunctionValue)
     {
-        // LEOPARD (15.10.2026): no ITEM_MONEY here. The transfer check counts
-        // money items differently, saw "not moved" and put the same item
-        // into the second player inventory too: the money landed with the
-        // player as items and stayed on the corpse, one Item in two places,
-        // and the next inventory window crashed in recalculateTotalWeight.
-        // Money stays out until it is taken the game's own way.
-
         case ITEM_WEAPON:
             return g_betterLootingRules.lootWeapons;
 

@@ -576,19 +576,6 @@ GetBetterLootingLootableCharacterSource(
     }
 
 
-    // LEOPARD (14.10.2026): taking things is theft only from a living,
-    // unconscious person - the game itself shows a steal chance there.
-    // Animals and animal robots (spiders) and the dead have no owner to
-    // steal from: the hunt and the battlefield were all marked stolen.
-    if (
-        sourceCharacter->isDead() ||
-        sourceCharacter->isAnimal() != NULL
-    )
-    {
-        return NULL;
-    }
-
-
     return sourceCharacter;
 }
 
@@ -3706,121 +3693,6 @@ static int GetBetterLootingEffectiveItemFunctionValue(
     return rawFunctionValue;
 }
 
-// LEOPARD (15.10.2026): money (ITEM_MONEY) is never moved by the item
-// transfer - it put one money Item into two inventories and the next
-// inventory window crashed. It is taken the way the player's right click
-// takes it: the game's own InventoryGUI::RClickAutoTrade on the target's
-// window (credits the cash, removes the item, refreshes both windows).
-// Only with the target's window open; the radius run has none and leaves
-// money alone. RClickAutoTrade is protected in the header but exported
-// public by KenshiLib - taken by its export name, as in Auto-Pause-on-Load.
-// A member function returning a class by value takes, on x64 MSVC, this,
-// then the address of the result, then its arguments.
-typedef InventoryGUI::TradeResult* (*BetterLootingRClickFn)(
-    InventoryGUI* self,
-    InventoryGUI::TradeResult* result,
-    const std::string* invSectionName,
-    int x,
-    int y,
-    InventoryGUI* sendingTo,
-    bool thieveryChecks,
-    bool first
-);
-
-
-static BetterLootingRClickFn GetBetterLootingRClickAutoTrade()
-{
-    static bool tried = false;
-    static BetterLootingRClickFn fn = NULL;
-
-    if (tried)
-        return fn;
-    tried = true;
-
-    HMODULE const lib = GetModuleHandleA("KenshiLib.dll");
-    void* const stub = lib != 0 ? reinterpret_cast<void*>(GetProcAddress(lib,
-        "?RClickAutoTrade@InventoryGUI@@QEAA?AVTradeResult@1@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@HHPEAV1@_N2@Z")) : 0;
-    if (stub == 0)
-    {
-        ErrorLog("BetterLooting WARN: InventoryGUI::RClickAutoTrade not exported - money is not taken");
-        return NULL;
-    }
-
-    fn = reinterpret_cast<BetterLootingRClickFn>(
-        KenshiLib::GetRealAddress(stub));
-    return fn;
-}
-
-
-static void TakeMoneyLikeRightClick(
-    InventoryGUI* sourceWindow,
-    Inventory* inventory,
-    InventoryGUI* destinationWindow,
-    bool bodyTheftSource,
-    const std::vector<BetterLootingCandidate>& candidates
-)
-{
-    if (!sourceWindow || !inventory || !destinationWindow)
-    {
-        BlTrace("BetterLooting: MONEY skip - no target window (radius run)");
-        return;
-    }
-
-    if (bodyTheftSource && !g_betterLootingRules.allowStolen)
-    {
-        BlTrace("BetterLooting: MONEY skip - body theft disabled by AllowStolen=0");
-        return;
-    }
-
-    std::vector<Item*> money;
-    for (std::size_t i = 0; i < candidates.size(); ++i)
-    {
-        Item* const item = candidates[i].item;
-        if (item && GetBetterLootingItemFunctionValue(item) == ITEM_MONEY)
-            money.push_back(item);
-    }
-    if (money.empty())
-        return;
-
-    const BetterLootingRClickFn rclick = GetBetterLootingRClickAutoTrade();
-    if (!rclick)
-        return;
-
-    for (std::size_t i = 0; i < money.size(); ++i)
-    {
-        // where it lies now - the window may have rearranged after the last one
-        const BetterLootingItemLocation location =
-            FindItemLocation(inventory, money[i]);
-        if (!location.found || !location.section)
-            continue;
-
-        InventoryGUI::TradeResult result(
-            InventoryGUI::TradeResult::ERROR_INVALID);
-        rclick(
-            sourceWindow,
-            &result,
-            &location.section->name,
-            location.x,
-            location.y,
-            destinationWindow,
-            true,
-            true
-        );
-
-        char message[256];
-        sprintf_s(
-            message,
-            "BetterLooting: MONEY rclick section=%s x=%d y=%d result=%d",
-            location.section->name.c_str(),
-            location.x,
-            location.y,
-            static_cast<int>(result.value)
-        );
-        BlTrace(message);
-    }
-}
-
-
 static void EvaluateTargetInventory(
     InventoryGUI* sourceWindow,
     Inventory* inventory,
@@ -4040,18 +3912,6 @@ static void EvaluateTargetInventory(
                 break;
             }
         }
-    }
-
-
-    if (!g_betterLootingTransferFault)
-    {
-        TakeMoneyLikeRightClick(
-            sourceWindow,
-            inventory,
-            destinationWindow,
-            bodyTheftSource,
-            candidates
-        );
     }
 }
 
@@ -7767,10 +7627,6 @@ static void InventoryGUIUpdate_hook(
     InventoryGUI* destinationWindow =
         g_pendingLootDestination;
 
-    // LEOPARD: the target's window - money is taken through it (right click)
-    InventoryGUI* sourceWindow =
-        g_pendingLootSource;
-
 
     g_pendingLootSource = NULL;
     g_pendingLootInventory = NULL;
@@ -7792,7 +7648,7 @@ static void InventoryGUIUpdate_hook(
         );
 
         EvaluateTargetInventory(
-            sourceWindow,
+            NULL,
             inventory,
             destinationWindow
         );
