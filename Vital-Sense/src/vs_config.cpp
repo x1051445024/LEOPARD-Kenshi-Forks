@@ -169,6 +169,7 @@ void ApplyDefaultConfig(PluginConfig& config)
     config.highlightKeyRequireShift = false;
     config.highlightKeyRequireAlt = false;
     config.maxHighlightDistanceMeters = 3500;
+    config.maxMarkers = 96;
     config.enableUnconsciousState = true;
     config.enableRecoveryComaState = true;
     config.enableDyingState = true;
@@ -244,6 +245,7 @@ bool SaveConfigToFile(const std::string& configPath, const PluginConfig& config)
     WriteJsonBool(out, "highlight_key_require_shift", config.highlightKeyRequireShift, true);
     WriteJsonBool(out, "highlight_key_require_alt", config.highlightKeyRequireAlt, true);
     WriteJsonUnsigned(out, "max_highlight_distance_m", config.maxHighlightDistanceMeters, true);
+    WriteJsonUnsigned(out, "max_markers", config.maxMarkers, true);
     WriteJsonBool(out, "enable_unconscious", config.enableUnconsciousState, true);
     WriteJsonBool(out, "enable_recovery_coma", config.enableRecoveryComaState, true);
     WriteJsonBool(out, "enable_dying", config.enableDyingState, true);
@@ -372,6 +374,26 @@ bool LoadConfigState(RuntimeStateView& state, const char* pluginName)
         else
         {
             state.config.maxHighlightDistanceMeters = parsedDistanceMeters;
+        }
+    }
+
+    // LEOPARD (16.10.2026): число значков настраивается (было зашито 48).
+    DWORD parsedMaxMarkers = 0;
+    if (ParseUnsignedFromJsonSafe(body, "max_markers", &parsedMaxMarkers))
+    {
+        if (parsedMaxMarkers < 8)
+        {
+            state.config.maxMarkers = 8;
+            vs_log::LogWarn(pluginName, "max_markers too low; clamped to 8");
+        }
+        else if (parsedMaxMarkers > 256)
+        {
+            state.config.maxMarkers = 256;
+            vs_log::LogWarn(pluginName, "max_markers too high; clamped to 256");
+        }
+        else
+        {
+            state.config.maxMarkers = parsedMaxMarkers;
         }
     }
 

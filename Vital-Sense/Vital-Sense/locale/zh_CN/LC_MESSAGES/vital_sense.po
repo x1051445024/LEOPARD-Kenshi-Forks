@@ -412,3 +412,9 @@ msgstr "记录图标贴图"
 
 msgid "Log custom icon texture resolution details"
 msgstr "将图标贴图的查找过程写入 RE_Kenshi_log.txt"
+
+msgid "Max markers"
+msgstr "最大标记数"
+
+msgid "How many markers can be on screen at once; the nearest to the camera centre get them first"
+msgstr "屏幕上同时显示的标记数量；不够时优先给离镜头中心最近的角色"

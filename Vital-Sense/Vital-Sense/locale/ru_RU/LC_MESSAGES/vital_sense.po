@@ -412,3 +412,9 @@ msgstr "Журнал картинок значков"
 
 msgid "Log custom icon texture resolution details"
 msgstr "Пишет в RE_Kenshi_log.txt, как нашлись картинки значков"
+
+msgid "Max markers"
+msgstr "Значков на экране"
+
+msgid "How many markers can be on screen at once; the nearest to the camera centre get them first"
+msgstr "Сколько значков может быть на экране одновременно; при нехватке - ближайшим к центру камеры"

@@ -12,6 +12,7 @@ PluginConfig g_config = {
     false,
     false,
     3500,
+    96,            // LEOPARD: maxMarkers
     true,
     true,
     true,

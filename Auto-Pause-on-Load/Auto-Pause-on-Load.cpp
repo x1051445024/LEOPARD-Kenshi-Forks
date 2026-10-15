@@ -2164,11 +2164,49 @@ static void TickPauseOnLoad()
     // LEOPARD (14.10.2026): перенос сохранения (Import). Флаг «идёт загрузка
     // сохранения» игра при нём не поднимает - путь загрузки не срабатывал.
     // Перенос отработал (хук SaveManager::importGame) или видели его сигнал -
-    // ждём, пока мир покрутится 1,5 с без загрузки, и ставим паузу.
+    // ждём, пока мир покрутится без загрузки, и ставим паузу.
+    // 16.10.2026 («всё ещё нестабильно»): мир после переноса ещё догружается
+    // рывками - 1,5 с считались с первого кадра, пауза вставала посреди
+    // загрузки, и игра снимала её сама, а если пауза уже стояла - мы её не
+    // ставили вовсе. Теперь: кадры должны идти ровно (без провала больше
+    // 0,25 с) 2 с подряд, потом пауза ставится всегда и 3 с удерживается -
+    // если игра её сняла, ставим снова (не больше трёх раз). Если за это
+    // время игрок нажал клавишу или кнопку мыши - паузу снял он, не мешаем.
     {
         static bool importSeen = false;
         static DWORD importSeenMs = 0;
         static DWORD importQuietSinceMs = 0;
+        static DWORD importLastTickMs = 0;
+        static DWORD importGuardUntilMs = 0;
+        static int importGuardRepeats = 0;
+        const bool hitch = importLastTickMs != 0 && nowMs - importLastTickMs > 250;
+        importLastTickMs = nowMs;
+        if (importGuardUntilMs != 0)
+        {
+            if (static_cast<int>(importGuardUntilMs - nowMs) <= 0)
+            {
+                importGuardUntilMs = 0;
+            }
+            else
+            {
+                // Игрок жмёт клавишу или кнопку мыши - паузу снимает он, не
+                // мешаем, удержание кончилось. Движение мыши не в счёт.
+                bool userInput = false;
+                for (int vk = 1; vk < 0xFF && !userInput; ++vk)
+                    userInput = (GetAsyncKeyState(vk) & 0x8000) != 0;
+                bool paused = false;
+                if (userInput)
+                {
+                    importGuardUntilMs = 0;
+                }
+                else if (QueryGamePaused(&paused) && !paused && importGuardRepeats < 3 && ForcePauseTrue())
+                {
+                    ++importGuardRepeats;
+                    g_state.lastPauseMs = nowMs;
+                    DebugLog("Auto-Pause-on-Load INFO: the game resumed itself after a save import - paused again");
+                }
+            }
+        }
         if (g_importGameDone)
         {
             g_importGameDone = false;
@@ -2188,7 +2226,7 @@ static void TickPauseOnLoad()
         }
         else if (importSeen)
         {
-            if (isLoadingSave)
+            if (isLoadingSave || hitch)
             {
                 importQuietSinceMs = 0;
             }
@@ -2196,16 +2234,17 @@ static void TickPauseOnLoad()
             {
                 importQuietSinceMs = nowMs;
             }
-            else if (DebounceWindowElapsed(nowMs, importQuietSinceMs, 1500))
+            else if (DebounceWindowElapsed(nowMs, importQuietSinceMs, 2000))
             {
                 importSeen = false;
                 importQuietSinceMs = 0;
                 bool paused = false;
-                if (!(QueryGamePaused(&paused) && paused) && ForcePauseTrue())
+                if ((QueryGamePaused(&paused) && paused) || ForcePauseTrue())
                 {
                     g_state.lastPauseMs = nowMs;
-                    if (g_config.debugLogTransitions)
-                        DebugLog("Auto-Pause-on-Load INFO: paused_after_load=true source=save_import");
+                    importGuardUntilMs = nowMs + 3000;
+                    importGuardRepeats = 0;
+                    DebugLog("Auto-Pause-on-Load INFO: paused_after_load=true source=save_import");
                 }
             }
             if (importSeen && DebounceWindowElapsed(nowMs, importSeenMs, 300000))

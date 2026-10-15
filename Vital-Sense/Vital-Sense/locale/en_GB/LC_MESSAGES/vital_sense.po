@@ -412,3 +412,9 @@ msgstr "Log icon pictures"
 
 msgid "Log custom icon texture resolution details"
 msgstr "Writes how the icon pictures were found to RE_Kenshi_log.txt"
+
+msgid "Max markers"
+msgstr "Max markers"
+
+msgid "How many markers can be on screen at once; the nearest to the camera centre get them first"
+msgstr "How many markers can be on screen at once; the nearest to the camera centre get them first"

@@ -57,6 +57,7 @@
   "recovery_coma_icon_texture": "gui/gfx/heart_64px.png",
   "recovery_coma_icon_size_px": 64,
   "max_highlight_distance_m": 3500,
+  "max_markers": 96,
   "dying_icon_texture": "gui/gfx/death_64px.png",
   "dying_icon_size_px": 64,
   "playing_dead_icon_texture": "",

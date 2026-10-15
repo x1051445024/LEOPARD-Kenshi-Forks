@@ -4,6 +4,8 @@
 
 #include <kenshi/Character.h>
 #include <kenshi/Kenshi.h>
+#include <kenshi/Globals.h>
+#include <kenshi/GameWorld.h>
 #include <mygui/MyGUI_Colour.h>
 #include <mygui/MyGUI_Gui.h>
 #include <mygui/MyGUI_ImageBox.h>
@@ -11,6 +13,9 @@
 #include <mygui/MyGUI_TextBox.h>
 
 #include <Windows.h>
+
+#include <algorithm>
+#include <utility>
 
 #include <cstring>
 #include <sstream>
@@ -28,7 +33,6 @@ namespace vs_marker_render
 {
 namespace
 {
-const size_t kMaxKoMarkerWidgets = 48;
 const int kKoMarkerWidthPx = 64;
 const int kKoMarkerHeightPx = 18;
 const int kKoBountySymbolMinWidthPx = 12;
@@ -1341,9 +1345,10 @@ bool CreateKoMarkerWidgetAt(RuntimeStateView& state, size_t index, const char* p
 
 bool EnsureKoMarkerPool(RuntimeStateView& state, size_t requiredCount, const char* pluginName)
 {
-    if (requiredCount > kMaxKoMarkerWidgets)
+    const size_t cap = state.config.maxMarkers < 8 ? 8 : static_cast<size_t>(state.config.maxMarkers);
+    if (requiredCount > cap)
     {
-        requiredCount = kMaxKoMarkerWidgets;
+        requiredCount = cap;
     }
 
     while (state.koMarkerWidgets.size() < requiredCount)
@@ -1560,16 +1565,39 @@ void TickKoMarkerRender(RuntimeStateView& state, const char* pluginName)
         return;
     }
 
-    size_t renderableTargetCount = state.koTargetCache.size();
-    if (renderableTargetCount > kMaxKoMarkerWidgets)
-    {
-        renderableTargetCount = kMaxKoMarkerWidgets;
-    }
+    // LEOPARD (16.10.2026): «значки не у всех». Раньше брались первые 48
+    // целей списка - и те, что за краем экрана, занимали места, а видимым
+    // их не хватало. Теперь перебираются все цели, место получают только
+    // видимые, при переполнении - ближайшие к центру камеры; сколько всего
+    // - настройка max_markers.
+    const size_t targetCount = state.koTargetCache.size();
+    const size_t markerCap = state.config.maxMarkers < 8 ? 8 : static_cast<size_t>(state.config.maxMarkers);
+    const size_t renderableTargetCount = targetCount < markerCap ? targetCount : markerCap;
 
     if (renderableTargetCount == 0)
     {
         HideAllKoMarkerWidgetsInternal(state);
         return;
+    }
+
+    static std::vector<std::pair<float, size_t> > drawOrder;
+    drawOrder.clear();
+    {
+        Ogre::Vector3 cameraCenter(0.0f, 0.0f, 0.0f);
+        const bool haveCamera = targetCount > markerCap && ou != 0;
+        if (haveCamera)
+        {
+            cameraCenter = ou->getCameraCenter();
+        }
+        for (size_t i = 0; i < targetCount; ++i)
+        {
+            const float d = haveCamera ? state.koTargetCache[i].worldPos.squaredDistance(cameraCenter) : 0.0f;
+            drawOrder.push_back(std::make_pair(d, i));
+        }
+        if (haveCamera)
+        {
+            std::sort(drawOrder.begin(), drawOrder.end());
+        }
     }
 
     if (!EnsureKoMarkerPool(state, renderableTargetCount, pluginName))
@@ -1588,9 +1616,9 @@ void TickKoMarkerRender(RuntimeStateView& state, const char* pluginName)
     const bool hasViewSize = TryGetViewSize(&viewWidth, &viewHeight);
 
     size_t visibleMarkerCount = 0;
-    for (size_t i = 0; i < renderableTargetCount; ++i)
+    for (size_t k = 0; k < drawOrder.size(); ++k)
     {
-        const CachedKoTarget& cached = state.koTargetCache[i];
+        const CachedKoTarget& cached = state.koTargetCache[drawOrder[k].second];
         const bool isBountyOnlyState = IsBountyOnlyMarkerState(cached.markerState);
 
         Ogre::Vector3 characterWorldPos = cached.worldPos;
@@ -1624,7 +1652,7 @@ void TickKoMarkerRender(RuntimeStateView& state, const char* pluginName)
             }
         }
 
-        if (visibleMarkerCount >= state.koMarkerWidgets.size())
+        if (visibleMarkerCount >= state.koMarkerWidgets.size() || visibleMarkerCount >= renderableTargetCount)
         {
             break;
         }

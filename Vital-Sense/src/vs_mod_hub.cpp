@@ -143,6 +143,7 @@ HubKeybindSettingDescriptor g_keybindSettingDescriptors[] = {
 HubIntSettingDescriptor g_intSettingDescriptors[] = {
     { "update_interval_ms", "Update interval", "KO target refresh interval in milliseconds", &PluginConfig::updateIntervalMs, 50, 2000, 1 },
     { "max_highlight_distance_m", "Max highlight distance", "Maximum horizontal distance from camera center for highlights", &PluginConfig::maxHighlightDistanceMeters, 5, 20000, 100 },
+    { "max_markers", "Max markers", "How many markers can be on screen at once; the nearest to the camera centre get them first", &PluginConfig::maxMarkers, 8, 256, 8 },
     { "bounty_symbol_size_px", "Bounty symbol size", "Base font height for the bounty symbol", &PluginConfig::bountySymbolTextSizePx, 8, 128, 1 },
     { "unconscious_text_size_px", "Unconscious text size", "Font height for the unconscious label", &PluginConfig::unconsciousTextSizePx, 8, 128, 1 },
     { "recovery_coma_text_size_px", "Recovery coma text size", "Font height for the recovery coma label", &PluginConfig::recoveryComaTextSizePx, 8, 128, 1 },

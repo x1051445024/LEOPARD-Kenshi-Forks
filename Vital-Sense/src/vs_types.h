@@ -29,6 +29,7 @@ struct PluginConfig
     bool highlightKeyRequireShift;
     bool highlightKeyRequireAlt;
     DWORD maxHighlightDistanceMeters;
+    DWORD maxMarkers;                    // LEOPARD: сколько значков на экране, 8..256
     bool enableUnconsciousState;
     bool enableRecoveryComaState;
     bool enableDyingState;
