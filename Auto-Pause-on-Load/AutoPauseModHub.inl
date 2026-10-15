@@ -242,6 +242,52 @@ static EMC_Result __cdecl SetPauseOnSquadAttackSetting(
         &PluginConfig::pauseOnSquadAttack);
 }
 
+// LEOPARD: cooldown of the attacked-squad pause, seconds
+static EMC_Result __cdecl GetSquadAttackCooldownSetting(void* user_data, int32_t* out_value)
+{
+    if (!user_data || !out_value)
+    {
+        return EMC_ERR_INVALID_ARGUMENT;
+    }
+
+    const PluginConfig* config = static_cast<const PluginConfig*>(user_data);
+    *out_value = static_cast<int32_t>(config->squadAttackCooldownSec);
+    return EMC_OK;
+}
+
+static EMC_Result __cdecl SetSquadAttackCooldownSetting(
+    void* user_data,
+    int32_t value,
+    char* err_buf,
+    uint32_t err_buf_size)
+{
+    if (!user_data)
+    {
+        emc::consumer::WriteErrorMessage(err_buf, err_buf_size, "missing_user_data");
+        return EMC_ERR_INVALID_ARGUMENT;
+    }
+
+    const EMC_Result rangeValidation = emc::consumer::ValidateValueInRange<int32_t>(
+        value,
+        0,
+        static_cast<int32_t>(kSquadAttackCooldownSecMax),
+        err_buf,
+        err_buf_size,
+        "squad_attack_cooldown_s_out_of_range");
+    if (rangeValidation != EMC_OK)
+    {
+        return rangeValidation;
+    }
+
+    return ApplyHubConfigUpdate(
+        user_data,
+        err_buf,
+        err_buf_size,
+        [value](PluginConfig& updated) {
+            updated.squadAttackCooldownSec = static_cast<DWORD>(value);
+        });
+}
+
 static void LogModHubFallback(const char* reason)
 {
     std::stringstream line;
@@ -323,10 +369,21 @@ static const EMC_BoolSettingDefV1 kHubResumeAfterInventoryCloseSetting = {
 static const EMC_BoolSettingDefV1 kHubPauseOnSquadAttackSetting = {
     "pause_on_squad_attack",
     "Pause when another squad is attacked",
-    "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). Once per squad in 30 seconds",
+    "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). For one squad - not more often than the cooldown below",
     &g_config,
     &GetPauseOnSquadAttackSetting,
     &SetPauseOnSquadAttackSetting };
+
+static const EMC_IntSettingDefV1 kHubSquadAttackCooldownSetting = {
+    "squad_attack_cooldown_s",
+    "Attacked squad pause cooldown (s)",
+    "After a pause for an attacked squad, the same squad pauses the game again not sooner than this many seconds. 0 - on every hit",
+    &g_config,
+    0,
+    static_cast<int32_t>(kSquadAttackCooldownSecMax),
+    5,
+    &GetSquadAttackCooldownSetting,
+    &SetSquadAttackCooldownSetting };
 
 static const emc::ModHubClientSettingRowV1 kModHubSettingRows[] = {
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubEnabledSetting },
@@ -336,7 +393,8 @@ static const emc::ModHubClientSettingRowV1 kModHubSettingRows[] = {
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubResumeAfterTradeSetting },
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnInventoryOpenSetting },
     { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubResumeAfterInventoryCloseSetting },
-    { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnSquadAttackSetting }
+    { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, &kHubPauseOnSquadAttackSetting },
+    { emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &kHubSquadAttackCooldownSetting }
 };
 
 static const emc::ModHubClientTableRegistrationV1 kModHubTableRegistration = {

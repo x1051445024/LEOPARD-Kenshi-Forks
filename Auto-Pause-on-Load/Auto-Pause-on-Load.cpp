@@ -35,6 +35,7 @@ struct PluginConfig
     bool pauseOnInventoryOpen;
     bool resumeAfterInventoryClose;
     bool pauseOnSquadAttack;   // LEOPARD: a squad that is not selected is hit
+    DWORD squadAttackCooldownSec;   // LEOPARD: the same squad again not sooner (0-300 s)
 };
 
 struct RuntimeState
@@ -72,6 +73,7 @@ static const DWORD kObservedTradeConversationPendingMs = 30000;
 static const DWORD kObservedTradeConversationTimeoutMs = 300000;
 static const DWORD kPauseDebounceMsMin = 0;
 static const DWORD kPauseDebounceMsMax = 600000;
+static const DWORD kSquadAttackCooldownSecMax = 300;   // LEOPARD
 static PluginConfig g_config = { true, 2000, false, true, true, true, true };
 static RuntimeState g_state = { false, false, false, false, 0, 0, 0, 0, 0, 0, false, false, false, false, false, false, false, false, false };
 
@@ -828,6 +830,22 @@ static bool ParseConfigJson(const std::string& body, PluginConfig* configOut, Co
                 }
             }
         }
+        else if (key == "squad_attack_cooldown_s")
+        {
+            DWORD parsedUnsigned = 0;
+            bool clamped = false;
+            size_t valuePos = pos;
+            if (ParseJsonUnsignedValue(body, &valuePos, &parsedUnsigned, &clamped))
+            {
+                configOut->squadAttackCooldownSec =
+                    parsedUnsigned > kSquadAttackCooldownSecMax ? kSquadAttackCooldownSecMax : parsedUnsigned;
+                pos = valuePos;
+            }
+            else if (!SkipJsonValue(body, &pos))
+            {
+                return RecordConfigSyntaxError(diagnostics, pos);
+            }
+        }
         else if (key == "pause_on_squad_attack")
         {
             bool parsedBool = false;
@@ -1114,7 +1132,8 @@ static bool SaveConfigToFile(const std::string& configPath, const PluginConfig& 
     out << "  \"resume_after_trade\": " << (config.resumeAfterTrade ? "true" : "false") << ",\n";
     out << "  \"pause_on_inventory_open\": " << (config.pauseOnInventoryOpen ? "true" : "false") << ",\n";
     out << "  \"resume_after_inventory_close\": " << (config.resumeAfterInventoryClose ? "true" : "false") << ",\n";
-    out << "  \"pause_on_squad_attack\": " << (config.pauseOnSquadAttack ? "true" : "false") << "\n";
+    out << "  \"pause_on_squad_attack\": " << (config.pauseOnSquadAttack ? "true" : "false") << ",\n";
+    out << "  \"squad_attack_cooldown_s\": " << config.squadAttackCooldownSec << "\n";
     out << "}\n";
 
     return true;
@@ -1131,6 +1150,7 @@ static void LoadConfigState()
     g_config.pauseOnInventoryOpen = true;
     g_config.resumeAfterInventoryClose = true;
     g_config.pauseOnSquadAttack = true;
+    g_config.squadAttackCooldownSec = 30;
 
     if (g_settingsPath.empty())
     {
@@ -2476,7 +2496,6 @@ static GameData* (*MedicalSystem_addWound_orig)(MedicalSystem*, bool, CutDirecti
 static Platoon* volatile g_attackedSquad = 0;      // кого ударили (ждёт кадра)
 static Platoon* g_lastPausedSquad = 0;
 static DWORD g_lastSquadPauseMs = 0;
-static const DWORD kSquadAttackRepeatMs = 30000;
 
 static void NoteSquadHit(MedicalSystem* self, RootObject* attacker)
 {
@@ -2523,7 +2542,7 @@ static void TickPauseOnSquadAttack()
         return;
     const DWORD nowMs = GetTickCount();
     if (squad == g_lastPausedSquad && g_lastSquadPauseMs != 0 &&
-        !DebounceWindowElapsed(nowMs, g_lastSquadPauseMs, kSquadAttackRepeatMs))
+        !DebounceWindowElapsed(nowMs, g_lastSquadPauseMs, g_config.squadAttackCooldownSec * 1000))
         return;
     bool paused = false;
     if (QueryGamePaused(&paused) && paused)

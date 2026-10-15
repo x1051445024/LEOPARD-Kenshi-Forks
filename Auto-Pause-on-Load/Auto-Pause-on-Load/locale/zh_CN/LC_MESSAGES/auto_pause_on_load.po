@@ -53,5 +53,11 @@ msgstr "关闭物品栏时继续游戏（如果是本模组暂停的）"
 msgid "Pause when another squad is attacked"
 msgstr "其他小队遭到攻击时暂停"
 
-msgid "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). Once per squad in 30 seconds"
-msgstr "未选中小队的角色受到攻击(不只是附近有敌人)时暂停游戏。同一小队每 30 秒最多一次"
+msgid "Pause the game when a character of a squad that is not selected takes a hit (not just enemies nearby). For one squad - not more often than the cooldown below"
+msgstr "未选中小队的角色受到攻击(不只是附近有敌人)时暂停游戏。同一小队的间隔见下方设置"
+
+msgid "Attacked squad pause cooldown (s)"
+msgstr "受袭小队暂停间隔(秒)"
+
+msgid "After a pause for an attacked squad, the same squad pauses the game again not sooner than this many seconds. 0 - on every hit"
+msgstr "因小队受袭暂停后,同一小队至少间隔这么多秒才会再次暂停。0 - 每次受击"
