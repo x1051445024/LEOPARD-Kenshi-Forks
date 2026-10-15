@@ -1,6 +1,7 @@
 // ModConfigMenu: подписи настроек идут через Tr - перевод в locale/<язык>.
 #define KLOC_DOMAIN "wall_b_gone"
 #include <IniDefaults.h>   // LEOPARD: mod-config.json from mod-config.defaults.json
+#include <WidgetRef.h>     // LEOPARD: the confirmation window, watched
 #include <Localization.h>
 
 #include <Debug.h>

@@ -781,21 +781,29 @@ static void TryDismantleSelectedBuilding(Building* b, const hand& sel, bool isWa
 // «Отмена»; Enter - разобрать, Esc - отмена. Ответ разбирается в кадре
 // игры (не в обработчике кнопки): постройку берём заново по hand - за
 // время вопроса её могли снести или выделение могло смениться.
-static MyGUI::Widget* g_confirmPanel = 0;
+// LEOPARD (ревью 15.10.2026): окно вопроса под присмотром MyGUI - удалит
+// его кто-то другой (выход в меню, загрузка), указатель обнулится, а не
+// повиснет.
+static WidgetRef& ConfirmPanelRef()
+{
+    static WidgetRef* ref = new WidgetRef();   // не разрушается: MyGUI держит его в списке
+    return *ref;
+}
 static hand g_confirmTarget;
 static int g_confirmAnswer = 0;     // 1 - разобрать, -1 - отмена
 
 static void CloseDismantleConfirm()
 {
-    if (g_confirmPanel == 0)
+    MyGUI::Widget* const panel = ConfirmPanelRef().get();
+    ConfirmPanelRef().reset();
+    if (panel == 0)
         return;
     MyGUI::InputManager* const input = MyGUI::InputManager::getInstancePtr();
     if (input != 0)
-        input->removeWidgetModal(g_confirmPanel);
+        input->removeWidgetModal(panel);
     MyGUI::Gui* const gui = MyGUI::Gui::getInstancePtr();
     if (gui != 0)
-        gui->destroyWidget(g_confirmPanel);
-    g_confirmPanel = 0;
+        gui->destroyWidget(panel);
 }
 
 static void OnConfirmYes(MyGUI::Widget*) { g_confirmAnswer = 1; }
@@ -864,7 +872,7 @@ static void OpenDismantleConfirm(Building* b, const hand& sel)
     MyGUI::InputManager* const input = MyGUI::InputManager::getInstancePtr();
     if (input != 0)
         input->addWidgetModal(panel);
-    g_confirmPanel = panel;
+    ConfirmPanelRef().set(panel);
     g_confirmTarget = sel;
     g_confirmAnswer = 0;
 }
@@ -873,7 +881,7 @@ static void OpenDismantleConfirm(Building* b, const hand& sel)
 // не делает).
 static bool TickDismantleConfirm()
 {
-    if (g_confirmPanel == 0)
+    if (ConfirmPanelRef().get() == 0)
         return false;
     if (g_confirmAnswer == 0)
         return true;
@@ -982,7 +990,7 @@ static void InputHandler_keyDownEvent_hook(InputHandler* thisptr, OIS::KeyCode k
 {
     // окно вопроса: Enter - разобрать, Esc - отмена; игре эти нажатия не
     // отдаём (Esc иначе открыл бы меню игры)
-    if (g_confirmPanel != 0 &&
+    if (ConfirmPanelRef().get() != 0 &&
         (keyCode == OIS::KC_RETURN || keyCode == OIS::KC_NUMPADENTER || keyCode == OIS::KC_ESCAPE))
     {
         g_confirmAnswer = keyCode == OIS::KC_ESCAPE ? -1 : 1;
