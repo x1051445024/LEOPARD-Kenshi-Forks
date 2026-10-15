@@ -3,6 +3,7 @@
 #include "vs_appearance_extern.h"
 #include "vs_character_lookup.h"
 #include "vs_log.h"
+#include "vs_marker_render.h"
 
 #ifndef BOOST_ALL_NO_LIB
 #define BOOST_ALL_NO_LIB
@@ -2078,6 +2079,29 @@ Ogre::ColourValue ResolveTintColour(RuntimeStateView& state, int markerRelation)
         1.0f);
 }
 
+// LEOPARD (16.10.2026): «Окрашивать цели с наградой» - цель с наградой
+// (стоящая или лежащая) красится цветом тира награды, как значок $; раньше
+// стоящие красились цветом отношения и не отличались от обычных врагов.
+int TintBountyOf(RuntimeStateView& state, const CachedKoTarget& target)
+{
+    return (state.config.characterTintIncludeBountyOnly && target.totalBounty > 0) ? target.totalBounty : 0;
+}
+
+// Цвет окраски записи: тир награды (если есть) или отношение.
+Ogre::ColourValue DesiredTintColour(RuntimeStateView& state, const CharacterTintEntry& entry)
+{
+    Ogre::ColourValue colour = ResolveTintColour(state, entry.markerRelation);
+    if (entry.totalBounty > 0)
+    {
+        const MyGUI::Colour tier = vs_marker_render::BountyTierColour(state, entry.totalBounty);
+        if (tier.alpha > 0.0f)
+        {
+            colour = Ogre::ColourValue(tier.red, tier.green, tier.blue, 1.0f);
+        }
+    }
+    return colour;
+}
+
 bool ShouldTintMarkerState(RuntimeStateView& state, int markerState)
 {
     if (markerState == CachedKoTarget::STATE_BOUNTY_ONLY)
@@ -2110,12 +2134,14 @@ void BuildDesiredTintEntries(RuntimeStateView& state, std::vector<CharacterTintE
         if (existingIndex >= 0)
         {
             desiredEntries[static_cast<size_t>(existingIndex)].markerRelation = target.markerRelation;
+            desiredEntries[static_cast<size_t>(existingIndex)].totalBounty = TintBountyOf(state, target);
             continue;
         }
 
         CharacterTintEntry entry = {
             target.targetHandle,
-            target.markerRelation
+            target.markerRelation,
+            TintBountyOf(state, target)
         };
         desiredEntries.push_back(entry);
     }
@@ -2331,9 +2357,27 @@ void SyncKoCharacterTint(RuntimeStateView& state, const char* pluginName)
         }
         const bool keepCurrentTint = !tintConfigChanged
             && hasDesiredEntry
-            && (desiredEntries[desiredIndex].tintEntry.markerRelation == oldEntry.markerRelation);
+            && (desiredEntries[desiredIndex].tintEntry.markerRelation == oldEntry.markerRelation)
+            && (desiredEntries[desiredIndex].tintEntry.totalBounty == oldEntry.totalBounty);
         if (keepCurrentTint)
         {
+            // LEOPARD (16.10.2026): чужие (не свой отряд, не животные) красятся
+            // через общий материал тела, а Character Highlight (пример
+            // KenshiLib) переписывает его каждый кадр - наша окраска держалась
+            // один кадр. Повторяем её каждый кадр (кадр мира уже прошёл -
+            // см. Vital-Sense.cpp: пишем после него). Свои и животные - на
+            // своих копиях материала, их никто не трогает.
+            Character* const keptCandidate = desiredEntries[desiredIndex].character;
+            if (keptCandidate
+                && !vs_character_lookup::IsAnimalCharacterSafe(keptCandidate)
+                && !vs_character_lookup::IsCharacterInPlayerSquadSafe(keptCandidate))
+            {
+                SetTintForCharacter(
+                    keptCandidate,
+                    DesiredTintColour(state, desiredEntries[desiredIndex].tintEntry),
+                    state.config.characterTintForceDepthOverride,
+                    pluginName);
+            }
             retainedEntries.push_back(oldEntry);
             retainedByHandle[MakeProbeHandleKey(oldEntry.targetHandle)] = true;
             if (gTintDiagnosticsEnabled)
@@ -2382,7 +2426,7 @@ void SyncKoCharacterTint(RuntimeStateView& state, const char* pluginName)
             continue;
         }
 
-        Ogre::ColourValue tintColour = ResolveTintColour(state, desired.tintEntry.markerRelation);
+        Ogre::ColourValue tintColour = DesiredTintColour(state, desired.tintEntry);
         Character* desiredCandidate = desired.character;
         if (gTintDiagnosticsEnabled && desiredCandidate)
         {

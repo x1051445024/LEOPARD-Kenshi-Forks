@@ -1727,4 +1727,9 @@ void TickKoMarkerRender(RuntimeStateView& state, const char* pluginName)
     EmitMarkerDiagLogIfDue(pluginName);
 }
 
+MyGUI::Colour BountyTierColour(RuntimeStateView& state, int totalBounty)
+{
+    return ResolveBountyTierColour(state, totalBounty);
+}
+
 } // namespace vs_marker_render

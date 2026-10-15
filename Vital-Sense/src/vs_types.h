@@ -123,6 +123,9 @@ struct CharacterTintEntry
 {
     hand targetHandle;
     int markerRelation;
+    // LEOPARD (16.10.2026): > 0 - красить цветом тира награды (как значок $),
+    // а не цветом отношения; 0 - цвет отношения.
+    int totalBounty;
 };
 
 struct ProbeDeferredCandidateState

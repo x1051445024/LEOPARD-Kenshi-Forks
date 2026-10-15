@@ -356,11 +356,11 @@ msgstr "为小队着色"
 msgid "Tint conscious squadmates when character tint is enabled"
 msgstr "也为站立的队友着色"
 
-msgid "Tint bounty-only"
+msgid "Tint bounty targets"
 msgstr "为悬赏目标着色"
 
-msgid "Tint non-downed bounty-only targets when character tint is enabled"
-msgstr "也为站立的悬赏角色着色"
+msgid "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on"
+msgstr "有悬赏的角色按悬赏等级着色，与 $ 符号颜色相同；若开启屏幕上所有人的悬赏符号，站立的角色也会着色"
 
 msgid "Force depth override"
 msgstr "穿墙显示"

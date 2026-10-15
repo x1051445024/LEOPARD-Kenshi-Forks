@@ -137,6 +137,15 @@ void GameWorld_mainLoopGPUSensitiveStuff_hook(GameWorld* thisptr, float time)
         return;
     }
 
+    // LEOPARD (16.10.2026): сначала кадр мира, потом окраска. Character
+    // Highlight (пример KenshiLib) красит всех в этом же хуке ДО вызова
+    // оригинала - если мы пишем раньше него, его цвет перекрывает наш (цель
+    // с наградой была жёлтой вместо цвета тира).
+    if (GameWorld_mainLoopGPUSensitiveStuffOrig)
+    {
+        GameWorld_mainLoopGPUSensitiveStuffOrig(thisptr, time);
+    }
+
     vs_character_tint::TickKoCharacterTintRuntime(state);
 
     if (state.highlightRuntimeActive)
@@ -146,11 +155,6 @@ void GameWorld_mainLoopGPUSensitiveStuff_hook(GameWorld* thisptr, float time)
     else
     {
         vs_character_tint::ClearKoCharacterTint(state, kPluginName);
-    }
-
-    if (GameWorld_mainLoopGPUSensitiveStuffOrig)
-    {
-        GameWorld_mainLoopGPUSensitiveStuffOrig(thisptr, time);
     }
 }
 

@@ -356,11 +356,11 @@ msgstr "Окрашивать свой отряд"
 msgid "Tint conscious squadmates when character tint is enabled"
 msgstr "Окрашивать и своих, кто на ногах"
 
-msgid "Tint bounty-only"
+msgid "Tint bounty targets"
 msgstr "Окрашивать цели с наградой"
 
-msgid "Tint non-downed bounty-only targets when character tint is enabled"
-msgstr "Окрашивать и стоящих персонажей с наградой"
+msgid "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on"
+msgstr "Персонажи с наградой окрашиваются цветом тира награды, как значок $; стоящие - тоже, если включён символ награды у всех на экране"
 
 msgid "Force depth override"
 msgstr "Видно сквозь стены"

@@ -159,7 +159,7 @@ HubBoolSettingDescriptor g_advancedBoolSettingDescriptors[] = {
 
 HubBoolSettingDescriptor g_tintBoolSettingDescriptors[] = {
     { "character_tint_include_squad", "Tint squad", "Tint conscious squadmates when character tint is enabled", "Include conscious squadmates in the tint pass when character tint is enabled.", &PluginConfig::characterTintIncludeSquad },
-    { "character_tint_include_bounty_only", "Tint bounty-only", "Tint non-downed bounty-only targets when character tint is enabled", "Also tint awake bounty-only targets when character tint is enabled.", &PluginConfig::characterTintIncludeBountyOnly },
+    { "character_tint_include_bounty_only", "Tint bounty targets", "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on", "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on.", &PluginConfig::characterTintIncludeBountyOnly },
     { "character_tint_force_depth_override", "Force depth override", "Force tint to render through depth when supported by the shader", "Keep tint visible through world depth when the active shader path supports it.", &PluginConfig::characterTintForceDepthOverride }
 };
 

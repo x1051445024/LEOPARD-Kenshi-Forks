@@ -356,11 +356,11 @@ msgstr "Tint squad"
 msgid "Tint conscious squadmates when character tint is enabled"
 msgstr "Also tints your squadmates who are on their feet"
 
-msgid "Tint bounty-only"
+msgid "Tint bounty targets"
 msgstr "Tint bounty targets"
 
-msgid "Tint non-downed bounty-only targets when character tint is enabled"
-msgstr "Also tints standing characters with a bounty"
+msgid "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on"
+msgstr "Characters with a bounty are tinted in the colour of their bounty tier, like the $ symbol; standing ones too if the live bounty symbol is on"
 
 msgid "Force depth override"
 msgstr "Show through walls"
