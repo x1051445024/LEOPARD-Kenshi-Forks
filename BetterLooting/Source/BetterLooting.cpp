@@ -3021,6 +3021,44 @@ static void ExecuteLootCandidate(
                 detachedQuantity;
 
 
+        // LEOPARD (15.10.2026): the game accepted the item but it did not
+        // show up where it was counted - another mod (KEO puts picked-up
+        // items into the worn backpack) or a stack merge placed it
+        // elsewhere. It is the game's now. The fallback, the rollback and
+        // the emergency storage below would add this same Item to a second
+        // inventory: one Item in two inventories, and the next inventory
+        // window crashed in InventorySection::recalculateTotalWeight
+        // (log: engineReturn=1 destination=0->0, then TRANSFER_ROLLBACK
+        // rollbackReturn=1). Trust the game and never touch it again.
+        if (
+            engineAdded &&
+            !exactMove
+        )
+        {
+            char trustedMessage[256];
+            sprintf_s(
+                trustedMessage,
+                "BetterLooting: TRANSFER_ENGINE_TRUSTED index=%u source=%d->%d destination=%d->%d quantity=%d",
+                static_cast<unsigned int>(candidateIndex),
+                sourceBefore,
+                sourceAfter,
+                destinationBefore,
+                destinationAfter,
+                detachedQuantity
+            );
+            BlTrace(trustedMessage);
+            if (!sourceWillRemain)
+            {
+                return;
+            }
+            continue;
+        }
+
+
+        // LEOPARD: set when the second attempt below is accepted by the game
+        bool engineTookItem = false;
+
+
         //
         // Symmetric runtime fallback:
         //
@@ -3093,6 +3131,9 @@ static void ExecuteLootCandidate(
                                 detachedItem,
                                 1
                             );
+
+                    engineTookItem =
+                        secondaryEngineAdded;
 
 
                     sourceInventory->
@@ -3232,6 +3273,23 @@ static void ExecuteLootCandidate(
                     }
                 }
             }
+        }
+
+
+        // LEOPARD: accepted by the game on the second attempt - same rule
+        if (
+            !exactMove &&
+            engineTookItem
+        )
+        {
+            BlTrace(
+                "BetterLooting: TRANSFER_ENGINE_TRUSTED secondary - no rollback"
+            );
+            if (!sourceWillRemain)
+            {
+                return;
+            }
+            continue;
         }
 
 
@@ -6998,6 +7056,22 @@ static void ExecuteBetterLootingStoreCandidate(
             }
 
 
+            continue;
+        }
+
+
+        // LEOPARD (15.10.2026): accepted by the game but not where it was
+        // counted - the game's now; a rollback would put the same Item
+        // into a second inventory (see TRANSFER_ENGINE_TRUSTED).
+        if (engineAdded)
+        {
+            BlTrace(
+                "BetterLooting: STORE_ENGINE_TRUSTED - no rollback"
+            );
+            if (!sourceWillRemain)
+            {
+                return;
+            }
             continue;
         }
 
