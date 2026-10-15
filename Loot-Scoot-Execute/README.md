@@ -112,3 +112,7 @@ It uses KenshiLib, which is released under GPLv3.
 - v3: подход к цели - раз в 1 с вместо 200 мс, clearAllAIGoals только первым приказом (раньше задача персонажа мелькала).
 - v3: убрана строка «Кнопка по умолчанию» (MCM сбрасывает всю страницу).
 - v4: звук добивания - только события из банков игры (проверено по хешам в data/audio/*.bnk): у оригинала первыми шли несуществующие "Heavy_Hit"/"Light_Hit", и звука не было. Теперь на жертве Impact + голос: человек - VO_Get_Hit, животное - VO_Creature_Die, скелет - Deflection (металл).
+
+## Изменения форка (15.10.2026)
+- «Добить» / «Добить всех» - пункты самого контекстного меню игры, по рецепту HarvestOrgans: сразу после `showContextMenu` слот PanelEmpty в optionsList и в нём Kenshi_Button1 с размерами пунктов игры (ContextMenuGUI +0x100 / +0x110), растёт только окно меню. Плашка под меню - только запасной вариант.
+- `mod-config.json` при первом запуске создаётся копией `mod-config.defaults.json` (`IniDefaults::PrepareJson`) - больше нет «could not read mod-config.json» в журнале на чистой установке.

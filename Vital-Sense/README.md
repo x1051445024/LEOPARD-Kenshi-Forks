@@ -106,3 +106,8 @@ It uses KenshiLib, which is released under GPLv3.
 - Значки рисуются на слое `Back` (как имена над головами у самой игры), а не на `Top`: больше не просвечивают сквозь окна и панели интерфейса.
 - Настройки — во вкладке MCM окна «Настройки»; Mod Hub не нужен.
 - Утечка: клоны материалов подсветки животных убираются из MaterialManager (в обычном кадре, не во время загрузки).
+
+## Изменения форка (15.10.2026)
+- Отношение «нейтрал» (`RELATION_NEUTRAL`) и цвет `neutral_color_hex` (#FFA64D): не враг ни одному своему персонажу и не союзник всем - как в CharacterHighlight (KenshiLib_Examples). Мирные дикие животные - тоже нейтралы, пауки - всегда враги.
+- В MCM четыре цвета отношений в разделе окраски (число строк - `kRelationColorSettingCount`).
+- `mod-config.json` при первом запуске создаётся копией `mod-config.defaults.json` (`IniDefaults::PrepareJson`) - больше нет «could not read mod-config.json» в журнале на чистой установке.
