@@ -55,8 +55,12 @@ inline bool IsAllowedLootCategory(
 {
     switch (itemFunctionValue)
     {
-        case ITEM_MONEY:
-            return true;   // LEOPARD: money - always (see EvaluateLootDecision)
+        // LEOPARD (15.10.2026): no ITEM_MONEY here. The transfer check counts
+        // money items differently, saw "not moved" and put the same item
+        // into the second player inventory too: the money landed with the
+        // player as items and stayed on the corpse, one Item in two places,
+        // and the next inventory window crashed in recalculateTotalWeight.
+        // Money stays out until it is taken the game's own way.
 
         case ITEM_WEAPON:
             return g_betterLootingRules.lootWeapons;
@@ -155,14 +159,6 @@ inline BetterLootingDecision EvaluateLootDecision(
     )
     {
         return BetterLootingDecision::SKIP_STOLEN;
-    }
-
-    // LEOPARD: money (cats, String of Cats - Pocket Change and the like)
-    // is always worth taking: one coin is worth 1-10, so the price and
-    // price-per-kg thresholds threw it away (14.10.2026).
-    if (itemFunctionValue == ITEM_MONEY)
-    {
-        return BetterLootingDecision::LOOT;
     }
 
     if (
