@@ -268,6 +268,9 @@ namespace
 
     struct Entry
     {
+        // Explicit: VC10 may leave the plain fields of a value-initialized
+        // struct with class members (hand, ColourValue) uninitialised.
+        Entry() : hasColour(false), tinted(false), evaluated(0), applied(0), seen(0) {}
         hand who;
         Ogre::ColourValue colour;
         bool hasColour;
