@@ -134,8 +134,8 @@ HubKeybindSettingDescriptor g_keybindSettingDescriptors[] = {
     {
         "highlight_key",
         "Highlight key",
-        "Primary key that gates KO highlights. Clear to Unbound for always-on highlights.",
-        "Capture the primary key for KO highlighting. Modifier requirements stay on the toggle rows below.",
+        "Highlights show while this key (or combination, e.g. CTRL+X) is held. NONE - always shown.",
+        "Capture the key or combination for KO highlighting (e.g. CTRL+X).",
         &PluginConfig::highlightKeyCode
     }
 };
@@ -659,9 +659,9 @@ void InitializeSettingDefinitions()
     // Core section.
     SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[0].setting_id, &g_boolSettingDefs[0], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[0], kHubSectionCoreId, kHubSectionCoreLabel);
     SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_KEYBIND, g_keybindSettingDefs[0].setting_id, &g_keybindSettingDefs[0], emc::MOD_HUB_CLIENT_SETTING_KIND_KEYBIND_V2, &g_keybindSettingDefsV2[0], kHubSectionCoreId, kHubSectionCoreLabel);
-    SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[1].setting_id, &g_boolSettingDefs[1], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[1], kHubSectionCoreId, kHubSectionCoreLabel);
-    SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[2].setting_id, &g_boolSettingDefs[2], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[2], kHubSectionCoreId, kHubSectionCoreLabel);
-    SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[3].setting_id, &g_boolSettingDefs[3], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[3], kHubSectionCoreId, kHubSectionCoreLabel);
+    // LEOPARD (16.10.2026): no "Require Ctrl/Shift/Alt" rows (descriptors 1-3) - the
+    // key button of Mod Config Menu takes a combination (CTRL+X) itself; the
+    // modifiers travel with the key value (Get/SetKeybindSettingValue).
     SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_INT, g_intSettingDefs[1].setting_id, &g_intSettingDefs[1], emc::MOD_HUB_CLIENT_SETTING_KIND_INT, &g_intSettingDefs[1], kHubSectionCoreId, kHubSectionCoreLabel);
     SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[9].setting_id, &g_boolSettingDefs[9], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[9], kHubSectionCoreId, kHubSectionCoreLabel);
     SetHubRows(rowIndex++, emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, g_boolSettingDefs[10].setting_id, &g_boolSettingDefs[10], emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL_V2, &g_boolSettingDefsV2[10], kHubSectionCoreId, kHubSectionCoreLabel);
@@ -874,7 +874,16 @@ EMC_Result __cdecl GetKeybindSettingValue(void* user_data, EMC_KeybindValueV1* o
     const HubKeybindSettingDescriptor* descriptor = static_cast<const HubKeybindSettingDescriptor*>(user_data);
     RuntimeStateView state = vs_runtime_state::GetRuntimeStateView();
     out_value->keycode = state.config.*(descriptor->field);
-    out_value->modifiers = 0u;
+    // the highlight key's combination, from the same config fields as before
+    const uint32_t own = vs_keybind::ModifierBitOfKey(out_value->keycode);
+    uint32_t modifiers = 0u;
+    if (state.config.highlightKeyRequireCtrl)
+        modifiers |= 1u;
+    if (state.config.highlightKeyRequireShift)
+        modifiers |= 2u;
+    if (state.config.highlightKeyRequireAlt)
+        modifiers |= 4u;
+    out_value->modifiers = modifiers & ~own;
     return EMC_OK;
 }
 
@@ -890,9 +899,9 @@ EMC_Result __cdecl SetKeybindSettingValue(
         return EMC_ERR_INVALID_ARGUMENT;
     }
 
-    if (value.modifiers != 0u)
+    if ((value.modifiers & ~7u) != 0u)
     {
-        emc::consumer::WriteErrorMessage(err_buf, err_buf_size, "use_modifier_toggles");
+        emc::consumer::WriteErrorMessage(err_buf, err_buf_size, "invalid_modifiers");
         return EMC_ERR_INVALID_ARGUMENT;
     }
 
@@ -910,6 +919,11 @@ EMC_Result __cdecl SetKeybindSettingValue(
     RuntimeStateView state = vs_runtime_state::GetRuntimeStateView();
     PluginConfig updated = state.config;
     updated.*(descriptor->field) = value.keycode;
+    // the combination's modifiers - into the same config fields as before
+    const uint32_t modifiers = value.modifiers & ~vs_keybind::ModifierBitOfKey(value.keycode);
+    updated.highlightKeyRequireCtrl = (modifiers & 1u) != 0u;
+    updated.highlightKeyRequireShift = (modifiers & 2u) != 0u;
+    updated.highlightKeyRequireAlt = (modifiers & 4u) != 0u;
     return ApplyHubConfigUpdate(updated, err_buf, err_buf_size);
 }
 

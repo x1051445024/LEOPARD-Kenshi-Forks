@@ -20,8 +20,8 @@ msgstr "Turns the whole mod on and off"
 msgid "Highlight key"
 msgstr "Highlight key"
 
-msgid "Primary key that gates KO highlights. Clear to Unbound for always-on highlights."
-msgstr "Downed characters are highlighted while this key is held. NONE - always highlighted"
+msgid "Highlights show while this key (or combination, e.g. CTRL+X) is held. NONE - always shown."
+msgstr "Highlights show while this key (or combination, e.g. CTRL+X) is held. NONE - always shown."
 
 msgid "Require Ctrl"
 msgstr "Require Ctrl"

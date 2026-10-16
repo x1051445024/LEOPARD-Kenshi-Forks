@@ -20,8 +20,8 @@ msgstr "开启或关闭整个模组"
 msgid "Highlight key"
 msgstr "高亮按键"
 
-msgid "Primary key that gates KO highlights. Clear to Unbound for always-on highlights."
-msgstr "按住此键时高亮倒地角色。NONE - 始终高亮"
+msgid "Highlights show while this key (or combination, e.g. CTRL+X) is held. NONE - always shown."
+msgstr "按住此键或组合键（例如 CTRL+X）时显示高亮。NONE - 始终显示。"
 
 msgid "Require Ctrl"
 msgstr "需要 Ctrl"

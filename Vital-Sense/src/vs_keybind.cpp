@@ -158,6 +158,17 @@ bool IsKeyDown(OIS::Keyboard* keyboard, int32_t keyCode)
 const int32_t kKeyCodeUnbound = -1;
 const int32_t kDefaultHighlightKeyCode = static_cast<int32_t>(OIS::KC_LMENU);
 
+uint32_t ModifierBitOfKey(int32_t keyCode)
+{
+    if (IsCtrlKeyCode(keyCode))
+        return 1u;
+    if (IsShiftKeyCode(keyCode))
+        return 2u;
+    if (IsAltKeyCode(keyCode))
+        return 4u;
+    return 0u;
+}
+
 bool TryParseKeyCode(const std::string& rawValue, int32_t* keyCodeOut)
 {
     if (keyCodeOut == 0)

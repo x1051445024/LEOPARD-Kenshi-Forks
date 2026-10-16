@@ -20,8 +20,8 @@ msgstr "Включает и выключает весь мод"
 msgid "Highlight key"
 msgstr "Клавиша подсветки"
 
-msgid "Primary key that gates KO highlights. Clear to Unbound for always-on highlights."
-msgstr "Пока зажата эта клавиша, лежащие выделены. NONE - выделены всегда"
+msgid "Highlights show while this key (or combination, e.g. CTRL+X) is held. NONE - always shown."
+msgstr "Пока зажата эта клавиша или сочетание (например CTRL+X), лежащие выделены. NONE - выделены всегда"
 
 msgid "Require Ctrl"
 msgstr "Нужен Ctrl"

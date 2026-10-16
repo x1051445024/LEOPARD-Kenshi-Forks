@@ -15,5 +15,7 @@ bool ValidatePrimaryKeyCode(int32_t keyCode, std::string* reasonOut);
 std::string KeyCodeToConfigString(int32_t keyCode);
 std::string FormatKeybind(const PluginConfig& config);
 bool IsHighlightGateOpen(const PluginConfig& config);
+// LEOPARD: 1 - the key itself is Ctrl, 2 - Shift, 4 - Alt (EMC/MCM modifier bits), else 0.
+uint32_t ModifierBitOfKey(int32_t keyCode);
 
 } // namespace vs_keybind
