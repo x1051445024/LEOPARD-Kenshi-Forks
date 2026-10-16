@@ -175,7 +175,7 @@ static void OrderlyMove(const Vec3& to)
 
 // ------------------------------------------------------------- the readout
 static void* g_readout = 0; static bool g_readoutDead = false, g_readoutShown = false; static int g_readoutShape = -1, g_readoutAdvance = -1, g_readoutLoose = -1;
-static char g_readoutBacking[512];
+static char g_readoutBacking[1200];
 static bool g_readoutStyled = false;
 
 static bool ReadoutMake()
@@ -185,7 +185,7 @@ static bool ReadoutMake()
     EngineString type, skin, layer, name; char skinBacking[64];
     if (!StrMakeInline(type, "TextBox") || !StrMakeHeap(skin, skinBacking, sizeof(skinBacking), "Kenshi_GenericTextBoxSkin") || !StrMakeInline(layer, "Back") || !StrMakeInline(name, "OK_Shapes")) { g_readoutDead = true; return false; }
     HWND hw = GetForegroundWindow(); RECT rc = { 0, 0, 1280, 720 }; if (hw) GetClientRect(hw, &rc);
-    int w = 200, h = 190, x = 12, y = (int)rc.bottom / 2 - h / 2;
+    int w = 250, h = 340, x = 12, y = (int)rc.bottom / 2 - h / 2;
     __try
     {
         void* gui = MG_getGui(); if (!PtrOk(gui)) { g_readoutDead = true; return false; }
@@ -220,10 +220,17 @@ static void ReadoutUpdate(bool show)
     ReadoutStyle();
     if (g_readoutShape != g_set.shape || g_readoutAdvance != g_set.advance || g_readoutLoose != g_set.loose)
     {
-        char text[400]; int p = 0;
-        p += sprintf_s(text + p, sizeof(text) - p, "FORMATIONS\n");
-        for (int i = 0; i < SHAPES; i++) p += sprintf_s(text + p, sizeof(text) - p, "%s %s  %s\n", i == g_set.shape ? ">" : "  ", g_set.keys[i], SHAPE_NAMES[i]);   // 1.4.3: the configured key names
-        p += sprintf_s(text + p, sizeof(text) - p, "  %s  %s\n\n  %s  retreat\n  %s  set rally", g_set.keys[KEY_LOOSE], g_set.loose ? "Loose" : "Tight", g_set.keys[KEY_RETREAT], g_set.keys[KEY_RALLY]);
+        // 17.10.2026: eleven shapes, and the readout in the game's language (it was Russian only)
+        static const char* const TITLE[3] = { "FORMATIONS", "ПОСТРОЕНИЯ", "阵型" };
+        static const char* const LOOSE[3] = { "loose", "свободно", "松散" };
+        static const char* const TIGHT[3] = { "tight", "плотно", "紧密" };
+        static const char* const RETREAT[3] = { "retreat", "отход", "撤退" };
+        static const char* const RALLY[3] = { "rally point", "точка сбора", "集结点" };
+        const int L = g_uiLang >= 0 && g_uiLang < 3 ? g_uiLang : 0;
+        char text[1000]; int p = 0;
+        p += sprintf_s(text + p, sizeof(text) - p, "%s\n", TITLE[L]);
+        for (int i = 0; i < SHAPES; i++) p += sprintf_s(text + p, sizeof(text) - p, "%s %s  %s\n", i == g_set.shape ? ">" : "  ", g_set.keys[SHAPE_KEY[i]], SHAPE_NAMES_UI[i][L]);   // 1.4.3: the configured key names
+        p += sprintf_s(text + p, sizeof(text) - p, "  %s  %s\n\n  %s  %s\n  %s  %s", g_set.keys[KEY_LOOSE], g_set.loose ? LOOSE[L] : TIGHT[L], g_set.keys[KEY_RETREAT], RETREAT[L], g_set.keys[KEY_RALLY], RALLY[L]);
         EngineString cap;
         if (StrMakeHeap(cap, g_readoutBacking, sizeof(g_readoutBacking), text))
         {

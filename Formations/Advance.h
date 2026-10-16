@@ -141,7 +141,7 @@ static void AdvanceLayShape(const Vec3& lp)
         for (int s = 0; s < k; s++) { if (used[s]) continue; float dx = slots[s].x - p.x, dz = slots[s].z - p.z, d = dx * dx + dz * dz; if (d < bd) { bd = d; bs = s; } }
         if (bs < 0) break; used[bs] = true;
         if (UT_terrainHeight) { __try { slots[bs].y = UT_terrainHeight(slots[bs].x, slots[bs].z); } __except (EXCEPTION_EXECUTE_HANDLER) { } }
-        if (CH_setStandingOrder) { __try { CH_setStandingOrder(mem[i], STANDING_HOLD, true); held++; } __except (EXCEPTION_EXECUTE_HANDLER) { } }
+        if (CH_setStandingOrder && g_set.hold) { __try { CH_setStandingOrder(mem[i], STANDING_HOLD, true); held++; } __except (EXCEPTION_EXECUTE_HANDLER) { } }
         if (GroundOrder(mem[i], &slots[bs])) placed++;
     }
     Log("advance: %s laid at the destination facing the march - %d placed, hold on for %d", SHAPE_NAMES[g_set.shape], placed, held);

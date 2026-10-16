@@ -23,8 +23,9 @@ plus ours):
 | Wall-B-Gone | [Emkej](https://github.com/Emkej/Wall-B-Gone) |
 | BetterLooting | [XxAtreuSSxX](https://github.com/XxAtreuSSxX/BetterLooting) |
 | Character-Highlight | [BFrizzleFoShizzle](https://github.com/BFrizzleFoShizzle/KenshiLib_Examples) (`CharacterHighlight`) |
+| Formations | [Slinkysalmon03](https://steamcommunity.com/sharedfiles/filedetails/?id=3795714050) (source shipped with the Workshop mod; first commit) |
 
-The Emkej mods are under GPLv3 (see LICENSE in each folder).
+The Emkej mods and Formations are under GPLv3 (see LICENSE in each folder).
 
 Our own plugins and the shared headers these forks include (Localization.h,
 ModConfigMenu.h, McmModHubBridge.h, WidgetRef.h, HoldKey.h) are in

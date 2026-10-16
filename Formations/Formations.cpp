@@ -63,7 +63,8 @@ static void LogInit()
         fputs("ALT+1 line  ALT+2 circle  ALT+3 rectangle  ALT+4 wedge  ALT+5 tight/loose.  (Every key and the modifier are yours to change in Formations_settings.txt.)\n", f);
         fputs("ALT+X retreat: everyone standing runs to the rally point (or away from the fight) and picks up the wounded on the way.\n", f);
         fputs("ALT+V sets the rally point under the cursor - a marker stands there while ALT is held (the editor's own town statue, 25 world units tall; MarkerHeight in the settings); ALT+V again on the marker clears it. Characters holding the game's own Medic job (the orders panel button, NUM7) carry the wounded to it on their own while a rally point exists, put them down there, and the Medic job heals them.\n", f);
-        fputs("The drag also switches the game's own Hold on for them (the orders panel button / NUM1 releases it). While ALT is held the game's plain right-click move does not fire.\n\n", f);
+        fputs("With Hold=1 (the default) the drag also switches the game's own Hold on for them (the orders panel button / NUM1 releases it); Hold=0 leaves it alone. While ALT is held the game's plain right-click move does not fire.\n", f);
+        fputs("ALT above is the default modifier - any key or combination can be set (Modifier in the settings, or Mod Config Menu).\n\n", f);
         fclose(f);
     }
 }
@@ -126,7 +127,15 @@ typedef int     (*AddHook_t)(void* target, void* detour, void** original);
 typedef __int64 (*GetRealAddress_t)(void* fn);
 static AddHook_t        KL_AddHook = 0;
 static GetRealAddress_t KL_GetRealAddress = 0;
-static void* Real(void* fn) { if (fn && KL_GetRealAddress) { __int64 r = KL_GetRealAddress(fn); if (r) return (void*)r; } return fn; }
+// GetRealAddress only for KenshiLib's own export stubs: for an Ogre function (Camera::setPosition) KenshiLib logs an
+// "Unnecessary call ... Error" pair at every start.
+static bool InKenshiLib(void* fn)
+{
+    HMODULE owner = 0;
+    return GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)fn, &owner)
+        && owner == GetModuleHandleA("KenshiLib.dll");
+}
+static void* Real(void* fn) { if (fn && KL_GetRealAddress && InKenshiLib(fn)) { __int64 r = KL_GetRealAddress(fn); if (r) return (void*)r; } return fn; }
 static bool Hook(const char* label, void* target, void* detour, void** orig)
 {
     if (!target) { Log("  %-34s NOT FOUND", label); return false; }
@@ -139,10 +148,18 @@ static bool Hook(const char* label, void* target, void* detour, void** orig)
 // 1.4.3 (the owner: "make the keybinds configurable"): the seven keys live in the settings as names - a letter or digit, F1-F12, or
 // space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period. KEY_ order: line, circle,
 // rectangle, wedge, tight/loose, retreat, rally. An unknown name disables that key (logged at load), never crashes.
-enum { KEY_LINE = 0, KEY_CIRCLE, KEY_RECT, KEY_WEDGE, KEY_LOOSE, KEY_RETREAT, KEY_RALLY, KEY_COUNT };
-static const char* KEY_SETTING[KEY_COUNT] = { "KeyLine", "KeyCircle", "KeyRectangle", "KeyWedge", "KeyLoose", "KeyRetreat", "KeyRally" };
-struct Settings { char modifier[8]; float spacing; int shape; int ghost; int followTask; int advance; int loose; float retreat; float markerHeight; char keys[KEY_COUNT][12]; };
-static Settings g_set = { "alt", 10.0f, 0, 1, 44, 1, 1, 300.0f, 25.0f, { "1", "2", "3", "4", "5", "X", "V" } };
+// 17.10.2026: seven more shapes - the follow shapes (Follow.h) for the drag too; their keys go after the
+// old ones so the settings file and its order stay as they were.
+enum { KEY_LINE = 0, KEY_CIRCLE, KEY_RECT, KEY_WEDGE, KEY_LOOSE, KEY_RETREAT, KEY_RALLY,
+       KEY_SQUARE, KEY_RHOMBUS, KEY_COLUMN2, KEY_PINCERS, KEY_DIAMOND, KEY_MOTH, KEY_CHEVRON, KEY_COUNT };
+static const char* KEY_SETTING[KEY_COUNT] = { "KeyLine", "KeyCircle", "KeyRectangle", "KeyWedge", "KeyLoose", "KeyRetreat", "KeyRally",
+                                             "KeySquare", "KeyRhombus", "KeyColumn", "KeyPincers", "KeyDiamond", "KeyMoth", "KeyChevron" };
+// modifier (16.10.2026): any key or combination, written the way Mod Config Menu captures it -
+// "ALT", "SHIFT", "F", "CTRL+B", "NUM5" (shared/HoldKey.h reads it). The old alt/ctrl/shift still read.
+// hold (16.10.2026): 1 = a formation switches the game's own Hold on for everyone it places. The owner:
+// "it sets Hold by itself, that is infuriating" - a SHIFT modifier caught the game's own shift-click.
+struct Settings { char modifier[32]; float spacing; int shape; int ghost; int followTask; int advance; int loose; float retreat; float markerHeight; char keys[KEY_COUNT][12]; int hold; };
+static Settings g_set = { "ALT", 10.0f, 0, 1, 44, 1, 1, 300.0f, 25.0f, { "1", "2", "3", "4", "5", "X", "V", "6", "7", "8", "9", "0", "minus", "plus" }, 1 };
 static int KeyVK(const char* name)
 {   // a key name -> virtual-key code; 0 = unknown (the key is off)
     if (!name || !name[0]) return 0;
@@ -155,33 +172,46 @@ static int KeyVK(const char* name)
 }
 static int KeyOf(int which) { return KeyVK(g_set.keys[which]); }   // markerHeight (1.4.2): the rally marker's height in world units - the editor's marker mesh is a unit cube, so a raw scale (1.4.1's MarkerScale 0.25) stood it a quarter of a unit high, invisible; 25 is the wall banner's height   // spacing in world units: a mouse drag across the screen is hundreds of them (measured 280-768), so 10, not 2
 static char g_settingsPath[MAX_PATH] = {0};
-static const char* SHAPE_NAMES[] = { "Line", "Circle", "Rectangle", "Wedge" };
-static const int SHAPES = 4;
+static const char* SHAPE_NAMES[] = { "Line", "Circle", "Rectangle", "Wedge", "Square", "Rhombus", "Column of two", "Pincers", "Diamond", "Moth", "Chevron" };
+// Экранные имена отдельно от журнальных: в лог пусть идёт английский,
+// чтобы отчёт об ошибке остался понятен автору мода. Язык - как у игры (g_uiLang: 0 en, 1 ru, 2 zh).
+static const char* SHAPE_NAMES_UI[][3] = { { "Line", "Линия", "横队" }, { "Circle", "Круг", "圆阵" }, { "Rectangle", "Прямоугольник", "方阵" },
+    { "Wedge", "Клин", "楔形" }, { "Square", "Каре", "空心方阵" }, { "Rhombus", "Ромб", "菱形" }, { "Column of two", "Колонна по двое", "双列纵队" },
+    { "Pincers", "Клещи", "钳形" }, { "Diamond", "Алмаз", "钻石阵" }, { "Moth", "Мотылёк", "飞蛾阵" }, { "Chevron", "Шеврон", "人字阵" } };
+static const int SHAPES = 11;
+static const int SHAPE_KEY[11] = { KEY_LINE, KEY_CIRCLE, KEY_RECT, KEY_WEDGE, KEY_SQUARE, KEY_RHOMBUS, KEY_COLUMN2, KEY_PINCERS, KEY_DIAMOND, KEY_MOTH, KEY_CHEVRON };
+static int g_uiLang = 0;
 // Bannerlord's tight/loose toggle: the spacing every shape and the march use
 static float Spacing() { return g_set.spacing * (g_set.loose ? 2.0f : 1.0f); }
+
+#include "HoldKey.h"
+static HoldKey::Key g_modKey;
+static bool ParseModifier() { g_modKey = HoldKey::Parse(g_set.modifier); return g_modKey.vk != 0; }
 
 static void SaveSettings()
 {
     FILE* f = 0;
     if (!g_settingsPath[0] || fopen_s(&f, g_settingsPath, "w") != 0 || !f) return;
-    fputs("# Formations - settings\n", f);
-    fputs("# Modifier: alt | ctrl | shift - held while dragging with the right mouse button, and with 1-5\n", f);
+    fputs("# Formations - настройки\n", f);
+    fputs("# Modifier: клавиша, которую держат при перетаскивании правой кнопкой и с клавишами фигур - ALT, CTRL, SHIFT, буква, F1-F12, NUM0-9, сочетание вроде CTRL+B\n", f);
     fprintf(f, "Modifier=%s\n", g_set.modifier);
-    fputs("# Spacing: world units between characters. A drag across the screen is a few hundred units; 10 is a close rank.\n", f);
+    fputs("# Spacing: расстояние между бойцами в единицах мира. Перетаскивание через экран - несколько сотен единиц; 10 - плотный строй.\n", f);
     fprintf(f, "Spacing=%.1f\n", g_set.spacing);
-    fputs("# Shape: 0 line, 1 circle, 2 rectangle, 3 wedge\n", f);
+    fputs("# Shape: фигура по умолчанию. 0 линия, 1 круг, 2 прямоугольник, 3 клин\n", f);
     fprintf(f, "Shape=%d\n", g_set.shape);
-    fputs("# Ghost: 1 = while dragging, a small square marks where each character will stand\n", f);
+    fputs("# Ghost: 1 = при перетаскивании бледный квадрат показывает, где встанет каждый боец\n", f);
     fprintf(f, "Ghost=%d\n", g_set.ghost);
-    fputs("# FollowTask: the TaskType the orderly move gives followers (44 = FOLLOW_PLAYER_ORDER in the SDK enum)\n", f);
+    fputs("# FollowTask: задача, которую марш выдаёт идущим за ведущим (44 = FOLLOW_PLAYER_ORDER в перечислении SDK). Без нужды не трогать.\n", f);
     fprintf(f, "FollowTask=%d\n", g_set.followTask);
-    fputs("# Advance: 1 = the orderly move keeps the current shape behind the leader; 0 = the game's own follow (a clump)\n", f);
+    fputs("# Advance: 1 = на марше отряд держит строй за ведущим; 0 = обычное следование игры, то есть толпой\n", f);
     fprintf(f, "Advance=%d\n", g_set.advance);
-    fputs("# Loose: 1 = double spacing (Bannerlord's loose), 0 = tight; ALT+5 toggles it\n", f);
+    fputs("# Loose: 1 = двойной интервал (свободный строй), 0 = плотный. Переключается модификатором и 5.\n", f);
     fprintf(f, "Loose=%d\n", g_set.loose);
-    fputs("# MarkerHeight: the rally marker's height in world units (the editor's own town statue, data/meshes/athene.mesh with the editor's debug_marker material, sized to this; a wall banner is about 25); shown only while the modifier is held\n", f);
+    fputs("# Hold: 1 = построенным включается кнопка игры \"Держать\" (стоят на месте); 0 = встают в строй, но \"Держать\" не трогается\n", f);
+    fprintf(f, "Hold=%d\n", g_set.hold);
+    fputs("# MarkerHeight: высота метки точки сбора в единицах мира (это статуя из редактора, data/meshes/athene.mesh; настенное знамя - примерно 25). Метка видна, только пока держишь модификатор.\n", f);
     fprintf(f, "MarkerHeight=%.0f\n", g_set.markerHeight);
-    fputs("# Keys (held with the modifier): a letter or digit, F1-F12, or space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period. Blank or unknown = that key is off.\n", f);
+    fputs("# Клавиши (нажимаются вместе с модификатором): буква или цифра, F1-F12, а также space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period. Пусто или непонятное значение = клавиша выключена.\n", f);
     for (int i = 0; i < KEY_COUNT; i++) fprintf(f, "%s=%s\n", KEY_SETTING[i], g_set.keys[i]);
     fclose(f);
 }
@@ -204,12 +234,14 @@ static void LoadSettings()
         else if (_stricmp(k, "FollowTask") == 0) g_set.followTask = atoi(v);
         else if (_stricmp(k, "Advance") == 0) g_set.advance = atoi(v) != 0;
         else if (_stricmp(k, "Loose") == 0) g_set.loose = atoi(v) != 0;
+        else if (_stricmp(k, "Hold") == 0) g_set.hold = atoi(v) != 0;
         else if (_stricmp(k, "Retreat") == 0) g_set.retreat = (float)atof(v);
         else if (_stricmp(k, "MarkerHeight") == 0) { g_set.markerHeight = (float)atof(v); if (g_set.markerHeight < 2.0f) g_set.markerHeight = 2.0f; if (g_set.markerHeight > 300.0f) g_set.markerHeight = 300.0f; }
         else if (_stricmp(k, "MarkerScale") == 0) Log("settings: MarkerScale (1.4.1) is retired - the marker is sized by MarkerHeight now (world units, default 25); the line is ignored");
         else { bool hit = false; for (int i = 0; i < KEY_COUNT && !hit; i++) if (_stricmp(k, KEY_SETTING[i]) == 0 || (i == KEY_LOOSE && _stricmp(k, "KeyTightLoose") == 0)) { strncpy_s(g_set.keys[i], sizeof(g_set.keys[i]), v, _TRUNCATE); hit = true; } }
     }
     fclose(f);
+    if (!ParseModifier()) { Log("settings: Modifier=%s is not a key - ALT is used", g_set.modifier); strcpy_s(g_set.modifier, sizeof(g_set.modifier), "ALT"); ParseModifier(); }
     for (int i = 0; i < KEY_COUNT; i++) if (!KeyOf(i)) Log("settings: %s=%s is not a key name - that key is OFF (a letter or digit, F1-F12, space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period)", KEY_SETTING[i], g_set.keys[i]);
     Log("keys: %s+%s line, +%s circle, +%s rectangle, +%s wedge, +%s tight/loose, +%s retreat, +%s rally (Formations_settings.txt)", g_set.modifier, g_set.keys[0], g_set.keys[1], g_set.keys[2], g_set.keys[3], g_set.keys[4], g_set.keys[5], g_set.keys[6]);
     SaveSettings();   // the file always carries every key, so a player sees what to edit
@@ -224,7 +256,7 @@ static bool GuiHasKeyboard()
     if (!MG_inputManager || !MG_isFocusKey) return false;
     __try { void* im = MG_inputManager(); return PtrOk(im) && MG_isFocusKey(im); } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
 }
-static int ModifierVK() { return _stricmp(g_set.modifier, "ctrl") == 0 ? VK_CONTROL : _stricmp(g_set.modifier, "shift") == 0 ? VK_SHIFT : VK_MENU; }
+static bool ModifierHeld() { return g_modKey.vk != 0 && HoldKey::Held(g_modKey); }
 
 // ------------------------------------------------------- the engine doors
 struct Vec3 { float x, y, z; };
@@ -372,7 +404,7 @@ static int g_swallowed = 0;
 static void AdvanceStop(const char* why);                  // Advance.h, included later
 static void hook_playerMove(void* pi, const Vec3* pos, void* building)
 {
-    if ((GetAsyncKeyState(ModifierVK()) & 0x8000) != 0) { if (g_swallowed++ < 5) Log("move: the game's right-click move swallowed (modifier held)"); return; }
+    if (ModifierHeld()) { if (g_swallowed++ < 5) Log("move: the game's right-click move swallowed (modifier held)"); return; }
     AdvanceStop("the player's own order");
     if (orig_playerMove) orig_playerMove(pi, pos, building);
 }
@@ -527,6 +559,7 @@ static int ReadSelection()
 }
 
 // --------------------------------------------------------------- the shapes
+static Vec3 FollowOffset(int s, int i, int n);   // Follow.h - the follow shapes, also laid by the drag (Layout.h 4..10)
 #include "Layout.h"
 
 // nearest-first assignment: each slot in turn takes the closest unassigned
@@ -568,7 +601,7 @@ static int OrderToSlots()
         void* ch = g_slotChar[i]; if (!PtrOk(ch)) continue;
         const char* why = CharBusyWhy(ch);
         if (why && strcmp(why, "under attack") != 0) { Log("   slot %d skipped: %s", i, why); continue; }
-        if (CH_setStandingOrder)
+        if (CH_setStandingOrder && g_set.hold)
         {
             __try { CH_setStandingOrder(ch, STANDING_HOLD, true); if (CH_getStandingOrder && CH_getStandingOrder(ch, STANDING_HOLD)) held++; }
             __except (EXCEPTION_EXECUTE_HANDLER) { Log("order: setStandingOrder faulted - disarming"); CH_setStandingOrder = 0; }
@@ -582,7 +615,7 @@ static int OrderToSlots()
         }
         __except (EXCEPTION_EXECUTE_HANDLER) { Log("order: the move order faulted - disarming"); CH_playerMoveOrderDefault = 0; CH_addJob = 0; return sent; }
     }
-    Log("   hold on for %d of %d; moved by %s", held, g_slotCount, CH_playerMoveOrderDefault ? "Character::playerMoveOrderDefault (the game's own click)" : "Character::addJob");
+    Log("   hold %s for %d of %d; moved by %s", g_set.hold ? "on" : "left alone (Hold=0)", held, g_slotCount, CH_playerMoveOrderDefault ? "Character::playerMoveOrderDefault (the game's own click)" : "Character::addJob");
     return sent;
 }
 
@@ -618,24 +651,27 @@ static void ApplyFormation()
 
 #include "Ghost.h"
 #include "Moves.h"
+static void FollowTick();   // Follow.h (17.10.2026): shapes for following the leader
 
 static float DragLen() { float dx = g_dragB.x - g_dragA.x, dz = g_dragB.z - g_dragA.z; return sqrtf(dx * dx + dz * dz); }
 static void hook_mainLoop(void* self, float dt)
 {
     if (orig_mainLoop) orig_mainLoop(self, dt);
-    bool mod = (GetAsyncKeyState(ModifierVK()) & 0x8000) != 0 && !GuiHasKeyboard();   // no hotkey while a text box types (1.4.2; the Cuneiform chat's boot 7)
+    bool mod = ModifierHeld() && !GuiHasKeyboard();   // no hotkey while a text box types (1.4.2; the Cuneiform chat's boot 7)
     bool rb  = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
     ReadoutUpdate(mod);
     RallyFlagUpdate(mod);
     AdvanceTick(false);
+    FollowTick();
     MedicTick();
 
-    // modifier + the four shape keys; + the tight/loose key (1.4.3: every key from the settings; 0 = off)
-    for (int i = 1; i <= 4; i++)
+    // modifier + the shape keys; + the tight/loose key (1.4.3: every key from the settings; 0 = off)
+    static bool shapeKeyDown[16] = { false };
+    for (int s = 0; s < SHAPES; s++)
     {
-        int vk = KeyOf(i - 1); bool d = mod && vk && (GetAsyncKeyState(vk) & 0x8000) != 0;
-        if (d && !g_keyDown[i]) { g_set.shape = i - 1; SaveSettings(); Log("shape: %s", SHAPE_NAMES[g_set.shape]); }
-        g_keyDown[i] = d;
+        int vk = KeyOf(SHAPE_KEY[s]); bool d = mod && vk && (GetAsyncKeyState(vk) & 0x8000) != 0;
+        if (d && !shapeKeyDown[s]) { g_set.shape = s; SaveSettings(); Log("shape: %s", SHAPE_NAMES[g_set.shape]); }
+        shapeKeyDown[s] = d;
     }
     {
         int vk = KeyOf(KEY_LOOSE); bool d = mod && vk && (GetAsyncKeyState(vk) & 0x8000) != 0;
@@ -674,10 +710,239 @@ static void hook_mainLoop(void* self, float dt)
 }
 
 // ---------------------------------------------------------------- startup
+// ------------------------------------------------- ModConfigMenu page
+// A page in the MCM tab of the game's Options window. Without MCM nothing changes: the settings live in
+// Formations_settings.txt as before. The rows call straight into g_set + SaveSettings(), so a change applies at once.
+// Formations links no KenshiLib (and so no Localization.h): the texts sit here in three languages and the language is
+// the game's own choice, read from settings.cfg (language=ru_RU).
+#include "ModConfigMenu.h"
+
+namespace formations_mcm
+{
+    enum Lang { EN = 0, RU = 1, ZH = 2 };
+
+    static int CurrentLang()
+    {
+        char path[MAX_PATH];
+        _snprintf_s(path, MAX_PATH, _TRUNCATE, "%s..\\..\\settings.cfg", g_dir);
+        FILE* f = 0;
+        if (fopen_s(&f, path, "r") != 0 || !f) return EN;
+        char line[256];
+        int lang = EN;
+        while (fgets(line, sizeof(line), f))
+        {
+            if (_strnicmp(line, "language=", 9) != 0) continue;
+            if (_strnicmp(line + 9, "ru", 2) == 0) lang = RU;
+            else if (_strnicmp(line + 9, "zh", 2) == 0) lang = ZH;
+            break;
+        }
+        fclose(f);
+        return lang;
+    }
+
+    struct Text { const char* t[3]; };
+    static int g_lang = EN;
+    static const char* T(const Text& x) { return x.t[g_lang]; }
+
+    static const Text kInfo = {{ "Bannerlord-style formations: hold the modifier and drag with the right mouse button to line up the selected squad",
+                                 "Строй как в Bannerlord: держите модификатор и тяните правой кнопкой - выделенные встанут вдоль линии",
+                                 "类似《骑马与砍杀》的阵型：按住修饰键并用右键拖动，所选角色会沿线排列" }};
+    static const Text kSecMain = {{ "Formation", "Строй", "阵型" }};
+    static const Text kSecKeys = {{ "Keys (pressed together with the modifier)", "Клавиши (вместе с модификатором)", "按键（与修饰键同时按下）" }};
+    static const Text kModifier = {{ "Modifier", "Модификатор", "修饰键" }};
+    static const Text kModifierTip = {{ "Key held while dragging with the right mouse button and with the shape keys. Click and press any key or combination. SHIFT clashes with the game's own shift-click: a slightly dragged click lines the squad up",
+                                       "Клавиша, которую держат при перетаскивании правой кнопкой и с клавишами фигур. Нажмите на поле и затем любую клавишу или сочетание. SHIFT мешает очереди приказов игры: чуть смазанный щелчок строит отряд",
+                                       "右键拖动及按阵型键时需按住的键。点击后按下任意键或组合键。SHIFT 会与游戏自带的 Shift 点击冲突" }};
+    static const Text kHold = {{ "Hold position after forming up", "Держать позицию после построения", "列阵后原地坚守" }};
+    static const Text kHoldTip = {{ "On: everyone placed in a formation gets the game's Hold button on, so they stay in their places and fight from there; the Hold button or NUM1 releases it. Off: they form up, but Hold is not touched",
+                                   "Включено: всем, кого поставили в строй, включается кнопка игры \"Держать\" - стоят на своих местах и бьются оттуда; снимается той же кнопкой или NUM1. Выключено: встают в строй, но \"Держать\" не трогается",
+                                   "开启：列阵的角色会打开游戏的“坚守”按钮，留在原位作战；用该按钮或 NUM1 取消。关闭：只列阵，不改动“坚守”" }};
+    static const Text kSpacing = {{ "Spacing", "Интервал", "间距" }};
+    static const Text kSpacingTip = {{ "Distance between fighters in world units; 10 is a tight line. Loose formation doubles it",
+                                      "Расстояние между бойцами в единицах мира; 10 - плотный строй. Свободный строй удваивает его",
+                                      "队员之间的距离（世界单位）；10 为紧密阵型。松散阵型时加倍" }};
+    static const Text kShape = {{ "Default shape", "Фигура по умолчанию", "默认阵型" }};
+    static const Text kShapeTip = {{ "Shape used when you drag without picking one first", "Фигура, в которую встаёт отряд, если её не выбрать заранее", "未预先选择时拖动所用的阵型" }};
+    static const Text kShapeNames[11] = {{{ "Line", "Линия", "横队" }}, {{ "Circle", "Круг", "圆阵" }},
+                                        {{ "Rectangle", "Прямоугольник", "方阵" }}, {{ "Wedge", "Клин", "楔形" }},
+                                        {{ "Square", "Каре", "空心方阵" }}, {{ "Rhombus", "Ромб", "菱形" }},
+                                        {{ "Column of two", "Колонна по двое", "双列纵队" }}, {{ "Pincers", "Клещи", "钳形" }},
+                                        {{ "Diamond", "Алмаз", "钻石阵" }}, {{ "Moth", "Мотылёк", "飞蛾阵" }}, {{ "Chevron", "Шеврон", "人字阵" }}};
+    static const Text kGhost = {{ "Show places while dragging", "Показывать места при перетаскивании", "拖动时显示站位" }};
+    static const Text kGhostTip = {{ "A pale square marks where each fighter will stand", "Бледный квадрат показывает, где встанет каждый боец", "用淡色方块标出每名队员的站位" }};
+    static const Text kAdvance = {{ "Keep formation on the march", "Держать строй на марше", "行军时保持阵型" }};
+    static const Text kAdvanceTip = {{ "A march is the modifier plus a plain right-click (no drag) on the ground. On: the slowest fighter leads to that point, the rest walk behind him in the chosen shape, and at the point they stand up in it. Off: the game's usual follow - everyone walks there as a crowd",
+                                      "Марш - это модификатор и простой щелчок правой кнопкой по земле, без перетаскивания. Включено: к точке ведёт самый медленный боец, остальные идут за ним выбранной фигурой и на месте в неё встают. Выключено: обычное следование игры - все идут туда толпой",
+                                      "行军：按住修饰键并在地面上右键单击（不拖动）。开启：最慢的队员带队前往该点，其余人按所选阵型跟随并在终点列阵。关闭：原版跟随，成群前往" }};
+    static const Text kLoose = {{ "Loose formation", "Свободный строй", "松散阵型" }};
+    static const Text kLooseTip = {{ "On: fighters stand twice the Spacing apart (loose ranks, less crowding in a fight). Off: exactly the Spacing (tight ranks). Also switched in game by the modifier and the tight/loose key",
+                                    "Включено: бойцы стоят на двойном интервале (редкий строй, меньше толкотни в бою). Выключено: ровно на интервале (плотный строй). В игре переключается модификатором и клавишей \"Плотный / свободный\"",
+                                    "开启：队员间距为设定间距的两倍（松散）。关闭：按设定间距（紧密）。游戏中也可用修饰键加紧密/松散键切换" }};
+    static const Text kMarker = {{ "Rally marker height", "Высота метки сбора", "集结标记高度" }};
+    static const Text kMarkerTip = {{ "Height of the rally point marker in world units; a wall banner is about 25. Seen only while the modifier is held",
+                                     "Высота метки точки сбора в единицах мира; настенное знамя - около 25. Видна, только пока держишь модификатор",
+                                     "集结点标记的高度（世界单位）；墙上旗帜约为 25。仅在按住修饰键时可见" }};
+    static const Text kKeyNames[KEY_COUNT] = {
+        {{ "Line", "Линия", "横队" }}, {{ "Circle", "Круг", "圆阵" }}, {{ "Rectangle", "Прямоугольник", "方阵" }},
+        {{ "Wedge", "Клин", "楔形" }}, {{ "Tight / loose", "Плотный / свободный", "紧密 / 松散" }},
+        {{ "Retreat", "Отступление", "撤退" }}, {{ "Rally", "Сбор", "集结" }},
+        {{ "Square", "Каре", "空心方阵" }}, {{ "Rhombus", "Ромб", "菱形" }}, {{ "Column of two", "Колонна по двое", "双列纵队" }},
+        {{ "Pincers", "Клещи", "钳形" }}, {{ "Diamond", "Алмаз", "钻石阵" }}, {{ "Moth", "Мотылёк", "飞蛾阵" }}, {{ "Chevron", "Шеврон", "人字阵" }} };
+    static const Text kKeyTip = {{ "A letter or digit, F1-F12, space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period. Empty - key off",
+                                   "Буква или цифра, F1-F12, space, tab, enter, home, end, pageup, pagedown, insert, delete, numpad0-9, plus, minus, comma, period. Пусто - клавиша выключена",
+                                   "字母或数字、F1-F12、space、tab、enter、home、end、pageup、pagedown、insert、delete、numpad0-9、plus、minus、comma、period。留空则禁用该键" }};
+
+    static void Err(char* err, unsigned size, const char* text) { if (err && size) strncpy_s(err, size, text, _TRUNCATE); }
+
+    // MCM hands over OIS key codes (DirectInput scan codes); the settings keep the text MCM itself
+    // prints for them, which is also what HoldKey reads.
+    struct KeyName { int code; const char* name; };
+    static const KeyName kOis[] = {
+        { 0x38, "ALT" }, { 0x1D, "CTRL" }, { 0x2A, "SHIFT" },
+        { 0x1E, "A" }, { 0x30, "B" }, { 0x2E, "C" }, { 0x20, "D" }, { 0x12, "E" }, { 0x21, "F" }, { 0x22, "G" },
+        { 0x23, "H" }, { 0x17, "I" }, { 0x24, "J" }, { 0x25, "K" }, { 0x26, "L" }, { 0x32, "M" }, { 0x31, "N" },
+        { 0x18, "O" }, { 0x19, "P" }, { 0x10, "Q" }, { 0x13, "R" }, { 0x1F, "S" }, { 0x14, "T" }, { 0x16, "U" },
+        { 0x2F, "V" }, { 0x11, "W" }, { 0x2D, "X" }, { 0x15, "Y" }, { 0x2C, "Z" },
+        { 0x0B, "0" }, { 0x02, "1" }, { 0x03, "2" }, { 0x04, "3" }, { 0x05, "4" }, { 0x06, "5" }, { 0x07, "6" },
+        { 0x08, "7" }, { 0x09, "8" }, { 0x0A, "9" },
+        { 0x3B, "F1" }, { 0x3C, "F2" }, { 0x3D, "F3" }, { 0x3E, "F4" }, { 0x3F, "F5" }, { 0x40, "F6" },
+        { 0x41, "F7" }, { 0x42, "F8" }, { 0x43, "F9" }, { 0x44, "F10" }, { 0x57, "F11" }, { 0x58, "F12" },
+        { 0x39, "SPACE" }, { 0x0F, "TAB" }, { 0x1C, "ENTER" }, { 0xD2, "INSERT" }, { 0xD3, "DELETE" },
+        { 0xC7, "HOME" }, { 0xCF, "END" }, { 0xC9, "PAGEUP" }, { 0xD1, "PAGEDOWN" }, { 0xC8, "UP" },
+        { 0xD0, "DOWN" }, { 0xCB, "LEFT" }, { 0xCD, "RIGHT" }, { 0x29, "`" }, { 0x0C, "-" }, { 0x0D, "=" },
+        { 0x1A, "[" }, { 0x1B, "]" }, { 0x27, ";" }, { 0x28, "'" }, { 0x33, "," }, { 0x34, "." }, { 0x35, "/" },
+        { 0x2B, "\\" },
+        { 0x52, "NUM0" }, { 0x4F, "NUM1" }, { 0x50, "NUM2" }, { 0x51, "NUM3" }, { 0x4B, "NUM4" }, { 0x4C, "NUM5" },
+        { 0x4D, "NUM6" }, { 0x47, "NUM7" }, { 0x48, "NUM8" }, { 0x49, "NUM9" },
+        { 0x1D, "LCTRL" }, { 0x9D, "RCTRL" }, { 0x2A, "LSHIFT" }, { 0x36, "RSHIFT" }, { 0x38, "LALT" }, { 0xB8, "RALT" },
+    };
+    static const int kOisCount = sizeof(kOis) / sizeof(kOis[0]);
+    static int __cdecl GetModifier(void*, MCM_Key* out)
+    {
+        out->keycode = 0x38; out->modifiers = 0;
+        char t[32]; size_t n = 0;
+        for (const char* p = g_set.modifier; *p && n + 1 < sizeof(t); ++p) if (*p != ' ') t[n++] = (char)toupper((unsigned char)*p);
+        t[n] = 0;
+        const char* key = t;
+        for (;;)
+        {
+            const char* plus = strchr(key, '+');
+            if (!plus || !plus[1]) break;
+            if (_strnicmp(key, "CTRL+", 5) == 0) out->modifiers |= MCM_KEY_CTRL;
+            else if (_strnicmp(key, "SHIFT+", 6) == 0) out->modifiers |= MCM_KEY_SHIFT;
+            else if (_strnicmp(key, "ALT+", 4) == 0) out->modifiers |= MCM_KEY_ALT;
+            key = plus + 1;
+        }
+        for (int i = 0; i < kOisCount; i++) if (strcmp(kOis[i].name, key) == 0) { out->keycode = kOis[i].code; return 0; }
+        out->modifiers = 0;
+        return 0;
+    }
+    static int __cdecl SetModifier(void*, MCM_Key v, char* err, unsigned size)
+    {
+        // Without a modifier every right-button drag would line the squad up - a key is required.
+        if (v.keycode < 0) { Err(err, size, "the modifier cannot be empty"); return 1; }
+        const char* name = 0;
+        for (int i = 0; i < kOisCount && !name; i++) if (kOis[i].code == v.keycode) name = kOis[i].name;
+        if (!name) { Err(err, size, "this key cannot be the modifier"); return 1; }
+        char t[32];
+        _snprintf_s(t, sizeof(t), _TRUNCATE, "%s%s%s%s", (v.modifiers & MCM_KEY_CTRL) ? "CTRL+" : "",
+                    (v.modifiers & MCM_KEY_SHIFT) ? "SHIFT+" : "", (v.modifiers & MCM_KEY_ALT) ? "ALT+" : "", name);
+        char old[sizeof(g_set.modifier)]; strcpy_s(old, sizeof(old), g_set.modifier);
+        strcpy_s(g_set.modifier, sizeof(g_set.modifier), t);
+        if (!ParseModifier()) { strcpy_s(g_set.modifier, sizeof(g_set.modifier), old); ParseModifier(); Err(err, size, "this key cannot be the modifier"); return 1; }
+        SaveSettings(); return 0;
+    }
+    static int __cdecl GetSpacing(void*, float* out) { *out = g_set.spacing; return 0; }
+    static int __cdecl SetSpacing(void*, float v, char*, unsigned)
+    {
+        if (v < 1.0f) v = 1.0f; if (v > 100.0f) v = 100.0f;
+        g_set.spacing = v; SaveSettings(); return 0;
+    }
+    static int __cdecl GetShape(void*, int* out) { *out = g_set.shape; return 0; }
+    static int __cdecl SetShape(void*, int v, char* err, unsigned size)
+    {
+        if (v < 0 || v >= SHAPES) { Err(err, size, "bad shape"); return 1; }
+        g_set.shape = v; SaveSettings(); return 0;
+    }
+    static int __cdecl GetFlag(void* ud, int* out) { *out = *static_cast<int*>(ud) ? 1 : 0; return 0; }
+    static int __cdecl SetFlag(void* ud, int v, char*, unsigned) { *static_cast<int*>(ud) = v ? 1 : 0; SaveSettings(); return 0; }
+    static int __cdecl GetMarker(void*, int* out) { *out = (int)(g_set.markerHeight + 0.5f); return 0; }
+    static int __cdecl SetMarker(void*, int v, char*, unsigned)
+    {
+        if (v < 2) v = 2; if (v > 300) v = 300;
+        g_set.markerHeight = (float)v; SaveSettings(); return 0;
+    }
+    static int g_keyIndex[KEY_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    static int __cdecl GetKey(void* ud, char* out, unsigned size)
+    {
+        strncpy_s(out, size, g_set.keys[*static_cast<int*>(ud)], _TRUNCATE); return 0;
+    }
+    static int __cdecl SetKey(void* ud, const char* v, char* err, unsigned size)
+    {
+        const int i = *static_cast<int*>(ud);
+        if (!v) v = "";
+        while (*v == ' ') v++;
+        if (strlen(v) >= sizeof(g_set.keys[i])) { Err(err, size, "key name too long"); return 1; }
+        if (v[0] && !KeyVK(v)) { Err(err, size, "unknown key name"); return 1; }
+        strcpy_s(g_set.keys[i], sizeof(g_set.keys[i]), v); SaveSettings(); return 0;
+    }
+}
+
+#include "Follow.h"
+
+extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
+{
+    using namespace formations_mcm;
+    if (api->version < 3) return;
+    g_lang = CurrentLang();
+    const bool defs = api->version >= 5;
+
+    api->beginMod(api, "Formations", "Formations", NULL, NULL);
+    if (api->version >= 2) api->info(api, T(kInfo));
+
+    api->section(api, T(kSecMain));
+    api->hotkeyFn(api, T(kModifier), T(kModifierTip), &GetModifier, &SetModifier, NULL, 0);
+    if (defs) api->defaultValue(api, "ALT");
+    api->numberFn(api, T(kSpacing), T(kSpacingTip), &GetSpacing, &SetSpacing, NULL, 1.0f, 100.0f, 1, 0);
+    if (defs) api->defaultValue(api, "10.0");
+    static const int shapeValues[11] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    const char* shapeLabels[11];
+    for (int s = 0; s < 11; s++) shapeLabels[s] = T(kShapeNames[s]);
+    api->choiceFn(api, T(kShape), T(kShapeTip), &GetShape, &SetShape, NULL, shapeValues, shapeLabels, 11, 0);
+    if (defs) api->defaultValue(api, "0");
+    api->toggleFn(api, T(kLoose), T(kLooseTip), &GetFlag, &SetFlag, &g_set.loose, 0);
+    if (defs) api->defaultValue(api, "1");
+    api->toggleFn(api, T(kHold), T(kHoldTip), &GetFlag, &SetFlag, &g_set.hold, 0);
+    if (defs) api->defaultValue(api, "1");
+    api->toggleFn(api, T(kAdvance), T(kAdvanceTip), &GetFlag, &SetFlag, &g_set.advance, 0);
+    if (defs) api->defaultValue(api, "1");
+    api->toggleFn(api, T(kGhost), T(kGhostTip), &GetFlag, &SetFlag, &g_set.ghost, 0);
+    if (defs) api->defaultValue(api, "1");
+    api->integerFn(api, T(kMarker), T(kMarkerTip), &GetMarker, &SetMarker, NULL, 2, 300, 0);
+    if (defs) api->defaultValue(api, "25");
+
+    api->section(api, T(kSecKeys));
+    static const char* const keyDefaults[KEY_COUNT] = { "1", "2", "3", "4", "5", "X", "V", "6", "7", "8", "9", "0", "minus", "plus" };
+    for (int i = 0; i < KEY_COUNT; i++)
+    {
+        api->textFn(api, T(kKeyNames[i]), T(kKeyTip), &GetKey, &SetKey, &g_keyIndex[i], 0);
+        if (defs) api->defaultValue(api, keyDefaults[i]);
+    }
+
+    // 17.10.2026: a follow shape for each squad of the loaded game (Follow.h; MCM v6 builds the rows on every show)
+    if (api->version >= 6 && GD_idataIndex)
+    {
+        static const Text kSecSquads = {{ "Squads - follow formation", "Отряды - строй при следовании", "小队 - 跟随阵型" }};
+        api->section(api, T(kSecSquads));
+        api->rows(api, &FollowRows, NULL);
+    }
+}
+
 __declspec(dllexport) void startPlugin()
 {
     LogInit();
     LoadSettings();
+    g_uiLang = formations_mcm::CurrentLang();
     HMODULE kl = GetModuleHandleA("KenshiLib.dll"); if (!kl) kl = LoadLibraryA("KenshiLib.dll");
     if (!kl) { Log("KenshiLib.dll not loaded - nothing to do"); return; }
     KL_AddHook = (AddHook_t)GetProcAddress(kl, "?AddHook@KenshiLib@@YA?AW4HookStatus@1@PEAX0PEAPEAX@Z");
@@ -688,6 +953,7 @@ __declspec(dllexport) void startPlugin()
 
     Hook("GameWorld main loop", GetProcAddress(kl, "?_NV_mainLoop_GPUSensitiveStuff@GameWorld@@QEAAXM@Z"), (void*)&hook_mainLoop, (void**)&orig_mainLoop);
     Hook("PlayerInterface::update", GetProcAddress(kl, "?update@PlayerInterface@@QEAAXXZ"), (void*)&hook_piUpdate, (void**)&orig_piUpdate);
+    FollowInstall(kl);
     if (ogre) Hook("Camera::setPosition", GetProcAddress(ogre, "?setPosition@Camera@Ogre@@QEAAXAEBVVector3@2@@Z"), (void*)&hook_camSetPos, (void**)&orig_camSetPos);
 
     CAM_getRay = ogre ? (camRay_t)GetProcAddress(ogre, "?getCameraToViewportRay@Camera@Ogre@@QEBAXMMPEAVRay@2@@Z") : 0;
@@ -741,7 +1007,7 @@ __declspec(dllexport) void startPlugin()
     Log("  selection (players + isSelected)   %s", (PI_getAllPlayerCharacters && PI_isObjectSelected) ? "reachable" : "NOT reachable");
     Log("  orders (Character::addJob)         %s", CH_addJob ? "reachable" : "NOT reachable");
     Log("  combat/down/dead                   %s", (CH_attackers && CH_isDown && CH_isUnconcious && CH_isDead) ? "reachable" : "partly reachable");
-    Log("\narmed - hold %s and drag with the right mouse button (hold on + the shape); %s + right-click = march, slowest leads; %s+1..4 shape (now: %s); %s+5 tight/loose (now: %s)\n",
+    Log("\narmed - hold %s and drag with the right mouse button (the shape, game Hold on if Hold=1); %s + right-click = march, slowest leads; %s+1..4 shape (now: %s); %s+5 tight/loose (now: %s)\n",
         g_set.modifier, g_set.modifier, g_set.modifier, SHAPE_NAMES[g_set.shape], g_set.modifier, g_set.loose ? "loose" : "tight");
 }
 

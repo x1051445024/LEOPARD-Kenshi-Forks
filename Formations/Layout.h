@@ -11,6 +11,9 @@
 //   2 rectangle     the drag is the front rank; ranks fill behind it (the left of the drag direction)
 //   3 wedge         the point at the far end of the drag, ranks of 1, 2, 3... behind it
 // (the column went in boot 10 - the march is always a column, and standing in one is a line)
+//   4..10 (17.10.2026) the follow shapes of Follow.h - square, rhombus, column of two, pincers, diamond,
+//                  moth, chevron: one character at the drag's middle, the rest around him as when they
+//                  follow, facing the right-hand side of the drag (where a rectangle's front rank faces)
 #pragma once
 static int Layout(int shape, int n, const Vec3& A, const Vec3& B, float spacing, Vec3* slots)
 {
@@ -60,6 +63,18 @@ static int Layout(int shape, int n, const Vec3& A, const Vec3& B, float spacing,
             for (int c = 0; c < inRow; c++) put(tip - spacing * row, inRow > 1 ? -w * 0.5f + spacing * c : 0);
             i += inRow; row++;
         }
+        break;
+    }
+    default:
+    {
+        // Follow.h ids: square 7, rhombus 6, column of two 8, pincers 10, diamond 11, moth 12, chevron 13.
+        // A follow offset is x behind the leader, z to his side, in steps of 22 - here x runs against
+        // `across` (the front faces it), z along the drag, scaled to the plugin's spacing.
+        static const int FOLLOW_OF[7] = { 7, 6, 8, 10, 11, 12, 13 };
+        if (shape < 4 || shape > 10) break;
+        const float sc = spacing / 22.0f;
+        put(0, 0);
+        for (int i = 0; i < n - 1; i++) { Vec3 o = FollowOffset(FOLLOW_OF[shape - 4], i, n - 1); put(o.z * sc, -o.x * sc); }
         break;
     }
     }
