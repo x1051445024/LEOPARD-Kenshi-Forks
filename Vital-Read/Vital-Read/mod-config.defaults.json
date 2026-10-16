@@ -30,5 +30,7 @@
   "crippledArmIconTexture": "gui/gfx/broken-arm_64px_opt.png",
   "crippledArmIconSizePx": 64,
   "crippledLegIconTexture": "gui/gfx/broken-leg_64px_opt.png",
-  "crippledLegIconSizePx": 64
+  "crippledLegIconSizePx": 64,
+  "repairingIconTexture": "gui/gfx/repair-wrench_64.png",
+  "repairingIconSizePx": 64
 }

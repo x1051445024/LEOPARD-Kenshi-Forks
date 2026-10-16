@@ -164,3 +164,4 @@ It uses KenshiLib, which is released under GPLv3.
 
 ## Изменения форка (15.10.2026)
 - `mod-config.json` при первом запуске создаётся копией `mod-config.defaults.json` (`IniDefaults::PrepareJson`) - больше нет «could not read mod-config.json» в журнале на чистой установке.
+- Ремонт скелета (16.10.2026): скелет, который лежит на кровати-ремонтнике (`Character::inSomething == IN_BED`, у постройки `inWhat` назначение `BF_SKELETON_BED`), получает значок ключа (`gui/gfx/repair-wrench_64.png`, настройки `repairingIcon*` в mod-config.json), в текстовом режиме - «RP». По приоритету - сразу после «мёртв», раньше «без сознания».

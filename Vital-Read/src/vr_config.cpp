@@ -16,6 +16,7 @@ const DWORD kDefaultPlayingDeadIconSizePx = 64u;
 const DWORD kDefaultStarvingIconSizePx = 64u;
 const DWORD kDefaultCrippledArmIconSizePx = 64u;
 const DWORD kDefaultCrippledLegIconSizePx = 64u;
+const DWORD kDefaultRepairingIconSizePx = 64u;
 const DWORD kDefaultPortraitIconDisplaySizePx = 0u;
 const DWORD kDefaultPortraitTextFontHeightPx = 14u;
 const int kDefaultPortraitOverlayMarginXPx = 0;
@@ -34,6 +35,7 @@ const char* kDefaultPlayingDeadIconTexture = "Kenshi_UI.png";
 const char* kDefaultStarvingIconTexture = "gui/gfx/starving_64px_opt.png";
 const char* kDefaultCrippledArmIconTexture = "gui/gfx/broken-arm_64px_opt.png";
 const char* kDefaultCrippledLegIconTexture = "gui/gfx/broken-leg_64px_opt.png";
+const char* kDefaultRepairingIconTexture = "gui/gfx/repair-wrench_64.png";
 const char* kDefaultPortraitIconAnchor = "bottom_left";
 const char* kDefaultPortraitTextAnchor = "top_right";
 
@@ -630,6 +632,17 @@ std::string BuildConfigText(const PluginConfig& config)
         config.crippledLegIconCoordTop,
         config.crippledLegIconCoordWidth,
         config.crippledLegIconCoordHeight,
+        true);
+    WriteStateIconConfig(
+        out,
+        "repairingIcon",
+        config.repairingIconTexture,
+        config.repairingIconSizePx,
+        config.repairingIconHasImageCoord,
+        config.repairingIconCoordLeft,
+        config.repairingIconCoordTop,
+        config.repairingIconCoordWidth,
+        config.repairingIconCoordHeight,
         false);
     out << "}\n";
     return out.str();
@@ -696,6 +709,13 @@ PluginConfig::PluginConfig()
     , crippledLegIconCoordTop(0)
     , crippledLegIconCoordWidth(0)
     , crippledLegIconCoordHeight(0)
+    , repairingIconTexture(kDefaultRepairingIconTexture)
+    , repairingIconSizePx(kDefaultRepairingIconSizePx)
+    , repairingIconHasImageCoord(false)
+    , repairingIconCoordLeft(0)
+    , repairingIconCoordTop(0)
+    , repairingIconCoordWidth(0)
+    , repairingIconCoordHeight(0)
 {
 }
 
@@ -846,6 +866,17 @@ LoadStatus LoadFromFile(const std::string& path, PluginConfig* outConfig)
             &outConfig->crippledLegIconCoordTop,
             &outConfig->crippledLegIconCoordWidth,
             &outConfig->crippledLegIconCoordHeight));
+    LoadStateIconConfig(
+        content,
+        StateIconConfigBinding(
+            "repairingIcon",
+            &outConfig->repairingIconTexture,
+            &outConfig->repairingIconSizePx,
+            &outConfig->repairingIconHasImageCoord,
+            &outConfig->repairingIconCoordLeft,
+            &outConfig->repairingIconCoordTop,
+            &outConfig->repairingIconCoordWidth,
+            &outConfig->repairingIconCoordHeight));
 
     return LOAD_OK;
 }

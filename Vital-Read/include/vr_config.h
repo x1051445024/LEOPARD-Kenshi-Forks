@@ -73,6 +73,14 @@ struct PluginConfig
     int crippledLegIconCoordTop;
     int crippledLegIconCoordWidth;
     int crippledLegIconCoordHeight;
+    // LEOPARD (16.10.2026): skeleton in a repair bed
+    std::string repairingIconTexture;
+    DWORD repairingIconSizePx;
+    bool repairingIconHasImageCoord;
+    int repairingIconCoordLeft;
+    int repairingIconCoordTop;
+    int repairingIconCoordWidth;
+    int repairingIconCoordHeight;
 };
 
 enum LoadStatus
