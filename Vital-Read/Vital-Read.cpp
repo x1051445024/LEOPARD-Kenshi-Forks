@@ -56,6 +56,7 @@ const char* kDyingOverlayWidgetNamePrefix = "VitalRead_DyingOverlayMarker_";
 const char* kPlayingDeadOverlayWidgetNamePrefix = "VitalRead_PlayingDeadOverlayMarker_";
 const char* kStarvingOverlayWidgetNamePrefix = "VitalRead_StarvingOverlayMarker_";
 const char* kRepairingOverlayWidgetNamePrefix = "VitalRead_RepairingOverlayMarker_";   // LEOPARD
+const char* kInBedOverlayWidgetNamePrefix = "VitalRead_InBedOverlayMarker_";             // LEOPARD
 const char* kCrippledArmOverlayWidgetNamePrefix = "VitalRead_CrippledArmOverlayMarker_";
 const char* kCrippledLegOverlayWidgetNamePrefix = "VitalRead_CrippledLegOverlayMarker_";
 const char* kPortraitTextLabelWidgetNamePrefix = "VitalRead_PortraitTextLabel_";
@@ -132,6 +133,8 @@ std::string& g_starvingIconTexture = g_config.starvingIconTexture;
 DWORD& g_starvingIconSizePx = g_config.starvingIconSizePx;
 std::string& g_repairingIconTexture = g_config.repairingIconTexture;
 DWORD& g_repairingIconSizePx = g_config.repairingIconSizePx;
+std::string& g_inBedIconTexture = g_config.inBedIconTexture;
+DWORD& g_inBedIconSizePx = g_config.inBedIconSizePx;
 std::string& g_crippledArmIconTexture = g_config.crippledArmIconTexture;
 DWORD& g_crippledArmIconSizePx = g_config.crippledArmIconSizePx;
 std::string& g_crippledLegIconTexture = g_config.crippledLegIconTexture;
@@ -164,6 +167,7 @@ PortraitOverlayRuntime g_dyingOverlayRuntime;
 PortraitOverlayRuntime g_playingDeadOverlayRuntime;
 PortraitOverlayRuntime g_starvingOverlayRuntime;
 PortraitOverlayRuntime g_repairingOverlayRuntime;
+PortraitOverlayRuntime g_inBedOverlayRuntime;
 PortraitOverlayRuntime g_crippledArmOverlayRuntime;
 PortraitOverlayRuntime g_crippledLegOverlayRuntime;
 PortraitOverlayRuntime g_portraitTextLabelRuntime;
@@ -288,6 +292,7 @@ struct MemberStateSnapshot
         , medicalIsCrippled(false)
         , medicalIsReallyHungry(false)
         , repairing(false)
+        , inBed(false)
         , leftArmOk(true)
         , rightArmOk(true)
         , canKick(true)
@@ -315,6 +320,7 @@ struct MemberStateSnapshot
     bool medicalIsCrippled;
     bool medicalIsReallyHungry;
     bool repairing;     // LEOPARD: a skeleton lying in a repair bed
+    bool inBed;         // LEOPARD: anyone lying in an ordinary bed
     bool leftArmOk;
     bool rightArmOk;
     bool canKick;
@@ -337,6 +343,7 @@ enum PortraitOverlayState
     PORTRAIT_OVERLAY_STATE_CRIPPLED_ARM,
     PORTRAIT_OVERLAY_STATE_CRIPPLED_LEG,
     PORTRAIT_OVERLAY_STATE_REPAIRING,
+    PORTRAIT_OVERLAY_STATE_IN_BED,
     PORTRAIT_OVERLAY_STATE_COUNT
 };
 
@@ -350,7 +357,8 @@ enum PortraitTextLabelState
     PORTRAIT_TEXT_LABEL_STARVING,
     PORTRAIT_TEXT_LABEL_CRIPPLED_ARM,
     PORTRAIT_TEXT_LABEL_CRIPPLED_LEG,
-    PORTRAIT_TEXT_LABEL_REPAIRING
+    PORTRAIT_TEXT_LABEL_REPAIRING,
+    PORTRAIT_TEXT_LABEL_IN_BED
 };
 
 enum PortraitOverlayMatchStatus
@@ -995,23 +1003,24 @@ size_t CountScopedSquadMembers(const SquadProbeScope& scope, int* selectedScopeI
     return scopedCount;
 }
 
-// LEOPARD (16.10.2026): a skeleton being repaired - lying in a bed whose
-// function is the skeleton repair bed (Character::inSomething / inWhat).
-bool IsRepairingInSkeletonBedRaw(Character* character)
+// LEOPARD (16.10.2026): lying in a bed of the given function
+// (Character::inSomething / inWhat): BF_SKELETON_BED - a skeleton being
+// repaired (wrench), BF_BED - an ordinary bed (red plus).
+bool IsInBedOfFunctionRaw(Character* character, BuildingFunction function)
 {
     if (character->inSomething != IN_BED)
         return false;
     Building* const bed = character->inWhat.getBuilding();
-    return bed != 0 && bed->specialFunction == BF_SKELETON_BED;
+    return bed != 0 && bed->specialFunction == function;
 }
 
-bool IsRepairingInSkeletonBed(Character* character)
+bool IsInBedOfFunction(Character* character, BuildingFunction function)
 {
     if (character == 0)
         return false;
     __try
     {
-        return IsRepairingInSkeletonBedRaw(character);
+        return IsInBedOfFunctionRaw(character, function);
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
@@ -1038,7 +1047,8 @@ bool TryResolveMemberStateSnapshot(Character* candidate, MemberStateSnapshot* ou
     snapshot.sub50KO = candidate->medical.sub50KO;
     snapshot.medicalIsCrippled = candidate->medical.isCrippled();
     snapshot.medicalIsReallyHungry = candidate->medical.isReallyHungry();
-    snapshot.repairing = IsRepairingInSkeletonBed(candidate);
+    snapshot.repairing = IsInBedOfFunction(candidate, BF_SKELETON_BED);
+    snapshot.inBed = !snapshot.repairing && IsInBedOfFunction(candidate, BF_BED);
     snapshot.leftArmOk = candidate->medical.isLeftArmOk();
     snapshot.rightArmOk = candidate->medical.isRightArmOk();
     snapshot.canKick = candidate->medical.canIkick();
@@ -1102,6 +1112,8 @@ const char* GetPortraitOverlayStateLabel(const PortraitOverlayState overlayState
     {
     case PORTRAIT_OVERLAY_STATE_REPAIRING:
         return "repairing";
+    case PORTRAIT_OVERLAY_STATE_IN_BED:
+        return "in_bed";
     case PORTRAIT_OVERLAY_STATE_CRIPPLED_LEG:
         return "crippled_leg";
     case PORTRAIT_OVERLAY_STATE_CRIPPLED_ARM:
@@ -1155,6 +1167,9 @@ bool TryMapPortraitTextLabelToOverlayState(
     case PORTRAIT_TEXT_LABEL_REPAIRING:
         *outOverlayState = PORTRAIT_OVERLAY_STATE_REPAIRING;
         return true;
+    case PORTRAIT_TEXT_LABEL_IN_BED:
+        *outOverlayState = PORTRAIT_OVERLAY_STATE_IN_BED;
+        return true;
     case PORTRAIT_TEXT_LABEL_NONE:
     default:
         return false;
@@ -1181,6 +1196,8 @@ const char* GetPortraitTextLabelCaption(const PortraitTextLabelState labelState)
         return "CrL";
     case PORTRAIT_TEXT_LABEL_REPAIRING:
         return "RP";
+    case PORTRAIT_TEXT_LABEL_IN_BED:
+        return "BD";
     case PORTRAIT_TEXT_LABEL_NONE:
     default:
         return "";
@@ -1208,6 +1225,13 @@ bool TryResolvePortraitTextLabelState(
     if (snapshot.repairing)
     {
         *outLabelState = PORTRAIT_TEXT_LABEL_REPAIRING;
+        return true;
+    }
+
+    // ...and anyone resting in an ordinary bed - the red plus.
+    if (snapshot.inBed)
+    {
+        *outLabelState = PORTRAIT_TEXT_LABEL_IN_BED;
         return true;
     }
 
@@ -1268,6 +1292,7 @@ bool SnapshotMatchesPortraitOverlayState(
     switch (overlayState)
     {
     case PORTRAIT_OVERLAY_STATE_REPAIRING:
+    case PORTRAIT_OVERLAY_STATE_IN_BED:
     case PORTRAIT_OVERLAY_STATE_CRIPPLED_LEG:
     case PORTRAIT_OVERLAY_STATE_CRIPPLED_ARM:
     case PORTRAIT_OVERLAY_STATE_STARVING:
@@ -3584,6 +3609,8 @@ PortraitOverlayRuntime* GetPortraitOverlayRuntime(const PortraitOverlayState ove
         return &g_starvingOverlayRuntime;
     case PORTRAIT_OVERLAY_STATE_REPAIRING:
         return &g_repairingOverlayRuntime;
+    case PORTRAIT_OVERLAY_STATE_IN_BED:
+        return &g_inBedOverlayRuntime;
     case PORTRAIT_OVERLAY_STATE_PLAYING_DEAD:
         return &g_playingDeadOverlayRuntime;
     case PORTRAIT_OVERLAY_STATE_DYING:
@@ -3660,6 +3687,18 @@ vr_marker_ui::OverlayStyle BuildPortraitOverlayStyle(const PortraitOverlayState 
             g_config.repairingIconCoordWidth,
             g_config.repairingIconCoordHeight);
         style.colour = MyGUI::Colour(0.45f, 0.82f, 1.0f, 0.95f);
+        break;
+    case PORTRAIT_OVERLAY_STATE_IN_BED:
+        style.widgetNamePrefix = kInBedOverlayWidgetNamePrefix;
+        style.iconTexture = g_inBedIconTexture;
+        style.iconTextureSizePx = static_cast<int>(g_inBedIconSizePx);
+        style.hasIconImageCoord = g_config.inBedIconHasImageCoord;
+        style.iconImageCoord = vr_marker_ui::Rect(
+            g_config.inBedIconCoordLeft,
+            g_config.inBedIconCoordTop,
+            g_config.inBedIconCoordWidth,
+            g_config.inBedIconCoordHeight);
+        style.colour = MyGUI::Colour(1.0f, 0.22f, 0.22f, 0.95f);
         break;
     case PORTRAIT_OVERLAY_STATE_PLAYING_DEAD:
         style.widgetNamePrefix = kPlayingDeadOverlayWidgetNamePrefix;
@@ -3751,6 +3790,9 @@ vr_marker_ui::OverlayStyle BuildPortraitTextLabelStyle(const PortraitTextLabelSt
     case PORTRAIT_TEXT_LABEL_REPAIRING:
         style.colour = MyGUI::Colour(0.45f, 0.82f, 1.0f, 1.0f);
         break;
+    case PORTRAIT_TEXT_LABEL_IN_BED:
+        style.colour = MyGUI::Colour(1.0f, 0.30f, 0.30f, 1.0f);
+        break;
     case PORTRAIT_TEXT_LABEL_CRIPPLED_ARM:
         style.colour = MyGUI::Colour(1.0f, 0.82f, 0.24f, 1.0f);
         break;
@@ -3806,6 +3848,7 @@ void ResetStateOverlays()
     ResetPortraitOverlayRuntime(&g_crippledArmOverlayRuntime);
     ResetPortraitOverlayRuntime(&g_crippledLegOverlayRuntime);
     ResetPortraitOverlayRuntime(&g_repairingOverlayRuntime);
+    ResetPortraitOverlayRuntime(&g_inBedOverlayRuntime);
     ResetPortraitOverlayRuntime(&g_portraitTextLabelRuntime);
     ClearPortraitDisplayCache();
 }
@@ -3820,6 +3863,7 @@ void ResetPortraitIconOverlays()
     ResetPortraitOverlayRuntime(&g_crippledArmOverlayRuntime);
     ResetPortraitOverlayRuntime(&g_crippledLegOverlayRuntime);
     ResetPortraitOverlayRuntime(&g_repairingOverlayRuntime);
+    ResetPortraitOverlayRuntime(&g_inBedOverlayRuntime);
 }
 
 void HidePortraitIconOverlays()
@@ -3832,6 +3876,7 @@ void HidePortraitIconOverlays()
     HidePortraitOverlay(&g_crippledArmOverlayRuntime);
     HidePortraitOverlay(&g_crippledLegOverlayRuntime);
     HidePortraitOverlay(&g_repairingOverlayRuntime);
+    HidePortraitOverlay(&g_inBedOverlayRuntime);
 }
 
 void TickHoveredMarker()
@@ -3866,7 +3911,8 @@ bool AnyPortraitIconOverlayRuntimeDue(const DWORD now)
         || IsPortraitOverlayRuntimeDue(&g_starvingOverlayRuntime, now)
         || IsPortraitOverlayRuntimeDue(&g_crippledArmOverlayRuntime, now)
         || IsPortraitOverlayRuntimeDue(&g_crippledLegOverlayRuntime, now)
-        || IsPortraitOverlayRuntimeDue(&g_repairingOverlayRuntime, now);
+        || IsPortraitOverlayRuntimeDue(&g_repairingOverlayRuntime, now)
+        || IsPortraitOverlayRuntimeDue(&g_inBedOverlayRuntime, now);
 }
 
 void SchedulePortraitOverlayRuntime(PortraitOverlayRuntime* overlayRuntime, const DWORD nextRefreshTick)
@@ -3887,6 +3933,7 @@ void SchedulePortraitIconOverlayRuntimes(const DWORD nextRefreshTick)
     SchedulePortraitOverlayRuntime(&g_crippledArmOverlayRuntime, nextRefreshTick);
     SchedulePortraitOverlayRuntime(&g_crippledLegOverlayRuntime, nextRefreshTick);
     SchedulePortraitOverlayRuntime(&g_repairingOverlayRuntime, nextRefreshTick);
+    SchedulePortraitOverlayRuntime(&g_inBedOverlayRuntime, nextRefreshTick);
 }
 
 void MaybeLogOverlayPerfSummary(const DWORD now)

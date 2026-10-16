@@ -17,6 +17,7 @@ const DWORD kDefaultStarvingIconSizePx = 64u;
 const DWORD kDefaultCrippledArmIconSizePx = 64u;
 const DWORD kDefaultCrippledLegIconSizePx = 64u;
 const DWORD kDefaultRepairingIconSizePx = 64u;
+const DWORD kDefaultInBedIconSizePx = 64u;
 const DWORD kDefaultPortraitIconDisplaySizePx = 0u;
 const DWORD kDefaultPortraitTextFontHeightPx = 14u;
 const int kDefaultPortraitOverlayMarginXPx = 0;
@@ -36,6 +37,7 @@ const char* kDefaultStarvingIconTexture = "gui/gfx/starving_64px_opt.png";
 const char* kDefaultCrippledArmIconTexture = "gui/gfx/broken-arm_64px_opt.png";
 const char* kDefaultCrippledLegIconTexture = "gui/gfx/broken-leg_64px_opt.png";
 const char* kDefaultRepairingIconTexture = "gui/gfx/repair-wrench_64.png";
+const char* kDefaultInBedIconTexture = "gui/gfx/bed-plus_64.png";
 const char* kDefaultPortraitIconAnchor = "bottom_left";
 const char* kDefaultPortraitTextAnchor = "top_right";
 
@@ -643,6 +645,17 @@ std::string BuildConfigText(const PluginConfig& config)
         config.repairingIconCoordTop,
         config.repairingIconCoordWidth,
         config.repairingIconCoordHeight,
+        true);
+    WriteStateIconConfig(
+        out,
+        "inBedIcon",
+        config.inBedIconTexture,
+        config.inBedIconSizePx,
+        config.inBedIconHasImageCoord,
+        config.inBedIconCoordLeft,
+        config.inBedIconCoordTop,
+        config.inBedIconCoordWidth,
+        config.inBedIconCoordHeight,
         false);
     out << "}\n";
     return out.str();
@@ -716,6 +729,13 @@ PluginConfig::PluginConfig()
     , repairingIconCoordTop(0)
     , repairingIconCoordWidth(0)
     , repairingIconCoordHeight(0)
+    , inBedIconTexture(kDefaultInBedIconTexture)
+    , inBedIconSizePx(kDefaultInBedIconSizePx)
+    , inBedIconHasImageCoord(false)
+    , inBedIconCoordLeft(0)
+    , inBedIconCoordTop(0)
+    , inBedIconCoordWidth(0)
+    , inBedIconCoordHeight(0)
 {
 }
 
@@ -877,6 +897,17 @@ LoadStatus LoadFromFile(const std::string& path, PluginConfig* outConfig)
             &outConfig->repairingIconCoordTop,
             &outConfig->repairingIconCoordWidth,
             &outConfig->repairingIconCoordHeight));
+    LoadStateIconConfig(
+        content,
+        StateIconConfigBinding(
+            "inBedIcon",
+            &outConfig->inBedIconTexture,
+            &outConfig->inBedIconSizePx,
+            &outConfig->inBedIconHasImageCoord,
+            &outConfig->inBedIconCoordLeft,
+            &outConfig->inBedIconCoordTop,
+            &outConfig->inBedIconCoordWidth,
+            &outConfig->inBedIconCoordHeight));
 
     return LOAD_OK;
 }

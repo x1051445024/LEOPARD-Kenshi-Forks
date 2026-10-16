@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair."
-msgstr "小队头像上的状态图标：昏迷、重度昏迷、濒死、装死、饥饿、肢体残疾、骷髅修理。"
+msgid "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair, in bed."
+msgstr "小队头像上的状态图标：昏迷、重度昏迷、濒死、装死、饥饿、肢体残疾、骷髅修理、卧床。"
 
 msgid "Core"
 msgstr "常规"

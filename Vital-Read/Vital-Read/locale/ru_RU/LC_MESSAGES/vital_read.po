@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair."
-msgstr "Значки состояния на портретах отряда: без сознания, кома, умирает, притворяется мёртвым, голодает, увечья, ремонт скелета."
+msgid "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair, in bed."
+msgstr "Значки состояния на портретах отряда: без сознания, кома, умирает, притворяется мёртвым, голодает, увечья, ремонт скелета, в кровати."
 
 msgid "Core"
 msgstr "Общее"

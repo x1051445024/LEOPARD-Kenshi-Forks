@@ -469,4 +469,4 @@ void StartModHubClient()
 }
 
 // Страница в ModConfigMenu (вкладка MCM в настройках игры) вместо Mod Hub.
-MCM_MODHUB_BRIDGE_TABLE(&g_modHubTableRegistration, "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair.")
+MCM_MODHUB_BRIDGE_TABLE(&g_modHubTableRegistration, "State icons on squad portraits: unconscious, coma, dying, playing dead, starving, crippled limbs, skeleton repair, in bed.")

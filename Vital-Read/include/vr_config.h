@@ -81,6 +81,14 @@ struct PluginConfig
     int repairingIconCoordTop;
     int repairingIconCoordWidth;
     int repairingIconCoordHeight;
+    // LEOPARD (16.10.2026): resting in an ordinary bed
+    std::string inBedIconTexture;
+    DWORD inBedIconSizePx;
+    bool inBedIconHasImageCoord;
+    int inBedIconCoordLeft;
+    int inBedIconCoordTop;
+    int inBedIconCoordWidth;
+    int inBedIconCoordHeight;
 };
 
 enum LoadStatus
