@@ -74,6 +74,21 @@ msgstr "Свой отряд"
 msgid "Show key"
 msgstr "Клавиша показа"
 
+msgid "Squad colour"
+msgstr "Цвет отряда"
+
+msgid "Enemy colour"
+msgstr "Цвет врагов"
+
+msgid "Ally colour"
+msgstr "Цвет союзников"
+
+msgid "Neutral colour"
+msgstr "Цвет нейтралов"
+
+msgid "Diplomat colour"
+msgstr "Цвет дипломатов"
+
 msgid "Who"
 msgstr "Кого окрашивать"
 

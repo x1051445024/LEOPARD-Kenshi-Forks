@@ -74,6 +74,21 @@ msgstr "你的小队"
 msgid "Show key"
 msgstr "显示按键"
 
+msgid "Squad colour"
+msgstr "小队颜色"
+
+msgid "Enemy colour"
+msgstr "敌人颜色"
+
+msgid "Ally colour"
+msgstr "盟友颜色"
+
+msgid "Neutral colour"
+msgstr "中立者颜色"
+
+msgid "Diplomat colour"
+msgstr "外交官颜色"
+
 msgid "Who"
 msgstr "着色对象"
 

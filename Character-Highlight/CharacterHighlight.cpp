@@ -498,13 +498,15 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
     api->toggle(api, kSec, "ShowAllies", Tr("Allies"), Tr("Tint those allied with all your characters."), 1, 0);
     api->toggle(api, kSec, "ShowNeutrals", Tr("Neutrals"), Tr("Tint everyone else."), 1, 0);
     api->toggle(api, kSec, "ShowDiplomats", Tr("Diplomats"), Tr("Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."), 1, 0);
+    // The game's options panel keeps its lines by label: a second row with
+    // the same label as a "Who" toggle would reuse that line and vanish.
     api->section(api, Tr("Colours"));
-    api->colour(api, kSec, "SquadColour", Tr("Your squad"), Tr("Colour of your characters, #RRGGBB."), "#0000FF", 0);
-    api->colour(api, kSec, "EnemyColour", Tr("Enemies"), Tr("Colour of those hostile to you, #RRGGBB."), "#FF0000", 0);
-    api->colour(api, kSec, "AllyColour", Tr("Allies"), Tr("Colour of those allied with all your characters, #RRGGBB."), "#00FF00", 0);
+    api->colour(api, kSec, "SquadColour", Tr("Squad colour"), Tr("Colour of your characters, #RRGGBB."), "#0000FF", 0);
+    api->colour(api, kSec, "EnemyColour", Tr("Enemy colour"), Tr("Colour of those hostile to you, #RRGGBB."), "#FF0000", 0);
+    api->colour(api, kSec, "AllyColour", Tr("Ally colour"), Tr("Colour of those allied with all your characters, #RRGGBB."), "#00FF00", 0);
     api->toggle(api, kSec, "NeutralByRelation", Tr("Neutrals by relation"), Tr("Neutrals go from red to yellow to green with their faction's relation to you. Off - the neutral colour below."), 1, 0);
-    api->colour(api, kSec, "NeutralColour", Tr("Neutrals"), Tr("Colour of neutrals when they are not coloured by relation, #RRGGBB."), "#FFFF00", 0);
-    api->colour(api, kSec, "DiplomatColour", Tr("Diplomats"), Tr("Colour of faction diplomats, #RRGGBB."), "#A040FF", 0);
+    api->colour(api, kSec, "NeutralColour", Tr("Neutral colour"), Tr("Colour of neutrals when they are not coloured by relation, #RRGGBB."), "#FFFF00", 0);
+    api->colour(api, kSec, "DiplomatColour", Tr("Diplomat colour"), Tr("Colour of faction diplomats, #RRGGBB."), "#A040FF", 0);
     api->section(api, Tr("Diagnostics"));
     api->toggle(api, kSec, "Debug", Tr("Detailed log"), Tr("Every 10 seconds in RE_Kenshi_log.txt: how many characters are known and how much work was done."), 0, 0);
 }

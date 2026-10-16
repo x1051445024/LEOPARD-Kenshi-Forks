@@ -74,6 +74,21 @@ msgstr "Your squad"
 msgid "Show key"
 msgstr "Show key"
 
+msgid "Squad colour"
+msgstr "Squad colour"
+
+msgid "Enemy colour"
+msgstr "Enemy colour"
+
+msgid "Ally colour"
+msgstr "Ally colour"
+
+msgid "Neutral colour"
+msgstr "Neutral colour"
+
+msgid "Diplomat colour"
+msgstr "Diplomat colour"
+
 msgid "Who"
 msgstr "Who"
 
