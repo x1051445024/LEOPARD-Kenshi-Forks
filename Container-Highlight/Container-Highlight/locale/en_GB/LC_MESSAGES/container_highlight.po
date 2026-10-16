@@ -17,8 +17,8 @@ msgstr "Turns the whole mod on and off"
 msgid "Highlight key"
 msgstr "Highlight key"
 
-msgid "Primary key that gates container highlighting; set Unbound and use modifier toggles for Shift/Alt alone"
-msgstr "Containers are highlighted while this key is held. NONE together with Require Shift or Alt below - highlight on Shift or Alt alone"
+msgid "Container highlighting shows while this key (or combination, e.g. CTRL+X) is held"
+msgstr "Container highlighting shows while this key (or combination, e.g. CTRL+X) is held"
 
 msgid "Require Ctrl"
 msgstr "Require Ctrl"

@@ -17,8 +17,8 @@ msgstr "Включает и выключает весь мод"
 msgid "Highlight key"
 msgstr "Клавиша подсветки"
 
-msgid "Primary key that gates container highlighting; set Unbound and use modifier toggles for Shift/Alt alone"
-msgstr "Пока зажата эта клавиша, сундуки подсвечены. NONE вместе с Нужен Shift или Alt ниже - подсветка по одному Shift или Alt"
+msgid "Container highlighting shows while this key (or combination, e.g. CTRL+X) is held"
+msgstr "Подсветка контейнеров видна, пока зажата эта клавиша или сочетание (например CTRL+X)"
 
 msgid "Require Ctrl"
 msgstr "Нужен Ctrl"

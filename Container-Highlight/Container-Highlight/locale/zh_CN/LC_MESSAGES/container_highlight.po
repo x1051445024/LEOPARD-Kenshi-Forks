@@ -17,8 +17,8 @@ msgstr "开启或关闭整个模组"
 msgid "Highlight key"
 msgstr "高亮按键"
 
-msgid "Primary key that gates container highlighting; set Unbound and use modifier toggles for Shift/Alt alone"
-msgstr "按住此键时高亮容器。设为 NONE 并勾选下方的需要 Shift 或 Alt - 仅按 Shift 或 Alt 即可高亮"
+msgid "Container highlighting shows while this key (or combination, e.g. CTRL+X) is held"
+msgstr "按住此键或组合键（例如 CTRL+X）时显示容器高亮"
 
 msgid "Require Ctrl"
 msgstr "需要 Ctrl"

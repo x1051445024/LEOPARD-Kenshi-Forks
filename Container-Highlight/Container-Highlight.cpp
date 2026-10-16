@@ -3356,8 +3356,18 @@ EMC_Result __cdecl HubGetHighlightKeySetting(void* user_data, EMC_KeybindValueV1
         return EMC_ERR_INVALID_ARGUMENT;
     }
 
+    // LEOPARD (16.10.2026): the key button of Mod Config Menu shows and takes
+    // combinations (CTRL+X) itself - the modifiers go out with the key, and the
+    // three "Require Ctrl/Shift/Alt" rows are gone from the page.
     out_value->keycode = g_state.config.highlightKeyCode;
-    out_value->modifiers = 0u;
+    uint32_t modifiers = 0u;
+    if (g_state.config.highlightKeyRequireCtrl && !IsCtrlKeyCode(g_state.config.highlightKeyCode))
+        modifiers |= EMC_KEYBIND_MODIFIER_CTRL_MASK;
+    if (g_state.config.highlightKeyRequireShift && !IsShiftKeyCode(g_state.config.highlightKeyCode))
+        modifiers |= EMC_KEYBIND_MODIFIER_SHIFT_MASK;
+    if (g_state.config.highlightKeyRequireAlt && !IsAltKeyCode(g_state.config.highlightKeyCode))
+        modifiers |= EMC_KEYBIND_MODIFIER_ALT_MASK;
+    out_value->modifiers = modifiers;
     return EMC_OK;
 }
 
@@ -3401,12 +3411,6 @@ EMC_Result __cdecl HubSetHighlightKeySetting(
         WriteRuntimeApiError(err_buf, err_buf_size, "invalid_modifiers");
         return EMC_ERR_INVALID_ARGUMENT;
     }
-    if (modifierRequirements != 0u)
-    {
-        WriteRuntimeApiError(err_buf, err_buf_size, "use_modifier_toggles");
-        return EMC_ERR_INVALID_ARGUMENT;
-    }
-
     std::string reason;
     if (!ValidatePrimaryKeyCode(requestedKeyCode, &reason))
     {
@@ -3415,12 +3419,22 @@ EMC_Result __cdecl HubSetHighlightKeySetting(
     }
 
     const int previousKeyCode = g_state.config.highlightKeyCode;
+    const bool previousCtrl = g_state.config.highlightKeyRequireCtrl;
+    const bool previousShift = g_state.config.highlightKeyRequireShift;
+    const bool previousAlt = g_state.config.highlightKeyRequireAlt;
 
+    // the combination's modifiers - into the same config fields as before
     g_state.config.highlightKeyCode = requestedKeyCode;
+    g_state.config.highlightKeyRequireCtrl = (modifierRequirements & EMC_KEYBIND_MODIFIER_CTRL_MASK) != 0u;
+    g_state.config.highlightKeyRequireShift = (modifierRequirements & EMC_KEYBIND_MODIFIER_SHIFT_MASK) != 0u;
+    g_state.config.highlightKeyRequireAlt = (modifierRequirements & EMC_KEYBIND_MODIFIER_ALT_MASK) != 0u;
 
     if (!SaveConfigState())
     {
         g_state.config.highlightKeyCode = previousKeyCode;
+        g_state.config.highlightKeyRequireCtrl = previousCtrl;
+        g_state.config.highlightKeyRequireShift = previousShift;
+        g_state.config.highlightKeyRequireAlt = previousAlt;
         WriteRuntimeApiError(err_buf, err_buf_size, "persist_failed");
         return EMC_ERR_INTERNAL;
     }
@@ -3730,7 +3744,7 @@ const emc::ModHubClientTableRegistrationV1* GetModHubTableRegistration()
     static const EMC_KeybindSettingDefV1 kHighlightKeySettingDef = {
         kHubSettingHighlightKeyId,
         "Highlight key",
-        "Primary key that gates container highlighting; set Unbound and use modifier toggles for Shift/Alt alone",
+        "Container highlighting shows while this key (or combination, e.g. CTRL+X) is held",
         &g_modHubClient,
         &HubGetHighlightKeySetting,
         &HubSetHighlightKeySetting };
@@ -3853,9 +3867,6 @@ const emc::ModHubClientTableRegistrationV1* GetModHubTableRegistration()
     static const emc::ModHubClientSettingRowV1 kRows[] = {
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingEnabledId, &kEnabledSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_KEYBIND, kHubSettingHighlightKeyId, &kHighlightKeySettingDef, 0, 0 },
-        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingHighlightKeyRequireCtrlId, &kHighlightKeyRequireCtrlSettingDef, 0, 0 },
-        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingHighlightKeyRequireShiftId, &kHighlightKeyRequireShiftSettingDef, 0, 0 },
-        { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingHighlightKeyRequireAltId, &kHighlightKeyRequireAltSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_FLOAT, kHubSettingMaxHighlightDistanceId, &kMaxHighlightDistanceSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingShowIconsId, &kShowIconsSettingDef, 0, 0 },
         { emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL, kHubSettingShowTextId, &kShowTextSettingDef, 0, 0 },
@@ -3870,9 +3881,6 @@ const emc::ModHubClientTableRegistrationV1* GetModHubTableRegistration()
 
     static const EMC_BoolConditionRuleDefV1 kBoolConditionRules[] = {
         { kHubSettingHighlightKeyId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
-        { kHubSettingHighlightKeyRequireCtrlId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
-        { kHubSettingHighlightKeyRequireShiftId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
-        { kHubSettingHighlightKeyRequireAltId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
         { kHubSettingMaxHighlightDistanceId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
         { kHubSettingShowIconsId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
         { kHubSettingShowTextId, kHubSettingEnabledId, EMC_BOOL_CONDITION_EFFECT_HIDE, 0 },
