@@ -22,6 +22,7 @@ plus ours):
 | Vital-Sense | [Emkej](https://github.com/Emkej/Vital-Sense) |
 | Wall-B-Gone | [Emkej](https://github.com/Emkej/Wall-B-Gone) |
 | BetterLooting | [XxAtreuSSxX](https://github.com/XxAtreuSSxX/BetterLooting) |
+| Character-Highlight | [BFrizzleFoShizzle](https://github.com/BFrizzleFoShizzle/KenshiLib_Examples) (`CharacterHighlight`) |
 
 The Emkej mods are under GPLv3 (see LICENSE in each folder).
 

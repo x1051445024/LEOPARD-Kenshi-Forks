@@ -1,0 +1,84 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CharacterHighlight\n"
+"Language: en_GB\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Allies"
+msgstr "Allies"
+
+msgid "Characters farther than this from the centre of the camera are not tinted. 0 - no limit."
+msgstr "Characters farther than this from the centre of the camera are not tinted. 0 - no limit."
+
+msgid "Colour of neutrals when they are not coloured by relation, #RRGGBB."
+msgstr "Colour of neutrals when they are not coloured by relation, #RRGGBB."
+
+msgid "Colour of those allied with all your characters, #RRGGBB."
+msgstr "Colour of those allied with all your characters, #RRGGBB."
+
+msgid "Colour of those hostile to you, #RRGGBB."
+msgstr "Colour of those hostile to you, #RRGGBB."
+
+msgid "Colour of your characters, #RRGGBB."
+msgstr "Colour of your characters, #RRGGBB."
+
+msgid "Colours"
+msgstr "Colours"
+
+msgid "Detailed log"
+msgstr "Detailed log"
+
+msgid "Diagnostics"
+msgstr "Diagnostics"
+
+msgid "Distance, m"
+msgstr "Distance, m"
+
+msgid "Enabled"
+msgstr "Enabled"
+
+msgid "Enemies"
+msgstr "Enemies"
+
+msgid "Every 10 seconds in RE_Kenshi_log.txt: how many characters are known and how much work was done."
+msgstr "Every 10 seconds in RE_Kenshi_log.txt: how many characters are known and how much work was done."
+
+msgid "General"
+msgstr "General"
+
+msgid "Neutrals by relation"
+msgstr "Neutrals by relation"
+
+msgid "Neutrals go from red to yellow to green with their faction's relation to you. Off - the neutral colour below."
+msgstr "Neutrals go from red to yellow to green with their faction's relation to you. Off - the neutral colour below."
+
+msgid "Neutrals"
+msgstr "Neutrals"
+
+msgid "Own key"
+msgstr "Own key"
+
+msgid "Show through walls"
+msgstr "Show through walls"
+
+msgid "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
+msgstr "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
+
+msgid "Tint characters while the highlight key is held."
+msgstr "Tint characters while the highlight key is held."
+
+msgid "Tinted characters are visible through walls and buildings."
+msgstr "Tinted characters are visible through walls and buildings."
+
+msgid "Use the game's highlight key"
+msgstr "Use the game's highlight key"
+
+msgid "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
+msgstr "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
+
+msgid "While the highlight key is held, characters are tinted by how they stand to you."
+msgstr "While the highlight key is held, characters are tinted by how they stand to you."
+
+msgid "Your squad"
+msgstr "Your squad"

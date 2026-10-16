@@ -1,0 +1,84 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CharacterHighlight\n"
+"Language: zh_CN\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Allies"
+msgstr "盟友"
+
+msgid "Characters farther than this from the centre of the camera are not tinted. 0 - no limit."
+msgstr "距离镜头中心超过此距离的角色不着色。0 - 不限制。"
+
+msgid "Colour of neutrals when they are not coloured by relation, #RRGGBB."
+msgstr "不按关系着色时中立者的颜色，#RRGGBB。"
+
+msgid "Colour of those allied with all your characters, #RRGGBB."
+msgstr "与你所有角色结盟者的颜色，#RRGGBB。"
+
+msgid "Colour of those hostile to you, #RRGGBB."
+msgstr "对你敌对者的颜色，#RRGGBB。"
+
+msgid "Colour of your characters, #RRGGBB."
+msgstr "你的角色的颜色，#RRGGBB。"
+
+msgid "Colours"
+msgstr "颜色"
+
+msgid "Detailed log"
+msgstr "详细日志"
+
+msgid "Diagnostics"
+msgstr "诊断"
+
+msgid "Distance, m"
+msgstr "距离（米）"
+
+msgid "Enabled"
+msgstr "启用"
+
+msgid "Enemies"
+msgstr "敌人"
+
+msgid "Every 10 seconds in RE_Kenshi_log.txt: how many characters are known and how much work was done."
+msgstr "每 10 秒写入 RE_Kenshi_log.txt：已知角色数量和完成的工作量。"
+
+msgid "General"
+msgstr "常规"
+
+msgid "Neutrals by relation"
+msgstr "中立者按关系着色"
+
+msgid "Neutrals go from red to yellow to green with their faction's relation to you. Off - the neutral colour below."
+msgstr "中立者按其派系对你的关系从红到黄到绿。关闭 - 使用下方的中立颜色。"
+
+msgid "Neutrals"
+msgstr "中立者"
+
+msgid "Own key"
+msgstr "自定义按键"
+
+msgid "Show through walls"
+msgstr "透过墙壁可见"
+
+msgid "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
+msgstr "游戏按键设置中的物品高亮键（设置，控制；默认 Alt）。关闭 - 使用下方的按键。"
+
+msgid "Tint characters while the highlight key is held."
+msgstr "按住高亮键时为角色着色。"
+
+msgid "Tinted characters are visible through walls and buildings."
+msgstr "着色的角色可透过墙壁和建筑看到。"
+
+msgid "Use the game's highlight key"
+msgstr "使用游戏的高亮键"
+
+msgid "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
+msgstr "关闭游戏高亮键时使用。按住此键时显示着色；NONE（设置时按 Backspace）- 始终显示。"
+
+msgid "While the highlight key is held, characters are tinted by how they stand to you."
+msgstr "按住高亮键时，角色按与你的关系着色。"
+
+msgid "Your squad"
+msgstr "你的小队"
