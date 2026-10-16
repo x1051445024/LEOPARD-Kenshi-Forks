@@ -74,5 +74,29 @@ msgstr "Your squad"
 msgid "Show key"
 msgstr "Show key"
 
+msgid "Who"
+msgstr "Who"
+
+msgid "Tint your own characters."
+msgstr "Tint your own characters."
+
+msgid "Tint those hostile to you."
+msgstr "Tint those hostile to you."
+
+msgid "Tint those allied with all your characters."
+msgstr "Tint those allied with all your characters."
+
+msgid "Tint everyone else."
+msgstr "Tint everyone else."
+
+msgid "Diplomats"
+msgstr "Diplomats"
+
+msgid "Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."
+msgstr "Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."
+
+msgid "Colour of faction diplomats, #RRGGBB."
+msgstr "Colour of faction diplomats, #RRGGBB."
+
 msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
 msgstr "The tint shows while this key is held. NONE (Backspace when assigning) - always on."

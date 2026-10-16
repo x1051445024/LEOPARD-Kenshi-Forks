@@ -27,6 +27,10 @@ Original: **BFrizzleFoShizzle**, [KenshiLib_Examples](https://github.com/BFrizzl
   - with the key not held, the tinted characters are reset once and then
     nothing is done.
 - A character with no faction no longer crashes the relation check.
+- Each kind (squad, enemies, allies, neutrals) can be turned off on its own.
+- Diplomats: faction diplomats get a colour of their own (purple by default),
+  before any other kind - the game's `Character::isDiplomaticStatus`, or a
+  squad from a "... diplomat" template.
 - The portrait and dead-body fixes of the original are kept.
 
 Vital Sense (our fork) tints after the main loop and re-applies its tint

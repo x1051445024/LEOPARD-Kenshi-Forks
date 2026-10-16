@@ -42,6 +42,7 @@
 #include <kenshi/GameWorld.h>
 #include <kenshi/PlayerInterface.h>
 #include <kenshi/Faction.h>
+#include <kenshi/Platoon.h>
 #include <kenshi/FactionRelations.h>
 #include <kenshi/KingOfRenderThread.h>
 #include <kenshi/Renderer.h>
@@ -72,6 +73,10 @@ namespace
     Ogre::ColourValue g_allyColour(0.0f, 1.0f, 0.0f, 1.0f);
     bool g_neutralByRelation = true;    // the original's red-yellow-green by faction relation
     Ogre::ColourValue g_neutralColour(1.0f, 1.0f, 0.0f, 1.0f);
+    // Which kinds are tinted at all (LEOPARD fork, 16.10.2026).
+    bool g_showSquad = true, g_showEnemies = true, g_showAllies = true, g_showNeutrals = true;
+    bool g_showDiplomats = true;        // diplomatic status - before every other kind
+    Ogre::ColourValue g_diplomatColour(0.627f, 0.251f, 1.0f, 1.0f);   // #A040FF
     bool g_debug = false;
 
     const int kEvalPerFrame = 40;
@@ -129,6 +134,12 @@ namespace
         g_allyColour = ReadColour(ini, "AllyColour", Ogre::ColourValue(0.0f, 1.0f, 0.0f, 1.0f));
         g_neutralByRelation = GetPrivateProfileIntA(kSec, "NeutralByRelation", 1, ini.c_str()) != 0;
         g_neutralColour = ReadColour(ini, "NeutralColour", Ogre::ColourValue(1.0f, 1.0f, 0.0f, 1.0f));
+        g_showSquad = GetPrivateProfileIntA(kSec, "ShowSquad", 1, ini.c_str()) != 0;
+        g_showEnemies = GetPrivateProfileIntA(kSec, "ShowEnemies", 1, ini.c_str()) != 0;
+        g_showAllies = GetPrivateProfileIntA(kSec, "ShowAllies", 1, ini.c_str()) != 0;
+        g_showNeutrals = GetPrivateProfileIntA(kSec, "ShowNeutrals", 1, ini.c_str()) != 0;
+        g_showDiplomats = GetPrivateProfileIntA(kSec, "ShowDiplomats", 1, ini.c_str()) != 0;
+        g_diplomatColour = ReadColour(ini, "DiplomatColour", Ogre::ColourValue(0.627f, 0.251f, 1.0f, 1.0f));
         g_debug = GetPrivateProfileIntA(kSec, "Debug", 0, ini.c_str()) != 0;
         ForgetColours();                // new colours - re-evaluate everyone
     }
@@ -169,10 +180,43 @@ namespace
     // Relation colour - the original's EnableHighlight, colours from the settings
     // ---------------------------------------------------------------
 
+    // Alpha 0 - this kind is turned off: the character is not tinted.
+    const Ogre::ColourValue kNoTint(1.0f, 1.0f, 1.0f, 0.0f);
+
+    // A faction diplomat: the game's own diplomatic status, or a squad made
+    // from a "... diplomat" template (a translation may name it in its own
+    // language), in case the status is only set while on the mission.
+    bool IsDiplomat(Character* character)
+    {
+        if (character->isDiplomaticStatus(true))
+            return true;
+        ActivePlatoon* const active = character->getPlatoon();
+        Platoon* const platoon = active != NULL ? active->me : NULL;
+        GameData* const squad = platoon != NULL ? platoon->squadTemplate : NULL;
+        if (squad == NULL)
+            return false;
+        // the name in lower case, any language (the game's names are UTF-8)
+        const std::string& utf8 = squad->name;
+        if (utf8.empty())
+            return false;
+        const int n = MultiByteToWideChar(CP_UTF8, 0, utf8.data(), static_cast<int>(utf8.size()), NULL, 0);
+        if (n <= 0)
+            return false;
+        std::wstring name(n, L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, utf8.data(), static_cast<int>(utf8.size()), &name[0], n);
+        CharLowerBuffW(&name[0], static_cast<DWORD>(name.size()));
+        // "diplomat" / "дипломат" (as code points - no Cyrillic bytes in the DLL)
+        static const wchar_t kRu[] = { 0x0434, 0x0438, 0x043F, 0x043B, 0x043E, 0x043C, 0x0430, 0x0442, 0 };
+        return name.find(L"diplomat") != std::wstring::npos || name.find(kRu) != std::wstring::npos;
+    }
+
     Ogre::ColourValue RelationColour(Character* character)
     {
         if (character->isPlayerCharacter())
-            return g_squadColour;
+            return g_showSquad ? g_squadColour : kNoTint;
+
+        if (g_showDiplomats && IsDiplomat(character))
+            return g_diplomatColour;
 
         const lektor<Character*>& players = ou->player->playerCharacters;
 
@@ -183,15 +227,17 @@ namespace
         for (uint32_t i = 0; i < players.size() && !isEnemy; ++i)
             isEnemy = players[i]->areYouGonnaGetMe(character);
         if (isEnemy)
-            return g_enemyColour;
+            return g_showEnemies ? g_enemyColour : kNoTint;
 
         // isAlly if allied with all characters
         bool isAlly = true;
         for (uint32_t i = 0; i < players.size() && isAlly; ++i)
             isAlly = character->isAlly(players[i], true);
         if (isAlly)
-            return g_allyColour;
+            return g_showAllies ? g_allyColour : kNoTint;
 
+        if (!g_showNeutrals)
+            return kNoTint;
         if (!g_neutralByRelation)
             return g_neutralColour;
 
@@ -349,6 +395,13 @@ namespace
             }
             if (!e.hasColour)
                 continue;               // waits for its turn in the budget
+            if (e.colour.a <= 0.0f)
+            {
+                // its kind is turned off
+                if (e.tinted && SafeWrite(c, kNoTint, false))
+                    e.tinted = false;
+                continue;
+            }
             if (changed || !e.tinted || now - e.applied >= kReapplyMs)
             {
                 if (SafeWrite(c, e.colour, g_throughWalls))
@@ -439,12 +492,19 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
     api->hotkey(api, kSec, "HoldKey", Tr("Show key"), Tr("The tint shows while this key is held. NONE (Backspace when assigning) - always on."), "ALT", 0);
     api->toggle(api, kSec, "ShowThroughWalls", Tr("Show through walls"), Tr("Tinted characters are visible through walls and buildings."), 1, 0);
     api->integer(api, kSec, "MaxDistance", Tr("Distance, m"), Tr("Characters farther than this from the centre of the camera are not tinted. 0 - no limit."), 0, 0, 5000, 0);
+    api->section(api, Tr("Who"));
+    api->toggle(api, kSec, "ShowSquad", Tr("Your squad"), Tr("Tint your own characters."), 1, 0);
+    api->toggle(api, kSec, "ShowEnemies", Tr("Enemies"), Tr("Tint those hostile to you."), 1, 0);
+    api->toggle(api, kSec, "ShowAllies", Tr("Allies"), Tr("Tint those allied with all your characters."), 1, 0);
+    api->toggle(api, kSec, "ShowNeutrals", Tr("Neutrals"), Tr("Tint everyone else."), 1, 0);
+    api->toggle(api, kSec, "ShowDiplomats", Tr("Diplomats"), Tr("Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."), 1, 0);
     api->section(api, Tr("Colours"));
     api->colour(api, kSec, "SquadColour", Tr("Your squad"), Tr("Colour of your characters, #RRGGBB."), "#0000FF", 0);
     api->colour(api, kSec, "EnemyColour", Tr("Enemies"), Tr("Colour of those hostile to you, #RRGGBB."), "#FF0000", 0);
     api->colour(api, kSec, "AllyColour", Tr("Allies"), Tr("Colour of those allied with all your characters, #RRGGBB."), "#00FF00", 0);
     api->toggle(api, kSec, "NeutralByRelation", Tr("Neutrals by relation"), Tr("Neutrals go from red to yellow to green with their faction's relation to you. Off - the neutral colour below."), 1, 0);
     api->colour(api, kSec, "NeutralColour", Tr("Neutrals"), Tr("Colour of neutrals when they are not coloured by relation, #RRGGBB."), "#FFFF00", 0);
+    api->colour(api, kSec, "DiplomatColour", Tr("Diplomats"), Tr("Colour of faction diplomats, #RRGGBB."), "#A040FF", 0);
     api->section(api, Tr("Diagnostics"));
     api->toggle(api, kSec, "Debug", Tr("Detailed log"), Tr("Every 10 seconds in RE_Kenshi_log.txt: how many characters are known and how much work was done."), 0, 0);
 }

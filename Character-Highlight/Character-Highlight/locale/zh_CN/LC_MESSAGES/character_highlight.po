@@ -74,5 +74,29 @@ msgstr "你的小队"
 msgid "Show key"
 msgstr "显示按键"
 
+msgid "Who"
+msgstr "着色对象"
+
+msgid "Tint your own characters."
+msgstr "为你的角色着色。"
+
+msgid "Tint those hostile to you."
+msgstr "为对你敌对者着色。"
+
+msgid "Tint those allied with all your characters."
+msgstr "为与你所有角色结盟者着色。"
+
+msgid "Tint everyone else."
+msgstr "为其他所有人着色。"
+
+msgid "Diplomats"
+msgstr "外交官"
+
+msgid "Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."
+msgstr "派系外交官（外交身份）使用单独的颜色，无论其派系与你的关系如何。"
+
+msgid "Colour of faction diplomats, #RRGGBB."
+msgstr "派系外交官的颜色，#RRGGBB。"
+
 msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
 msgstr "按住此键时显示着色。NONE（设置时按 Backspace）- 始终显示。"

@@ -74,5 +74,29 @@ msgstr "Свой отряд"
 msgid "Show key"
 msgstr "Клавиша показа"
 
+msgid "Who"
+msgstr "Кого окрашивать"
+
+msgid "Tint your own characters."
+msgstr "Окрашивать своих персонажей."
+
+msgid "Tint those hostile to you."
+msgstr "Окрашивать тех, кто к вам враждебен."
+
+msgid "Tint those allied with all your characters."
+msgstr "Окрашивать тех, кто в союзе со всеми вашими персонажами."
+
+msgid "Tint everyone else."
+msgstr "Окрашивать всех остальных."
+
+msgid "Diplomats"
+msgstr "Дипломаты"
+
+msgid "Faction diplomats (diplomatic status) get a colour of their own, whatever their faction's relation to you."
+msgstr "Дипломаты фракций (дипломатический статус) - своим цветом, каким бы ни было отношение их фракции к вам."
+
+msgid "Colour of faction diplomats, #RRGGBB."
+msgstr "Цвет дипломатов фракций, #RRGGBB."
+
 msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
 msgstr "Окраска видна, пока зажата эта клавиша. NONE (Backspace при назначении) - всегда."
