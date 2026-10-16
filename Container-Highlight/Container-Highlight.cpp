@@ -165,6 +165,27 @@ struct MarkerWidget
     MyGUI::TextBox* text;
 };
 
+// LEOPARD (16.10.2026): what a marker widget already shows - set again only on change.
+struct MarkerStyleState
+{
+    MarkerStyleState()
+        : icon(0), text(0), textureTried(false), textureOk(false), iconColourSet(false),
+          textSet(false), fontHeight(0)
+    {
+    }
+    MyGUI::ImageBox* icon;
+    MyGUI::TextBox* text;
+    bool textureTried;
+    bool textureOk;
+    std::string texture;
+    bool iconColourSet;
+    MyGUI::Colour iconColour;
+    bool textSet;
+    std::string caption;
+    int fontHeight;
+    MyGUI::Colour textColour;
+};
+
 struct ScreenHighlightWidget
 {
     MyGUI::ImageBox* topEdge;
@@ -191,6 +212,11 @@ struct TintEntityBinding
     Ogre::Entity* entity;
     std::vector<Ogre::MaterialPtr> originalMaterials;
     std::vector<Ogre::MaterialPtr> cloneMaterials;
+    // LEOPARD (16.10.2026): what the clones were last tinted with - an
+    // unchanged binding is not re-tinted and setMaterial is not called again.
+    bool hasApplied;
+    Ogre::ColourValue appliedColour;
+    bool appliedDepth;
 };
 
 struct TintBatchBinding
@@ -5128,8 +5154,11 @@ bool ContainerTargetDistanceLess(const ContainerTarget& left, const ContainerTar
     return left.distanceSq < right.distanceSq;
 }
 
+unsigned g_targetCacheGeneration = 0;     // LEOPARD: +1 on every container scan (SyncTint follows it)
+
 void RefreshContainerTargetCache()
 {
+    ++g_targetCacheGeneration;
     g_state.targetCache.clear();
     if (ou == 0)
     {
@@ -5161,7 +5190,11 @@ void RefreshContainerTargetCache()
 
     for (size_t typeIndex = 0; typeIndex < (sizeof(scanTypes) / sizeof(scanTypes[0])); ++typeIndex)
     {
-        lektor<RootObject*> nearbyObjects;
+        // LEOPARD (16.10.2026): lektor has no destructor - a local one leaked the
+        // game's buffer on every scan. Kept and cleared, the buffer is reused.
+        static lektor<RootObject*> s_nearbyObjects[2];
+        lektor<RootObject*>& nearbyObjects = s_nearbyObjects[typeIndex];
+        nearbyObjects.clear();
         ou->getObjectsWithinSphere(
             nearbyObjects,
             probeCenter,
@@ -6312,17 +6345,51 @@ void TickMarkerRender()
         }
 
         MarkerWidget& marker = g_state.markerWidgets[visibleMarkerCount];
-        bool showIcon = g_state.config.showMarkerIcons
-            && marker.icon != 0
-            && TryApplyMarkerIconTexture(marker.icon, g_state.config.markerIconTexture);
-        if (showIcon)
+        // LEOPARD (16.10.2026): texture (a resource lookup over several path
+        // variants), caption, font and colour of 9 text layers were set on every
+        // marker every frame; now only when they change. The position still
+        // follows the container every frame.
+        static std::vector<MarkerStyleState> s_styles;
+        if (s_styles.size() < g_state.markerWidgets.size())
+            s_styles.resize(g_state.markerWidgets.size());
+        MarkerStyleState& style = s_styles[visibleMarkerCount];
+        if (style.icon != marker.icon || style.text != marker.text)
+        {
+            style = MarkerStyleState();
+            style.icon = marker.icon;
+            style.text = marker.text;
+        }
+
+        bool showIcon = false;
+        if (g_state.config.showMarkerIcons && marker.icon != 0)
+        {
+            if (!style.textureTried || style.texture != g_state.config.markerIconTexture)
+            {
+                style.textureTried = true;
+                style.texture = g_state.config.markerIconTexture;
+                style.textureOk = TryApplyMarkerIconTexture(marker.icon, style.texture);
+                style.iconColourSet = false;
+            }
+            showIcon = style.textureOk;
+        }
+        if (showIcon && (!style.iconColourSet || style.iconColour != g_state.config.markerColour))
         {
             SetMarkerIconColour(marker.icon, g_state.config.markerColour);
+            style.iconColour = g_state.config.markerColour;
+            style.iconColourSet = true;
         }
 
         const bool showText = g_state.config.showMarkerText && marker.text != 0;
-        if (showText)
+        const bool textChanged = !style.textSet
+            || style.caption != g_state.config.markerText
+            || style.fontHeight != static_cast<int>(g_state.config.markerTextSizePx)
+            || style.textColour != g_state.config.markerColour;
+        if (showText && textChanged)
         {
+            style.textSet = true;
+            style.caption = g_state.config.markerText;
+            style.fontHeight = static_cast<int>(g_state.config.markerTextSizePx);
+            style.textColour = g_state.config.markerColour;
             const MyGUI::Colour outlineColour = MarkerTextOutlineColour(g_state.config.markerColour);
             for (size_t outlineIndex = 0; outlineIndex < kMarkerTextOutlineLayerCount; ++outlineIndex)
             {
@@ -7957,6 +8024,7 @@ bool ApplyTintToEntityBinding(const hand& targetHandle, size_t bindingIndex, Ogr
     {
         ClearTintBinding(binding);
         binding->entity = entity;
+        binding->hasApplied = false;
     }
 
     size_t subEntityCount = 0;
@@ -7981,7 +8049,14 @@ bool ApplyTintToEntityBinding(const hand& targetHandle, size_t bindingIndex, Ogr
         binding->cloneMaterials.clear();
         binding->originalMaterials.resize(subEntityCount);
         binding->cloneMaterials.resize(subEntityCount);
+        binding->hasApplied = false;
     }
+
+    // LEOPARD: the same colour already on the clones - only a sub-entity whose
+    // material is not our clone any more needs work.
+    const bool sameTint = binding->hasApplied
+        && binding->appliedColour == g_state.config.tintColour
+        && binding->appliedDepth == g_state.config.tintForceDepthOverride;
 
     bool appliedAny = false;
     for (size_t subEntityIndex = 0; subEntityIndex < subEntityCount; ++subEntityIndex)
@@ -8017,6 +8092,11 @@ bool ApplyTintToEntityBinding(const hand& targetHandle, size_t bindingIndex, Ogr
         Ogre::MaterialPtr& cloneMaterial = binding->cloneMaterials[subEntityIndex];
         const bool currentIsClone =
             !cloneMaterial.isNull() && MaterialPtrsReferSameObject(currentMaterial, cloneMaterial);
+        if (currentIsClone && sameTint)
+        {
+            appliedAny = true;
+            continue;
+        }
         if (!currentIsClone)
         {
             binding->originalMaterials[subEntityIndex] = currentMaterial;
@@ -8059,6 +8139,12 @@ bool ApplyTintToEntityBinding(const hand& targetHandle, size_t bindingIndex, Ogr
         }
     }
 
+    if (appliedAny)
+    {
+        binding->hasApplied = true;
+        binding->appliedColour = g_state.config.tintColour;
+        binding->appliedDepth = g_state.config.tintForceDepthOverride;
+    }
     return appliedAny;
 }
 
@@ -8167,6 +8253,30 @@ void SyncTint()
         return;
     }
 
+    // LEOPARD (16.10.2026): the tint pass walked every container's scene nodes
+    // and re-tinted / re-set every material each frame. Clones stay on the
+    // entities by themselves, so the pass runs after each container scan
+    // (150-500 ms), when the colour changes, and every 500 ms in case the game
+    // swapped a material.
+    {
+        static unsigned s_generation = ~0u;
+        static DWORD s_lastMs = 0;
+        static Ogre::ColourValue s_colour;
+        static bool s_depth = false;
+        const DWORD nowMs = GetTickCount();
+        if (s_generation == g_targetCacheGeneration
+            && s_colour == g_state.config.tintColour
+            && s_depth == g_state.config.tintForceDepthOverride
+            && nowMs - s_lastMs < 500)
+        {
+            return;
+        }
+        s_generation = g_targetCacheGeneration;
+        s_colour = g_state.config.tintColour;
+        s_depth = g_state.config.tintForceDepthOverride;
+        s_lastMs = nowMs;
+    }
+
     const bool emitTintInvestigation = ShouldEmitTintInvestigation();
     std::vector<hand> activeHandles;
     const size_t tintTargetCount = std::min(g_state.targetCache.size(), kMaxTintTargetsPerCycle);
@@ -8214,6 +8324,8 @@ void SyncTint()
         {
             TintEntityBinding binding;
             binding.entity = 0;
+            binding.hasApplied = false;
+            binding.appliedDepth = false;
             tintEntry.entityBindings.push_back(binding);
         }
 
