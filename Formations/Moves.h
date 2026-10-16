@@ -212,6 +212,14 @@ static void ReadoutStyle()
     __except (EXCEPTION_EXECUTE_HANDLER) { Log("readout: styling faulted - text may be unreadable"); }
 }
 
+// a key as the readout shows it: the settings' names of the punctuation keys as the keys themselves
+static const char* KeyShown(const char* k)
+{
+    static const char* const map[][2] = { { "minus", "-" }, { "plus", "=" }, { "comma", "," }, { "period", "." } };
+    for (int i = 0; i < 4; i++) if (_stricmp(k, map[i][0]) == 0) return map[i][1];
+    return k;
+}
+
 static void ReadoutUpdate(bool show)
 {
     if (g_readoutDead) return;
@@ -229,8 +237,8 @@ static void ReadoutUpdate(bool show)
         const int L = g_uiLang >= 0 && g_uiLang < 3 ? g_uiLang : 0;
         char text[1000]; int p = 0;
         p += sprintf_s(text + p, sizeof(text) - p, "%s\n", TITLE[L]);
-        for (int i = 0; i < SHAPES; i++) p += sprintf_s(text + p, sizeof(text) - p, "%s %s  %s\n", i == g_set.shape ? ">" : "  ", g_set.keys[SHAPE_KEY[i]], SHAPE_NAMES_UI[i][L]);   // 1.4.3: the configured key names
-        p += sprintf_s(text + p, sizeof(text) - p, "  %s  %s\n\n  %s  %s\n  %s  %s", g_set.keys[KEY_LOOSE], g_set.loose ? LOOSE[L] : TIGHT[L], g_set.keys[KEY_RETREAT], RETREAT[L], g_set.keys[KEY_RALLY], RALLY[L]);
+        for (int i = 0; i < SHAPES; i++) p += sprintf_s(text + p, sizeof(text) - p, "%s %s  %s\n", i == g_set.shape ? ">" : "  ", KeyShown(g_set.keys[SHAPE_KEY[i]]), SHAPE_NAMES_UI[i][L]);   // 1.4.3: the configured key names
+        p += sprintf_s(text + p, sizeof(text) - p, "  %s  %s\n\n  %s  %s\n  %s  %s", KeyShown(g_set.keys[KEY_LOOSE]), g_set.loose ? LOOSE[L] : TIGHT[L], KeyShown(g_set.keys[KEY_RETREAT]), RETREAT[L], KeyShown(g_set.keys[KEY_RALLY]), RALLY[L]);
         EngineString cap;
         if (StrMakeHeap(cap, g_readoutBacking, sizeof(g_readoutBacking), text))
         {

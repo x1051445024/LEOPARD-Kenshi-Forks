@@ -295,6 +295,13 @@ static void FollowTick()
     unsigned long now = GetTickCount();
     if (now - g_followTickAt < 500) return;
     g_followTickAt = now;
+    // Review 17.10.2026: nothing of ours in use (the game's shape for all, no squad picks) - no walk over
+    // the player's characters at all; the table is emptied once so the hook passes everything through.
+    if (g_followDefault >= 0 && g_followDefault <= FS_CARAVAN && g_followPickN == 0 && g_followLastDefault == g_followDefault)
+    {
+        if (g_followTab[g_followActive].n) { LONG back = 1 - g_followActive; g_followTab[back].n = 0; InterlockedExchange(&g_followActive, back); }
+        return;
+    }
     void* squads[64]; int ns = FollowSquads(squads, 64);
     if (!ns) return;
 
@@ -335,13 +342,25 @@ static void FollowTick()
         void* f[SQUAD_MAX * 4]; int n = SquadFollowers(squads[k], f, SQUAD_MAX * 4);
         for (int i = 0; i < n && t.n < SQUAD_MAX * 4; i++) { t.slot[t.n].ch = f[i]; t.slot[t.n].off = FollowOffset(shape, i, n); t.n++; }
     }
+    // sorted by character, so the hook (called for every follower in the world, NPCs included) finds
+    // one in a few steps instead of reading the whole table
+    for (int a = 1; a < t.n; a++)
+        for (int b = a; b > 0 && (UINT_PTR)t.slot[b].ch < (UINT_PTR)t.slot[b - 1].ch; b--)
+        { FollowSlot x = t.slot[b]; t.slot[b] = t.slot[b - 1]; t.slot[b - 1] = x; }
     InterlockedExchange(&g_followActive, back);
 }
 
 static const Vec3* hook_bbOffset(void* bb, void* ch)
 {
     const FollowTable& t = g_followTab[g_followActive];
-    for (int i = 0; i < t.n; i++) if (t.slot[i].ch == ch) return &t.slot[i].off;
+    int lo = 0, hi = t.n - 1;
+    while (lo <= hi)
+    {
+        int mid = (lo + hi) >> 1;
+        UINT_PTR m = (UINT_PTR)t.slot[mid].ch, c = (UINT_PTR)ch;
+        if (m == c) return &t.slot[mid].off;
+        if (m < c) lo = mid + 1; else hi = mid - 1;
+    }
     return orig_bbOffset ? orig_bbOffset(bb, ch) : 0;
 }
 
