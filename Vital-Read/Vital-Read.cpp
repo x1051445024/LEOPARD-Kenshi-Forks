@@ -3698,7 +3698,8 @@ vr_marker_ui::OverlayStyle BuildPortraitOverlayStyle(const PortraitOverlayState 
             g_config.inBedIconCoordTop,
             g_config.inBedIconCoordWidth,
             g_config.inBedIconCoordHeight);
-        style.colour = MyGUI::Colour(1.0f, 0.22f, 0.22f, 0.95f);
+        // the same blue as the repair wrench: one colour = being healed
+        style.colour = MyGUI::Colour(0.45f, 0.82f, 1.0f, 0.95f);
         break;
     case PORTRAIT_OVERLAY_STATE_PLAYING_DEAD:
         style.widgetNamePrefix = kPlayingDeadOverlayWidgetNamePrefix;
@@ -3791,7 +3792,7 @@ vr_marker_ui::OverlayStyle BuildPortraitTextLabelStyle(const PortraitTextLabelSt
         style.colour = MyGUI::Colour(0.45f, 0.82f, 1.0f, 1.0f);
         break;
     case PORTRAIT_TEXT_LABEL_IN_BED:
-        style.colour = MyGUI::Colour(1.0f, 0.30f, 0.30f, 1.0f);
+        style.colour = MyGUI::Colour(0.45f, 0.82f, 1.0f, 1.0f);
         break;
     case PORTRAIT_TEXT_LABEL_CRIPPLED_ARM:
         style.colour = MyGUI::Colour(1.0f, 0.82f, 0.24f, 1.0f);
