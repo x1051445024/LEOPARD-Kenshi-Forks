@@ -9,8 +9,8 @@ Original: **BFrizzleFoShizzle**, [KenshiLib_Examples](https://github.com/BFrizzl
 
 ## Changes in this fork
 
-- Settings in Mod Config Menu (Options window, MCM tab): on/off, the game's
-  highlight key or an own key (or always on), see through walls, distance
+- Settings in Mod Config Menu (Options window, MCM tab): on/off, the show key
+  (ALT by default, any key or always on), see through walls, distance
   limit, colours of the squad, enemies, allies and neutrals (by relation or
   one colour). Without MCM - `CharacterHighlight.ini` (made from
   `CharacterHighlight.defaults.ini` on first start, new keys added on update).

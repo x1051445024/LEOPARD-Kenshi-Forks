@@ -56,14 +56,8 @@ msgstr "中立者按其派系对你的关系从红到黄到绿。关闭 - 使用
 msgid "Neutrals"
 msgstr "中立者"
 
-msgid "Own key"
-msgstr "自定义按键"
-
 msgid "Show through walls"
 msgstr "透过墙壁可见"
-
-msgid "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
-msgstr "游戏按键设置中的物品高亮键（设置，控制；默认 Alt）。关闭 - 使用下方的按键。"
 
 msgid "Tint characters while the highlight key is held."
 msgstr "按住高亮键时为角色着色。"
@@ -71,14 +65,14 @@ msgstr "按住高亮键时为角色着色。"
 msgid "Tinted characters are visible through walls and buildings."
 msgstr "着色的角色可透过墙壁和建筑看到。"
 
-msgid "Use the game's highlight key"
-msgstr "使用游戏的高亮键"
-
-msgid "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
-msgstr "关闭游戏高亮键时使用。按住此键时显示着色；NONE（设置时按 Backspace）- 始终显示。"
-
 msgid "While the highlight key is held, characters are tinted by how they stand to you."
 msgstr "按住高亮键时，角色按与你的关系着色。"
 
 msgid "Your squad"
 msgstr "你的小队"
+
+msgid "Show key"
+msgstr "显示按键"
+
+msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
+msgstr "按住此键时显示着色。NONE（设置时按 Backspace）- 始终显示。"

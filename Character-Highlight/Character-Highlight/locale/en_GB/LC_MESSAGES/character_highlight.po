@@ -56,14 +56,8 @@ msgstr "Neutrals go from red to yellow to green with their faction's relation to
 msgid "Neutrals"
 msgstr "Neutrals"
 
-msgid "Own key"
-msgstr "Own key"
-
 msgid "Show through walls"
 msgstr "Show through walls"
-
-msgid "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
-msgstr "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
 
 msgid "Tint characters while the highlight key is held."
 msgstr "Tint characters while the highlight key is held."
@@ -71,14 +65,14 @@ msgstr "Tint characters while the highlight key is held."
 msgid "Tinted characters are visible through walls and buildings."
 msgstr "Tinted characters are visible through walls and buildings."
 
-msgid "Use the game's highlight key"
-msgstr "Use the game's highlight key"
-
-msgid "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
-msgstr "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
-
 msgid "While the highlight key is held, characters are tinted by how they stand to you."
 msgstr "While the highlight key is held, characters are tinted by how they stand to you."
 
 msgid "Your squad"
 msgstr "Your squad"
+
+msgid "Show key"
+msgstr "Show key"
+
+msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
+msgstr "The tint shows while this key is held. NONE (Backspace when assigning) - always on."

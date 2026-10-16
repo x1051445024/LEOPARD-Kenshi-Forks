@@ -64,8 +64,7 @@ namespace
     // ---------------------------------------------------------------
 
     bool g_enabled = true;
-    bool g_useGameKey = true;           // the game's own "Highlight" control
-    HoldKey::Key g_holdKey;             // otherwise this key; NONE - always on
+    HoldKey::Key g_holdKey;             // ALT (as the game's item highlight); NONE - always on
     bool g_throughWalls = true;
     float g_maxDistance = 0.0f;         // metres from the camera centre, 0 - no limit
     Ogre::ColourValue g_squadColour(0.0f, 0.0f, 1.0f, 1.0f);
@@ -119,7 +118,6 @@ namespace
         if (ini.empty())
             return;
         g_enabled = GetPrivateProfileIntA(kSec, "Enabled", 1, ini.c_str()) != 0;
-        g_useGameKey = GetPrivateProfileIntA(kSec, "UseGameKey", 1, ini.c_str()) != 0;
         char key[64] = {};
         GetPrivateProfileStringA(kSec, "HoldKey", "ALT", key, sizeof(key), ini.c_str());
         g_holdKey = HoldKey::Parse(key);
@@ -259,10 +257,10 @@ namespace
         g_anyTinted = false;
     }
 
+    // Own key, changeable in MCM like our other plugins (the original used the
+    // game's item highlight control, Alt by default - ALT is the default here).
     bool KeyHeld()
     {
-        if (g_useGameKey)
-            return key != NULL && key->highlight;
         return HoldKey::Held(g_holdKey);
     }
 
@@ -438,8 +436,7 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
         api->info(api, Tr("While the highlight key is held, characters are tinted by how they stand to you."));
     api->section(api, Tr("General"));
     api->toggle(api, kSec, "Enabled", Tr("Enabled"), Tr("Tint characters while the highlight key is held."), 1, 0);
-    api->toggle(api, kSec, "UseGameKey", Tr("Use the game's highlight key"), Tr("The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."), 1, 0);
-    api->hotkey(api, kSec, "HoldKey", Tr("Own key"), Tr("Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."), "ALT", 0);
+    api->hotkey(api, kSec, "HoldKey", Tr("Show key"), Tr("The tint shows while this key is held. NONE (Backspace when assigning) - always on."), "ALT", 0);
     api->toggle(api, kSec, "ShowThroughWalls", Tr("Show through walls"), Tr("Tinted characters are visible through walls and buildings."), 1, 0);
     api->integer(api, kSec, "MaxDistance", Tr("Distance, m"), Tr("Characters farther than this from the centre of the camera are not tinted. 0 - no limit."), 0, 0, 5000, 0);
     api->section(api, Tr("Colours"));

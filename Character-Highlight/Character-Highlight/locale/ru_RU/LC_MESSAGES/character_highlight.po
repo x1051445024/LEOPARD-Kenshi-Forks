@@ -56,14 +56,8 @@ msgstr "Нейтралы - от красного через жёлтый к зе
 msgid "Neutrals"
 msgstr "Нейтралы"
 
-msgid "Own key"
-msgstr "Своя клавиша"
-
 msgid "Show through walls"
 msgstr "Видно сквозь стены"
-
-msgid "The game's item highlight key from its key bindings (Options, Controls; Alt by default). Off - the key below."
-msgstr "Клавиша подсветки предметов из настроек управления игры (Настройки, Управление; по умолчанию Alt). Выключено - клавиша ниже."
 
 msgid "Tint characters while the highlight key is held."
 msgstr "Окрашивать персонажей, пока зажата клавиша подсветки."
@@ -71,14 +65,14 @@ msgstr "Окрашивать персонажей, пока зажата кла�
 msgid "Tinted characters are visible through walls and buildings."
 msgstr "Окрашенных персонажей видно сквозь стены и постройки."
 
-msgid "Use the game's highlight key"
-msgstr "Клавиша подсветки игры"
-
-msgid "Used when the game's highlight key is off. The tint shows while this key is held; NONE (Backspace when assigning) - always on."
-msgstr "Если клавиша подсветки игры выключена. Окраска видна, пока зажата эта клавиша; NONE (Backspace при назначении) - всегда."
-
 msgid "While the highlight key is held, characters are tinted by how they stand to you."
 msgstr "Пока зажата клавиша подсветки, персонажи окрашиваются по отношению к вам."
 
 msgid "Your squad"
 msgstr "Свой отряд"
+
+msgid "Show key"
+msgstr "Клавиша показа"
+
+msgid "The tint shows while this key is held. NONE (Backspace when assigning) - always on."
+msgstr "Окраска видна, пока зажата эта клавиша. NONE (Backspace при назначении) - всегда."
