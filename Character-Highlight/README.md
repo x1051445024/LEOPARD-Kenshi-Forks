@@ -29,8 +29,10 @@ Original: **BFrizzleFoShizzle**, [KenshiLib_Examples](https://github.com/BFrizzl
 - A character with no faction no longer crashes the relation check.
 - Each kind (squad, enemies, allies, neutrals) can be turned off on its own.
 - Diplomats: faction diplomats get a colour of their own (purple by default),
-  before any other kind - the game's `Character::isDiplomaticStatus`, or a
-  squad from a "... diplomat" template.
+  before any other kind - the game's `Character::isDiplomaticStatus`, the
+  character's NPC class Diplomat (`StateBroadcastData::NPCType == OT_DIPLOMAT`,
+  "NPC class" 5 in the character template - how mods mark their envoys,
+  17.10.2026), or a squad from a "... diplomat" template.
 - The portrait and dead-body fixes of the original are kept.
 
 Vital Sense (our fork) tints after the main loop and re-applies its tint

@@ -48,6 +48,8 @@
 #include <kenshi/Renderer.h>
 #include <kenshi/RenderToTextureotron.h>
 #include <kenshi/util/hand.h>
+#include <kenshi/AI/AI.h>
+#include <kenshi/StateBroadcastData.h>
 #include <core/Functions.h>
 #include <ogre/OgreMaterial.h>
 #include <ogre/OgreTechnique.h>
@@ -189,6 +191,13 @@ namespace
     bool IsDiplomat(Character* character)
     {
         if (character->isDiplomaticStatus(true))
+            return true;
+        // The character's NPC class from its template ("NPC class" = 5, Diplomat) - what every
+        // mod's diplomats set, whatever their squad is called. 17.10.2026, the owner: "modded
+        // diplomats are not purple" - HN Ascended, Reactive World, GenMod and others give their
+        // envoys class 5 under squad names with no "diplomat" in them.
+        AI* const ai = character->ai;
+        if (ai != NULL && ai->state != NULL && ai->state->NPCType == OT_DIPLOMAT)
             return true;
         ActivePlatoon* const active = character->getPlatoon();
         Platoon* const platoon = active != NULL ? active->me : NULL;
