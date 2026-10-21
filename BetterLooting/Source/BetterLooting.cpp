@@ -5617,6 +5617,10 @@ static void ProcessBetterLootingRadiusRun()
 // ============================================================
 
 static volatile LONG g_storeAllRequested = 0;
+// Когда запросили (22.10.2026): запрос, не выполненный за секунду (не было
+// окна инвентаря персонажа игрока), снимается - иначе раскладка сработала
+// бы позже, когда игрок о ней уже забыл.
+static DWORD g_storeAllRequestedAt = 0;
 static bool g_storeAllRunning = false;
 // Итог раскладки (22.10.2026) - строкой в журнал всегда, без [Debug] Log:
 // куда сколько ушло, сколько не нашло места, сколько сбоев.
@@ -7642,6 +7646,24 @@ static void InventoryGUIUpdate_hook(
         g_smartLootInsertConsumed = true;
     }
 
+    if (
+        InterlockedCompareExchange(
+            &g_storeAllRequested,
+            0,
+            0
+        ) != 0 &&
+        GetTickCount() - g_storeAllRequestedAt > 1000 &&
+        !g_storeAllRunning
+    )
+    {
+        InterlockedExchange(
+            &g_storeAllRequested,
+            0
+        );
+
+        DebugLog("BetterLooting: deposit request dropped - no player character inventory within a second");
+    }
+
 
     Character* storeTriggerCharacter =
         self->getCallbackCharacter();
@@ -8113,6 +8135,8 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 void BetterLootingRequestStoreAll()
 {
+    g_storeAllRequestedAt = GetTickCount();
+
     const LONG previous =
         InterlockedExchange(
             &g_storeAllRequested,
