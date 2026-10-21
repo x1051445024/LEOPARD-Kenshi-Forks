@@ -95,7 +95,7 @@ Supported keys:
 If config is missing or unreadable, defaults are used and written back.
 
 ## Emkejs Mod Hub
-If `Emkejs-Mod-Core` is present, Job-B-Gone registers its core settings with Mod Hub on startup and keeps `mod-config.json` as the persistence source of truth. The panel toggle hotkey is exposed there as a primary key plus separate Ctrl/Alt/Shift toggles; panel-position fields remain file-backed only. If the hub is unavailable or registration fails, Job-B-Gone falls back to its standalone file-based config without disabling the in-game panel.
+If `Emkejs-Mod-Core` is present, Job-B-Gone registers its core settings with Mod Hub on startup and keeps `mod-config.json` as the persistence source of truth. The panel toggle hotkey is exposed there as one key button that takes a combination (CTRL+B); panel-position fields remain file-backed only. If the hub is unavailable or registration fails, Job-B-Gone falls back to its standalone file-based config without disabling the in-game panel.
 
 Recommended load order:
 - `Emkejs-Mod-Core`
@@ -119,3 +119,8 @@ It uses KenshiLib, which is released under GPLv3.
 
 ## Изменения форка (15.10.2026)
 - `mod-config.json` при первом запуске создаётся копией `mod-config.defaults.json` (`IniDefaults::PrepareJson`) - больше нет «could not read mod-config.json» в журнале на чистой установке.
+
+## Изменения форка (22.10.2026, v4)
+- MCM: клавиша панели - одно сочетание на кнопке клавиши (CTRL+B), как в Vital-Sense. Строки «Нужен Ctrl / Alt / Shift» убраны; кнопка раньше показывала только «B» без Ctrl - теперь сочетание целиком. Ключ в mod-config.json тот же (panel_visibility_toggle_hotkey).
+
+- Меньше нагрузки: ApplyPanelLayout вызывается каждый кадр и ставил setCoord всем виджетам панели - MyGUI пересобирал слой Main даже без изменений (замер LayerProbe: ~1100 пометок слоя за кадр). Теперь координата задаётся, только если изменилась (SetCoordIfChanged).

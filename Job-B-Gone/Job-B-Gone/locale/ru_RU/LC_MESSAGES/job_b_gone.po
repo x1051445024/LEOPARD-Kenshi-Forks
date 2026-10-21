@@ -18,7 +18,7 @@ msgid "Panel toggle key"
 msgstr "Клавиша показа панели"
 
 msgid "Primary key for the panel visibility toggle. Clear to disable the hotkey."
-msgstr "Показывает и прячет панель. NONE - без клавиши"
+msgstr "Показывает и прячет панель. Можно сочетание, например CTRL+B. NONE - без клавиши"
 
 msgid "Require Ctrl"
 msgstr "Нужен Ctrl"

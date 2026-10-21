@@ -395,6 +395,13 @@ void InitializeSettingDefinitions()
 
     for (size_t i = 1u; i < JBG_ARRAY_COUNT(g_boolSettingDescriptors); ++i)
     {
+        // LEOPARD (22.10.2026): no "Require Ctrl/Alt/Shift" rows - the key button
+        // of Mod Config Menu takes a combination (CTRL+B) itself; the modifiers
+        // travel with the key value (Get/SetKeybindSettingValue).
+        if (g_boolSettingDescriptors[i].kind != HubBoolSettingKind_ConfigField)
+        {
+            continue;
+        }
         g_modHubRows[rowIndex].kind = emc::MOD_HUB_CLIENT_SETTING_KIND_BOOL;
         g_modHubRows[rowIndex].def = &g_boolSettingDefs[i];
         ++rowIndex;
@@ -564,7 +571,15 @@ EMC_Result __cdecl GetKeybindSettingValue(void* user_data, EMC_KeybindValueV1* o
     }
 
     out_value->keycode = state.enabled ? state.keyCode : EMC_KEY_UNBOUND;
-    out_value->modifiers = 0u;
+    // the combination's modifiers (1 Ctrl, 2 Shift, 4 Alt), from the hotkey string
+    uint32_t modifiers = 0u;
+    if (state.enabled && state.requireCtrl)
+        modifiers |= 1u;
+    if (state.enabled && state.requireShift)
+        modifiers |= 2u;
+    if (state.enabled && state.requireAlt)
+        modifiers |= 4u;
+    out_value->modifiers = modifiers;
     return EMC_OK;
 }
 
@@ -580,9 +595,9 @@ EMC_Result __cdecl SetKeybindSettingValue(
         return EMC_ERR_INVALID_ARGUMENT;
     }
 
-    if (value.modifiers != 0u)
+    if ((value.modifiers & ~7u) != 0u)
     {
-        emc::consumer::WriteErrorMessage(err_buf, err_buf_size, "use_modifier_toggles");
+        emc::consumer::WriteErrorMessage(err_buf, err_buf_size, "invalid_modifiers");
         return EMC_ERR_INVALID_ARGUMENT;
     }
 
@@ -605,12 +620,10 @@ EMC_Result __cdecl SetKeybindSettingValue(
 
     state.enabled = value.keycode != EMC_KEY_UNBOUND;
     state.keyCode = value.keycode;
-    if (!state.enabled)
-    {
-        state.requireCtrl = false;
-        state.requireAlt = false;
-        state.requireShift = false;
-    }
+    // the combination's modifiers - into the hotkey string (CTRL+B)
+    state.requireCtrl = state.enabled && (value.modifiers & 1u) != 0u;
+    state.requireShift = state.enabled && (value.modifiers & 2u) != 0u;
+    state.requireAlt = state.enabled && (value.modifiers & 4u) != 0u;
 
     std::string hotkeyValue;
     std::string reason;

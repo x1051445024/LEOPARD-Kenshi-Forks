@@ -18,7 +18,7 @@ msgid "Panel toggle key"
 msgstr "Panel toggle key"
 
 msgid "Primary key for the panel visibility toggle. Clear to disable the hotkey."
-msgstr "Shows and hides the panel. NONE - no key"
+msgstr "Shows and hides the panel. A combination works too, e.g. CTRL+B. NONE - no key"
 
 msgid "Require Ctrl"
 msgstr "Require Ctrl"

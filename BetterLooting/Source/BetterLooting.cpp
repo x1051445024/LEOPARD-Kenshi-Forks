@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 #include <Debug.h>
@@ -4024,6 +4025,15 @@ static void EvaluateTargetInventory(
 
 static std::string BetterLootingIniPath();
 
+// Клавиша «разложить по хранилищам» (22.10.2026). У автора это была кнопка
+// в окне SHIFT+L; окно убрано 04.10 (настройки - в MCM), кнопка ушла с ним.
+// Теперь - сочетание из MCM (DepositKey), по умолчанию ALT+INSERT.
+static HoldKey::Key g_depositKey;
+// Раскладывать только то, что прошло бы правила сбора (категории, цены) -
+// так было у автора. По умолчанию нет: раскладывается всё, что не надето
+// (игрок выключил сбор оружия и брони - а убрать их в шкаф хочет).
+static bool g_depositByRules = false;
+
 static bool LoadBetterLootingRules()
 {
     char exePath[MAX_PATH] = {};
@@ -4238,6 +4248,15 @@ static bool LoadBetterLootingRules()
             if (named.vk != 0)
                 g_betterLootingRules.activationVirtualKey = named.vk;
         }
+    }
+
+    {
+        char keyName[64] = {};
+        GetPrivateProfileStringA("Behavior", "DepositKey", "ALT+INSERT", keyName,
+                                 sizeof(keyName), configPath.c_str());
+        g_depositKey = HoldKey::Parse(keyName);
+        g_depositByRules =
+            GetPrivateProfileIntA("Behavior", "DepositByRules", 0, configPath.c_str()) != 0;
     }
 
     if (
@@ -5599,6 +5618,15 @@ static void ProcessBetterLootingRadiusRun()
 
 static volatile LONG g_storeAllRequested = 0;
 static bool g_storeAllRunning = false;
+// Итог раскладки (22.10.2026) - строкой в журнал всегда, без [Debug] Log:
+// куда сколько ушло, сколько не нашло места, сколько сбоев.
+struct BetterLootingStoreTally
+{
+    int moved;
+};
+static std::map<RootObject*, BetterLootingStoreTally> g_storeTally;
+static int g_storeNoRoom = 0;
+static int g_storeFaults = 0;
 static bool g_storeAllTransferFault = false;
 
 
@@ -6723,6 +6751,17 @@ static void ReleaseBetterLootingProtectedLootForStore(
 }
 
 
+static void BetterLootingStoreCount(
+    const BetterLootingStorePlacement& placement
+)
+{
+    BetterLootingStoreTally& t =
+        g_storeTally[placement.object];
+
+    ++t.moved;
+}
+
+
 static void LogBetterLootingStoreInvariantFault(
     GameData* itemData,
     int sourceBefore,
@@ -6731,6 +6770,8 @@ static void LogBetterLootingStoreInvariantFault(
     int destinationAfter
 )
 {
+    ++g_storeFaults;
+
     char message[768];
 
     sprintf_s(
@@ -6872,6 +6913,8 @@ static void ExecuteBetterLootingStoreCandidate(
                 noTargetMessage
             );
 
+            g_storeNoRoom += sourceQuantity;
+
             return;
         }
 
@@ -6995,6 +7038,7 @@ static void ExecuteBetterLootingStoreCandidate(
 
 
             ++movedTotal;
+            BetterLootingStoreCount(placement);
 
 
             char successMessage[768];
@@ -7068,6 +7112,7 @@ static void ExecuteBetterLootingStoreCandidate(
             BlTrace(
                 "BetterLooting: STORE_ENGINE_TRUSTED - no rollback"
             );
+            BetterLootingStoreCount(placement);
             if (!sourceWillRemain)
             {
                 return;
@@ -7134,6 +7179,7 @@ static void ExecuteBetterLootingStoreCandidate(
 
             if (rollbackExact)
             {
+                ++g_storeNoRoom;
                 return;
             }
 
@@ -7297,14 +7343,16 @@ static void EvaluateBetterLootingStoreSourceInventory(
 
 
         const BetterLootingDecision decision =
-            EvaluateLootDecision(
-                valueSingle,
-                weightSingle,
-                stolen,
-                type,
-                effectiveItemFunctionValue,
-                isResource
-            );
+            g_depositByRules
+                ? EvaluateLootDecision(
+                    valueSingle,
+                    weightSingle,
+                    stolen,
+                    type,
+                    effectiveItemFunctionValue,
+                    isResource
+                )
+                : BetterLootingDecision::LOOT;
 
 
         char decisionMessage[640];
@@ -7470,6 +7518,11 @@ static void RunBetterLootingStoreAll(
             getInventory();
 
 
+    g_storeTally.clear();
+    g_storeNoRoom = 0;
+    g_storeFaults = 0;
+
+
     char startMessage[512];
 
     sprintf_s(
@@ -7513,19 +7566,32 @@ static void RunBetterLootingStoreAll(
     }
 
 
-    char endMessage[384];
-
-    sprintf_s(
-        endMessage,
-        "BetterLooting: STORE_ALL END fault=%d",
-        g_storeAllTransferFault
-            ? 1
-            : 0
-    );
-
-    BlTrace(
-        endMessage
-    );
+    // итог - всегда (раньше «END fault=0» шло в журнал как ошибка из-за
+    // слова fault, а куда ушли вещи, не было видно вовсе)
+    {
+        int movedAll = 0;
+        std::string where;
+        for (std::map<RootObject*, BetterLootingStoreTally>::const_iterator it = g_storeTally.begin();
+             it != g_storeTally.end(); ++it)
+        {
+            movedAll += it->second.moved;
+            float distance = -1.0f;
+            for (std::size_t i = 0; i < targets.size(); ++i)
+                if (targets[i].object == it->first)
+                    distance = targets[i].distance / 10.0f;
+            char part[256];
+            _snprintf_s(part, _TRUNCATE, "%s%d -> %s (%.0f m)", where.empty() ? "" : ", ", it->second.moved,
+                      it->first != NULL ? it->first->getName().c_str() : "?", distance);
+            where += part;
+        }
+        char summary[256];
+        _snprintf_s(summary, _TRUNCATE, "BetterLooting: deposit by %s: %d item(s) put away, %d left (no room), %d transfer problem(s)%s",
+                  character->getName().c_str(), movedAll, g_storeNoRoom, g_storeFaults,
+                  g_storeAllTransferFault ? ", stopped" : "");
+        DebugLog(std::string(summary) + (where.empty() ? std::string() : ": " + where));
+        if (g_storeFaults != 0 || g_storeAllTransferFault)
+            ErrorLog("BetterLooting: deposit had transfer problems - see the line above");
+    }
 
 
     g_storeAllRunning =
@@ -7534,6 +7600,7 @@ static void RunBetterLootingStoreAll(
 
 
 static bool g_smartLootInsertConsumed = false;
+static bool g_depositKeyWasDown = false;
 
 
 static void InventoryGUIUpdate_hook(
@@ -7554,6 +7621,25 @@ static void InventoryGUIUpdate_hook(
     )
     {
         return;
+    }
+
+
+    // Клавиша «разложить»: одно срабатывание на нажатие. Пока она зажата,
+    // клавиша сбора (у ALT+INSERT это тот же Insert) не срабатывает.
+    const bool depositDown =
+        g_depositKey.vk != 0 &&
+        HoldKey::Held(g_depositKey);
+
+    if (depositDown && !g_depositKeyWasDown)
+    {
+        BetterLootingRequestStoreAll();
+    }
+
+    g_depositKeyWasDown = depositDown;
+
+    if (depositDown)
+    {
+        g_smartLootInsertConsumed = true;
     }
 
 
@@ -8241,6 +8327,12 @@ extern "C" __declspec(dllexport) void MCM_Describe(MCM_Api* api)
     api->hotkey(api, "Behavior", "ActivationKey", Tr("Looting key"),
                 Tr("Key that collects loot around the selected character. Click and press a key."),
                 "INSERT", 0);
+    api->hotkey(api, "Behavior", "DepositKey", Tr("Deposit key"),
+                Tr("Puts the character's items away into nearby storage that accepts them (ore into the ore box, weapons into the weapon rack and so on). Click and press a key or combination."),
+                "ALT+INSERT", 0);
+    api->toggle(api, "Behavior", "DepositByRules", Tr("Deposit only by looting rules"),
+                Tr("Off: every item that is not worn is put away. On: only items that pass the looting categories and price limits below."),
+                0, 0);
     api->number(api, "General", "LootRadius", Tr("Loot radius (m)"),
                 Tr("How far around the character the mod looks for loot."),
                 20.0f, 1.0f, 100.0f, 1, 0);

@@ -2319,6 +2319,17 @@ static MyGUI::IntCoord ResolvePanelCoordFromConfig()
     return GetFallbackButtonCoord();
 }
 
+// LEOPARD (22.10.2026): ApplyPanelLayout runs every frame; MyGUI's setCoord
+// marks the layer for a rebuild even when the coordinate is the same, so the
+// panel's layer (Main) was rebuilt every frame (~1100 marks per frame).
+static void SetCoordIfChanged(MyGUI::Widget* widget, const MyGUI::IntCoord& coord)
+{
+    if (widget->getCoord() != coord)
+    {
+        widget->setCoord(coord);
+    }
+}
+
 static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
 {
     if (!g_jobBGonePanel || !g_jobBGoneHeaderButton || !g_jobBGoneBodyFrame || !g_jobBGoneStatusText
@@ -2331,14 +2342,14 @@ static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
         return;
     }
 
-    g_jobBGonePanel->setCoord(panelCoord);
-    g_jobBGoneHeaderButton->setCoord(MyGUI::IntCoord(0, 0, panelCoord.width, 38));
-    g_jobBGoneBodyFrame->setCoord(MyGUI::IntCoord(0, 40, panelCoord.width, panelCoord.height - 40));
-    g_jobBGoneStatusText->setCoord(MyGUI::IntCoord(14, 50, panelCoord.width - 28, 22));
-    g_jobBGoneEmptyStateText->setCoord(MyGUI::IntCoord(14, 122, panelCoord.width - 28, 24));
+    SetCoordIfChanged(g_jobBGonePanel, panelCoord);
+    SetCoordIfChanged(g_jobBGoneHeaderButton, MyGUI::IntCoord(0, 0, panelCoord.width, 38));
+    SetCoordIfChanged(g_jobBGoneBodyFrame, MyGUI::IntCoord(0, 40, panelCoord.width, panelCoord.height - 40));
+    SetCoordIfChanged(g_jobBGoneStatusText, MyGUI::IntCoord(14, 50, panelCoord.width - 28, 22));
+    SetCoordIfChanged(g_jobBGoneEmptyStateText, MyGUI::IntCoord(14, 122, panelCoord.width - 28, 24));
     if (g_jobBGoneHoverHintText)
     {
-        g_jobBGoneHoverHintText->setCoord(MyGUI::IntCoord(14, panelCoord.height - 30, panelCoord.width - 28, 18));
+        SetCoordIfChanged(g_jobBGoneHoverHintText, MyGUI::IntCoord(14, panelCoord.height - 30, panelCoord.width - 28, 18));
     }
 
     const int overlayWidth = 460;
@@ -2358,16 +2369,16 @@ static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
         overlayTop = 48;
     }
 
-    g_jobBGoneConfirmOverlay->setCoord(MyGUI::IntCoord(overlayLeft, overlayTop, overlayWidth, overlayHeight));
-    g_jobBGoneConfirmTitleText->setCoord(MyGUI::IntCoord(12, 10, overlayWidth - 24, 24));
-    g_jobBGoneConfirmTitleTextBold->setCoord(MyGUI::IntCoord(13, 10, overlayWidth - 24, 24));
-    g_jobBGoneConfirmBodyText->setCoord(MyGUI::IntCoord(12, 40, overlayWidth - 24, overlayHeight - 86));
+    SetCoordIfChanged(g_jobBGoneConfirmOverlay, MyGUI::IntCoord(overlayLeft, overlayTop, overlayWidth, overlayHeight));
+    SetCoordIfChanged(g_jobBGoneConfirmTitleText, MyGUI::IntCoord(12, 10, overlayWidth - 24, 24));
+    SetCoordIfChanged(g_jobBGoneConfirmTitleTextBold, MyGUI::IntCoord(13, 10, overlayWidth - 24, 24));
+    SetCoordIfChanged(g_jobBGoneConfirmBodyText, MyGUI::IntCoord(12, 40, overlayWidth - 24, overlayHeight - 86));
     const int confirmButtonWidth = 110;
     const int confirmButtonHeight = 30;
     const int confirmButtonsTop = overlayHeight - confirmButtonHeight - 12;
-    g_jobBGoneConfirmYesButton->setCoord(
+    SetCoordIfChanged(g_jobBGoneConfirmYesButton, 
         MyGUI::IntCoord(overlayWidth - (confirmButtonWidth * 2) - 18, confirmButtonsTop, confirmButtonWidth, confirmButtonHeight));
-    g_jobBGoneConfirmNoButton->setCoord(
+    SetCoordIfChanged(g_jobBGoneConfirmNoButton, 
         MyGUI::IntCoord(overlayWidth - confirmButtonWidth - 12, confirmButtonsTop, confirmButtonWidth, confirmButtonHeight));
 
     const int meButtonWidth = kScopeButtonMeWidth;
@@ -2387,17 +2398,17 @@ static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
     }
     const int topButtonsLeft = 14 + topTitleWidth + 8;
 
-    g_deleteAllJobsTitleText->setCoord(MyGUI::IntCoord(14, 80, topTitleWidth, buttonHeight));
-    g_deleteAllJobsSelectedMemberButton->setCoord(MyGUI::IntCoord(topButtonsLeft, 80, meButtonWidth, buttonHeight));
-    g_deleteAllJobsSelectedMembersButton->setCoord(
+    SetCoordIfChanged(g_deleteAllJobsTitleText, MyGUI::IntCoord(14, 80, topTitleWidth, buttonHeight));
+    SetCoordIfChanged(g_deleteAllJobsSelectedMemberButton, MyGUI::IntCoord(topButtonsLeft, 80, meButtonWidth, buttonHeight));
+    SetCoordIfChanged(g_deleteAllJobsSelectedMembersButton, 
         MyGUI::IntCoord(topButtonsLeft + meButtonWidth + buttonGap, 80, selectedButtonWidth, buttonHeight));
-    g_deleteAllJobsWholeSquadButton->setCoord(
+    SetCoordIfChanged(g_deleteAllJobsWholeSquadButton, 
         MyGUI::IntCoord(
             topButtonsLeft + meButtonWidth + selectedButtonWidth + (buttonGap * 2),
             80,
             squadButtonWidth,
             buttonHeight));
-    g_deleteAllJobsEveryoneButton->setCoord(
+    SetCoordIfChanged(g_deleteAllJobsEveryoneButton, 
         MyGUI::IntCoord(
             topButtonsLeft + meButtonWidth + selectedButtonWidth + squadButtonWidth + (buttonGap * 3),
             80,
@@ -2422,14 +2433,14 @@ static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
 
         const int top = GetJobRowTop(static_cast<int>(i));
         const int buttonsLeft = 14 + labelWidth + 8;
-        rowWidgets.label->setCoord(MyGUI::IntCoord(14, top, labelWidth, buttonHeight));
-        rowWidgets.deleteSelectedMemberButton->setCoord(
+        SetCoordIfChanged(rowWidgets.label, MyGUI::IntCoord(14, top, labelWidth, buttonHeight));
+        SetCoordIfChanged(rowWidgets.deleteSelectedMemberButton, 
             MyGUI::IntCoord(buttonsLeft, top, meButtonWidth, buttonHeight));
-        rowWidgets.deleteSelectedMembersButton->setCoord(
+        SetCoordIfChanged(rowWidgets.deleteSelectedMembersButton, 
             MyGUI::IntCoord(buttonsLeft + meButtonWidth + buttonGap, top, selectedButtonWidth, buttonHeight));
-        rowWidgets.deleteWholeSquadButton->setCoord(
+        SetCoordIfChanged(rowWidgets.deleteWholeSquadButton, 
             MyGUI::IntCoord(buttonsLeft + meButtonWidth + selectedButtonWidth + (buttonGap * 2), top, squadButtonWidth, buttonHeight));
-        rowWidgets.deleteEveryoneButton->setCoord(
+        SetCoordIfChanged(rowWidgets.deleteEveryoneButton, 
             MyGUI::IntCoord(
                 buttonsLeft + meButtonWidth + selectedButtonWidth + squadButtonWidth + (buttonGap * 3),
                 top,
@@ -2447,9 +2458,9 @@ static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
             downTop = upTop + kJobRowsScrollButtonHeight + 4;
         }
 
-        g_jobRowsScrollUpButton->setCoord(
+        SetCoordIfChanged(g_jobRowsScrollUpButton, 
             MyGUI::IntCoord(scrollButtonLeft, upTop, kJobRowsScrollButtonWidth, kJobRowsScrollButtonHeight));
-        g_jobRowsScrollDownButton->setCoord(
+        SetCoordIfChanged(g_jobRowsScrollDownButton, 
             MyGUI::IntCoord(scrollButtonLeft, downTop, kJobRowsScrollButtonWidth, kJobRowsScrollButtonHeight));
     }
 }
