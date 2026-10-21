@@ -2330,6 +2330,18 @@ static void SetCoordIfChanged(MyGUI::Widget* widget, const MyGUI::IntCoord& coor
     }
 }
 
+// LEOPARD (22.10.2026): the panel's body is a Kenshi_Button1 frame (dark), but
+// Kenshi_TextboxStandardText is coloured for the light parchment - dark text on
+// a dark frame in vanilla and dark interfaces alike (Asur). The labels take
+// the text colour of the panel's own buttons, so they follow any interface mod.
+static void MatchButtonTextColour(MyGUI::TextBox* text, MyGUI::Button* sample)
+{
+    if (text && sample)
+    {
+        text->setTextColour(sample->getTextColour());
+    }
+}
+
 static void ApplyPanelLayout(const MyGUI::IntCoord& panelCoord)
 {
     if (!g_jobBGonePanel || !g_jobBGoneHeaderButton || !g_jobBGoneBodyFrame || !g_jobBGoneStatusText
@@ -3042,6 +3054,15 @@ static void EnsureSelectedMemberJobPanelButton(PlayerInterface* thisptr)
             g_jobRowWidgets.push_back(rowWidgets);
         }
 
+        MatchButtonTextColour(g_jobBGoneStatusText, g_deleteAllJobsSelectedMemberButton);
+        MatchButtonTextColour(g_jobBGoneEmptyStateText, g_deleteAllJobsSelectedMemberButton);
+        MatchButtonTextColour(g_deleteAllJobsTitleText, g_deleteAllJobsSelectedMemberButton);
+        MatchButtonTextColour(g_jobBGoneHoverHintText, g_deleteAllJobsSelectedMemberButton);
+        for (size_t i = 0; i < g_jobRowWidgets.size(); ++i)
+        {
+            MatchButtonTextColour(g_jobRowWidgets[i].label, g_deleteAllJobsSelectedMemberButton);
+        }
+
         if (g_config.debugLogTransitions)
         {
             DebugLog("Job-B-Gone DEBUG: created Job-B-Gone collapsible panel");
@@ -3088,6 +3109,9 @@ static void EnsureSelectedMemberJobPanelButton(PlayerInterface* thisptr)
         if (g_jobBGoneConfirmOverlay && g_jobBGoneConfirmTitleText && g_jobBGoneConfirmTitleTextBold && g_jobBGoneConfirmBodyText
             && g_jobBGoneConfirmYesButton && g_jobBGoneConfirmNoButton)
         {
+            MatchButtonTextColour(g_jobBGoneConfirmTitleText, g_jobBGoneConfirmYesButton);
+            MatchButtonTextColour(g_jobBGoneConfirmTitleTextBold, g_jobBGoneConfirmYesButton);
+            MatchButtonTextColour(g_jobBGoneConfirmBodyText, g_jobBGoneConfirmYesButton);
             if (g_config.debugLogTransitions)
             {
                 std::stringstream info;

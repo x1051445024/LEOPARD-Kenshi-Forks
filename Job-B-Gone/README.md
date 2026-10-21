@@ -124,3 +124,4 @@ It uses KenshiLib, which is released under GPLv3.
 - MCM: клавиша панели - одно сочетание на кнопке клавиши (CTRL+B), как в Vital-Sense. Строки «Нужен Ctrl / Alt / Shift» убраны; кнопка раньше показывала только «B» без Ctrl - теперь сочетание целиком. Ключ в mod-config.json тот же (panel_visibility_toggle_hotkey).
 
 - Меньше нагрузки: ApplyPanelLayout вызывается каждый кадр и ставил setCoord всем виджетам панели - MyGUI пересобирал слой Main даже без изменений (замер LayerProbe: ~1100 пометок слоя за кадр). Теперь координата задаётся, только если изменилась (SetCoordIfChanged).
+- Надписи панели (Kenshi_TextboxStandardText - цвет для светлого пергамента) были тёмными на тёмной рамке Kenshi_Button1 и в ванильном, и в тёмном интерфейсе (Asur). Теперь берут цвет текста кнопок той же панели (MatchButtonTextColour) - следуют за любым модом на интерфейс.
