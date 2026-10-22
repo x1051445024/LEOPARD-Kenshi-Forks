@@ -2499,4 +2499,45 @@ void SyncKoCharacterTint(RuntimeStateView& state, const char* pluginName)
     EmitTintDiagLogIfDue(pluginName);
 }
 
+// LEOPARD (22.10.2026): портреты. Портрет игра рисует сразу внутри
+// RenderToTextureotron::renderCharacter, копируя материалы модели персонажа
+// (Entity::setMaterial) - а своих и животных мы красим клонами материалов на
+// частях модели: оглушённый под зажатой клавишей попадал в портрет
+// окрашенным. На время отрисовки портрета снимаем свою окраску с этого
+// персонажа и сразу возвращаем (Character Highlight делает так же со своей).
+bool SuspendCharacterTintForPortrait(
+    RuntimeStateView& state,
+    Character* character,
+    Ogre::ColourValue& colourOut,
+    bool& depthOut,
+    const char* pluginName)
+{
+    if (!character || state.characterTintEntries.empty())
+    {
+        return false;
+    }
+
+    const int index = FindTintEntryByHandle(state.characterTintEntries, character->handle);
+    if (index < 0)
+    {
+        return false;
+    }
+
+    colourOut = DesiredTintColour(state, state.characterTintEntries[index]);
+    depthOut = state.config.characterTintForceDepthOverride;
+
+    bool hadException = false;
+    return TryApplyTintToCharacterSeh(character, &kClearTintColour, false, pluginName, &hadException);
+}
+
+void ResumeCharacterTintAfterPortrait(
+    Character* character,
+    const Ogre::ColourValue& colour,
+    bool depth,
+    const char* pluginName)
+{
+    bool hadException = false;
+    TryApplyTintToCharacterSeh(character, &colour, depth, pluginName, &hadException);
+}
+
 } // namespace vs_character_tint

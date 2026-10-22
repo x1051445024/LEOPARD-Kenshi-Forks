@@ -7,6 +7,8 @@
 #include <kenshi/PlayerInterface.h>
 #include <kenshi/SaveInfo.h>
 #include <kenshi/SaveManager.h>
+#include <kenshi/Character.h>
+#include <kenshi/RenderToTextureotron.h>
 
 #include "src/vs_config.h"
 #include "src/vs_character_tint.h"
@@ -120,6 +122,26 @@ void PlayerInterface_updateUT_hook(PlayerInterface* thisptr)
         {
             vs_marker_render::TickKoMarkerRender(state, kPluginName);
         }
+    }
+}
+
+// LEOPARD (22.10.2026): портрет без нашей окраски (см. SuspendCharacterTintForPortrait).
+void (*RenderToTextureotron_renderCharacterOrig)(RenderToTextureotron*, Character*, Ogre::SharedPtr<Ogre::Texture>,
+                                                 const iVector2&, const Ogre::TRect<float>&) = NULL;
+
+void RenderToTextureotron_renderCharacter_hook(RenderToTextureotron* thisptr, Character* character,
+                                               Ogre::SharedPtr<Ogre::Texture> texture, const iVector2& size,
+                                               const Ogre::TRect<float>& rect)
+{
+    RuntimeStateView state = vs_runtime_state::GetRuntimeStateView();
+    Ogre::ColourValue colour;
+    bool depth = false;
+    const bool suspended =
+        vs_character_tint::SuspendCharacterTintForPortrait(state, character, colour, depth, kPluginName);
+    RenderToTextureotron_renderCharacterOrig(thisptr, character, texture, size, rect);
+    if (suspended)
+    {
+        vs_character_tint::ResumeCharacterTintAfterPortrait(character, colour, depth, kPluginName);
     }
 }
 
@@ -254,6 +276,15 @@ __declspec(dllexport) void startPlugin()
     {
         vs_log::LogError(kPluginName, "could not hook SaveManager::load(info)");
         return;
+    }
+
+    if (KenshiLib::SUCCESS != KenshiLib::AddHook(
+        KenshiLib::GetRealAddress(&RenderToTextureotron::renderCharacter),
+        RenderToTextureotron_renderCharacter_hook,
+        &RenderToTextureotron_renderCharacterOrig))
+    {
+        // Not fatal: only portraits may catch the tint.
+        vs_log::LogError(kPluginName, "could not hook RenderToTextureotron::renderCharacter - portraits may be tinted");
     }
 
     vs_log::LogInfo(kPluginName, "update, gpu, and save-load hooks installed");
