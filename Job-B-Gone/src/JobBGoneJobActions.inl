@@ -401,11 +401,11 @@ static const char* GetDangerScopeCaption(JobDeleteScope scope, bool armed)
 {
     if (scope == JobDeleteScope_WholeSquad)
     {
-        return armed ? "Confirm" : "Squad";
+        return Tr(armed ? "Confirm" : "Squad");
     }
     if (scope == JobDeleteScope_EveryoneGlobal)
     {
-        return armed ? "Confirm" : "All";
+        return Tr(armed ? "Confirm" : "All");
     }
     return "";
 }
@@ -463,8 +463,8 @@ static bool HandleDangerScopeTwoStep(MyGUI::Widget* sender, JobDeleteScope scope
         if (g_jobBGoneHoverHintText)
         {
             std::stringstream hint;
-            hint << "Armed: " << GetScopeDisplayName(scope)
-                 << ". Click again to open confirmation.";
+            hint << Tr("Armed:") << " " << GetScopeDisplayName(scope)
+                 << ". " << Tr("Click again to open confirmation.");
             g_jobBGoneHoverHintText->setCaption(hint.str());
         }
 
@@ -801,13 +801,13 @@ static const char* GetScopeDisplayName(JobDeleteScope scope)
     switch (scope)
     {
     case JobDeleteScope_SelectedMember:
-        return "Me";
+        return Tr("Me");
     case JobDeleteScope_SelectedMembers:
-        return "Selected";
+        return Tr("Selected");
     case JobDeleteScope_WholeSquad:
-        return "Squad";
+        return Tr("Squad");
     case JobDeleteScope_EveryoneGlobal:
-        return "All Squads";
+        return Tr("All Squads");
     default:
         break;
     }
@@ -999,16 +999,18 @@ static bool ShowDeleteAllConfirmation(JobDeleteScope scope)
     const int jobsToDelete = CountDeleteAllJobsInScope(targetList);
 
     std::stringstream title;
-    title << "Confirm " << GetScopeDisplayName(scope) << " Delete-All";
+    // LEOPARD (22.10.2026): the confirmation text goes through the translation
+    // (it was English in any game language).
+    title << Tr("Delete all jobs") << ": " << GetScopeDisplayName(scope);
     std::stringstream body;
-    body << "Scope: " << GetScopeDisplayName(scope)
-         << "\nMembers affected: " << targetList.size()
-         << "\nJobs queued to delete: " << jobsToDelete;
+    body << Tr("Scope:") << " " << GetScopeDisplayName(scope)
+         << "\n" << Tr("Members affected:") << " " << targetList.size()
+         << "\n" << Tr("Jobs queued to delete:") << " " << jobsToDelete;
     if (jobsToDelete <= 0)
     {
-        body << "\n\nNo jobs found in this scope.";
+        body << "\n\n" << Tr("No jobs found in this scope.");
     }
-    body << "\n\nPress Enter to confirm.";
+    body << "\n\n" << Tr("Press Enter to confirm.");
     return ShowConfirmationOverlay(
         PendingConfirmationAction_DeleteAllScope,
         scope,
@@ -1051,13 +1053,13 @@ static bool ShowDeleteRowConfirmation(
     }
 
     std::stringstream title;
-    title << "Confirm " << GetScopeDisplayName(scope) << " Job Delete";
+    title << Tr("Delete the job") << ": " << GetScopeDisplayName(scope);
     std::stringstream body;
-    body << "Scope: " << GetScopeDisplayName(scope)
-         << "\nMembers affected: " << targetList.size()
-         << "\nJobs queued to delete: " << jobsToDelete
-         << "\nTask: " << taskName
-         << "\n\nPress Enter to confirm.";
+    body << Tr("Scope:") << " " << GetScopeDisplayName(scope)
+         << "\n" << Tr("Members affected:") << " " << targetList.size()
+         << "\n" << Tr("Jobs queued to delete:") << " " << jobsToDelete
+         << "\n" << Tr("Task") << ": " << taskName
+         << "\n\n" << Tr("Press Enter to confirm.");
     return ShowConfirmationOverlay(
         PendingConfirmationAction_DeleteRowScope,
         scope,

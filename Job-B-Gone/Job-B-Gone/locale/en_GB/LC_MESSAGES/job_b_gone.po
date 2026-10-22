@@ -151,3 +151,33 @@ msgstr "Warning: delete this job for the whole squad."
 
 msgid "Warning: delete this job for all player-controlled squads."
 msgstr "Warning: delete this job for all player-controlled squads."
+
+msgid "All Squads"
+msgstr "All Squads"
+
+msgid "Armed:"
+msgstr "Armed:"
+
+msgid "Click again to open confirmation."
+msgstr "Click again to open confirmation."
+
+msgid "Delete all jobs"
+msgstr "Delete all jobs"
+
+msgid "Delete the job"
+msgstr "Delete the job"
+
+msgid "Scope:"
+msgstr "Scope:"
+
+msgid "Members affected:"
+msgstr "Members affected:"
+
+msgid "Jobs queued to delete:"
+msgstr "Jobs queued to delete:"
+
+msgid "No jobs found in this scope."
+msgstr "No jobs found in this scope."
+
+msgid "Press Enter to confirm."
+msgstr "Press Enter to confirm."

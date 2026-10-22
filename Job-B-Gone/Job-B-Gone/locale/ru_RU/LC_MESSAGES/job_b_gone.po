@@ -151,3 +151,33 @@ msgstr "Внимание: снять эту работу у всего отря�
 
 msgid "Warning: delete this job for all player-controlled squads."
 msgstr "Внимание: снять эту работу у всех ваших отрядов."
+
+msgid "All Squads"
+msgstr "Все отряды"
+
+msgid "Armed:"
+msgstr "Готово к удалению:"
+
+msgid "Click again to open confirmation."
+msgstr "Нажмите ещё раз, чтобы открыть подтверждение."
+
+msgid "Delete all jobs"
+msgstr "Снять все работы"
+
+msgid "Delete the job"
+msgstr "Снять работу"
+
+msgid "Scope:"
+msgstr "Охват:"
+
+msgid "Members affected:"
+msgstr "Затронуто персонажей:"
+
+msgid "Jobs queued to delete:"
+msgstr "Будет снято работ:"
+
+msgid "No jobs found in this scope."
+msgstr "В этом охвате работ нет."
+
+msgid "Press Enter to confirm."
+msgstr "Нажмите Enter, чтобы подтвердить."
